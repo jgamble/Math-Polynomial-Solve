@@ -1,11 +1,11 @@
 package Math::Polynomial::Solve;
 
-require 5.004_04;
+require 5.006;
 
 use Math::Complex;
 use Carp;
 use Exporter;
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $epsilon);
+use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $epsilon $use_hessenberg $debug_module);
 use strict;
 
 @ISA = qw(Exporter);
@@ -19,9 +19,13 @@ use strict;
 	quadratic_roots
 	cubic_roots
 	quartic_roots
+	get_hessenberg
+	set_hessenberg
 );
 
-$VERSION = '1.00';
+$VERSION = '2.00';
+$use_hessenberg = 0;	# Set to 1 to force its use regardless of polynomial degree.
+$debug_module = 0;
 
 #
 # Set up the epsilon variable, the value that in the floating-point math
@@ -40,7 +44,21 @@ BEGIN
 		$epsilon2 /= 2.0;
 	}
 
-#	print "\$Math::Polynomial::Solve::epsilon = ", $epsilon, "\n";
+	print "\$Math::Polynomial::Solve::epsilon = ", $epsilon, "\n" if ($debug_module);
+}
+
+#
+# Get/Set the flag that tells the module to use the QR Hessenberg
+# method regardless of the degree of the polynomial.
+#
+sub get_hessenberg
+{
+	return $use_hessenberg;
+}
+
+sub set_hessenberg
+{
+	$use_hessenberg = ($_[0])? 1: 0;
 }
 
 #
@@ -51,7 +69,7 @@ sub linear_roots(@)
 {
 	my($a, $b) = @_;
 
-	if (abs($a) <= $epsilon)
+	if (abs($a) < $epsilon)
 	{
 		carp "The coefficient of the highest power must not be zero!\n";
 		return (undef);
@@ -68,7 +86,7 @@ sub quadratic_roots(@)
 {
 	my($a, $b, $c) = @_;
 
-	if (abs($a) <= $epsilon)
+	if (abs($a) < $epsilon)
 	{
 		carp "The coefficient of the highest power must not be zero!\n";
 		return (undef, undef);
@@ -78,7 +96,7 @@ sub quadratic_roots(@)
 
 	my $dis_sqrt = sqrt($b*$b - $a * 4 * $c);
 
-	$dis_sqrt = -$dis_sqrt if ($b < 0);	# Avoid catastrophic cancellation.
+	$dis_sqrt = -$dis_sqrt if ($b < $epsilon);	# Avoid catastrophic cancellation.
 
 	my $xt = ($b + $dis_sqrt)/-2;
 
@@ -94,7 +112,7 @@ sub cubic_roots(@)
 	my($a, $b, $c, $d) = @_;
 	my @x;
 
-	if (abs($a) <= $epsilon)
+	if (abs($a) < $epsilon)
 	{
 		carp "The coefficient of the highest power must not be zero!\n";
 		return @x;
@@ -252,11 +270,445 @@ sub quartic_roots(@)
 	return ($x[0] - $b4, $x[1] - $b4, $x[2] - $b4, $x[3] - $b4);
 }
 
+
+# Perl code to find roots of a polynomial translated by Nick Ing-Simmons
+# <Nick@Ing-Simmons.net> from FORTRAN code by Hiroshi Murakami.
+# From the netlib archive: http://netlib.bell-labs.com/netlib/search.html
+# In particular http://netlib.bell-labs.com/netlib/opt/companion.tgz
+
+#       BASE is the base of the floating point representation on the machine.
+#       It is 16 for base 16 float : for example, IBM system 360/370.
+#       It is 2  for base  2 float : for example, IEEE float.
+
+my $MAX_ITERATIONS = 60;
+sub BASE ()    { 2 }
+sub BASESQR () { BASE * BASE }
+
+#
+# $matrix_ref = build_companion(@coefficients);
+#
+# Build the Companion Matrix of the N degree polynomial.  Return a
+# reference to the N by N matrix.
+#
+sub build_companion(@)
+{
+	my @coefficients = @_;
+	my $n = $#coefficients;
+	my @h;			# The matrix.
+
+	#
+	# First step:  Divide by the leading coefficient.
+	#
+	my $cn = shift @coefficients;
+
+	foreach my $c (@coefficients)
+	{
+		$c /= $cn;
+	}
+
+	#
+	# Why would we be calling this for a linear equation?
+	# Who knows, but if we are, then we can skip all the
+	# complicated looping.
+	#
+	if ($n == 1)
+	{
+		$h[1][1] = -$coefficients[0];
+		return \@h;
+	}
+
+	#
+	# Next: set up the diagonal matrix.
+	#
+	for my $i (1 .. $n)
+	{
+		for my $j (1 .. $n)
+		{
+			$h[$i][$j] = 0.0;
+		}
+	}
+
+	for my $i (2 .. $n)
+	{
+		$h[$i][$i - 1] = 1.0;
+	}
+
+	#
+	# And put in the coefficients.
+	#
+	for my $i (1 .. $n)
+	{
+		$h[$i][$n] = - (pop @coefficients);
+	}
+
+	#
+	# Now we balance the matrix.
+	#
+	# Balancing the unsymmetric matrix A.
+	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
+	# from FORTRAN code by Hiroshi Murakami.
+	#
+	#  The fortran code is based on the Algol code "balance" from paper:
+	#  "Balancing a Matrix for Calculation of Eigenvalues and Eigenvectors"
+	#  by B. N. Parlett and C. Reinsch, Numer. Math. 13, 293-304(1969).
+	#
+	#  Note: The only non-zero elements of the companion matrix are touched.
+	#
+	my $noconv = 1;
+	while ($noconv)
+	{
+		$noconv = 0;
+		for my $i (1 .. $n)
+		{
+			#
+			# Touch only non-zero elements of companion.
+			#
+			my $c;
+			if ($i != $n)
+			{
+				$c = abs($h[$i + 1][$i]);
+			}
+			else
+			{
+				$c = 0.0;
+				for my $j (1 .. $n - 1)
+				{
+					$c += abs($h[$j][$n]);
+				}
+			}
+
+			my $r;
+			if ($i == 1)
+			{
+				$r = abs($h[1][$n]);
+			}
+			elsif ($i != $n)
+			{
+				$r = abs($h[$i][$i - 1]) + abs($h[$i][$n]);
+			}
+			else
+			{
+				$r = abs($h[$i][$i - 1]);
+			}
+
+			next if ($c == 0.0 || $r == 0.0);
+
+			my $g = $r / BASE;
+			my $f = 1.0;
+			my $s = $c + $r;
+			while ( $c < $g )
+			{
+				$f = $f * BASE;
+				$c = $c * BASESQR;
+			}
+
+			$g = $r * BASE;
+			while ($c >= $g)
+			{
+				$f = $f / BASE;
+				$c = $c / BASESQR;
+			}
+
+			if (($c + $r) < 0.95 * $s * $f)
+			{
+				$g = 1.0 / $f;
+				$noconv = 1;
+
+				#C Generic code.
+				#C   do $j=1,$n
+				#C	 $h($i,$j)=$h($i,$j)*$g
+				#C   enddo
+				#C   do $j=1,$n
+				#C	 $h($j,$i)=$h($j,$i)*$f
+				#C   enddo
+				#C begin specific code. Touch only non-zero elements of companion.
+				if ($i == 1)
+				{
+					$h[1][$n] *= $g;
+				}
+				else
+				{
+					$h[$i][$i - 1] *= $g;
+					$h[$i][$n] *= $g;
+				}
+				if ($i != $n)
+				{
+					$h[$i + 1][$i] *= $f;
+				}
+				else
+				{
+					for my $j (1 .. $n)
+					{
+						$h[$j][$i] *= $f;
+					}
+				}
+			}
+		}	# for $i
+	}	# while $noconv
+
+	return \@h;
+}
+
+#
+# @roots = hqr_eigen_hessenberg($matrix_ref)
+#
+# Finds the eigenvalues of a real upper Hessenberg matrix,
+# H, stored in the array $h(1:n,1:n).  Returns a list
+# of real and/or complex numbers.
+#
+sub hqr_eigen_hessenberg($)
+{
+	my $ref = shift;
+	my @h   = @$ref;
+	my $n   = $#h;
+
+	#
+	#
+	# Eigenvalue Computation by the Householder QR method for the Real Hessenberg matrix.
+	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
+	# from FORTRAN code by Hiroshi Murakami.
+	# The fortran code is based on the Algol code "hqr" from the paper:
+	#   "The QR Algorithm for Real Hessenberg Matrices"
+	#   by R. S. Martin, G. Peters and J. H. Wilkinson,
+	#   Numer. Math. 14, 219-231(1970).
+	#
+	#
+	my($p, $q, $r);
+	my($w, $x, $y);
+	my($s, $z );
+	my $t = 0.0;
+
+	my @w;
+
+	ROOT:
+	while ($n > 0)
+	{
+		my $its = 0;
+		my $na  = $n - 1;
+
+		while ($its < $MAX_ITERATIONS)
+		{
+			#
+			# Look for single small sub-diagonal element;
+			#
+			my $l;
+			for ($l = $n; $l >= 2; $l--)
+			{
+				last if ( abs( $h[$l][ $l - 1 ] ) <= $epsilon *
+					( abs( $h[ $l - 1 ][ $l - 1 ] ) + abs( $h[$l][$l] ) ) );
+			}
+
+			$x = $h[$n][$n];
+
+			if ($l == $n)
+			{
+				#
+				# One (real) root found.
+				#
+				push @w, $x + $t;
+				$n--;
+				next ROOT;
+			}
+
+			$y = $h[$na][$na];
+			$w = $h[$n][$na] * $h[$na][$n];
+
+			if ($l == $na)
+			{
+				$p = ( $y - $x ) / 2;
+				$q = $p * $p + $w;
+				$y = sqrt( abs($q) );
+				$x = $x + $t;
+
+				if ($q > 0.0)
+				{
+					#
+					# Real pair.
+					#
+					$y = -$y if ( $p < 0.0 );
+					$y += $p;
+					push @w, $x - $w / $y;
+					push @w, $x + $y;
+				}
+				else
+				{
+					#
+					# Complex or twin pair.
+					#
+					push @w, $x + $p - $y * i;
+					push @w, $x + $p + $y * i;
+				}
+
+				$n -= 2;
+				next ROOT;
+			}
+
+			if ($its == $MAX_ITERATIONS)
+			{
+				croak "Too many iterations ($its) at n=$n\n";
+			}
+			elsif ($its && $its % 10 == 0)
+			{
+				#
+				# Form exceptional shift.
+				#
+				carp "exceptional shift \@ $its" if ($debug_module);
+
+				$t = $t + $x;
+				for (my $i = 1; $i <= $n; $i++)
+				{
+					$h[$i][$i] -= $x;
+				}
+
+				$s = abs($h[$n][$na]) + abs($h[$na][$n - 2]);
+				$y = 0.75 * $s;
+				$x = $y;
+				$w = -0.4375 * $s * $s;
+			}
+
+			$its++;
+
+			#
+			# Look for two consecutive small sub-diagonal elements.
+			#
+			my $m;
+			for ($m = $n - 2 ; $m >= $l ; $m--)
+			{
+				$z = $h[$m][$m];
+				$r = $x - $z;
+				$s = $y - $z;
+				$p = ($r * $s - $w) / $h[$m + 1][$m] + $h[$m][$m + 1];
+				$q = $h[$m + 1][$m + 1] - $z - $r - $s;
+				$r = $h[$m + 2][$m + 1];
+
+				$s = abs($p) + abs($q) + abs($r);
+				$p = $p / $s;
+				$q = $q / $s;
+				$r = $r / $s;
+
+				last if ($m == $l);
+				last if (
+					abs($h[$m][$m - 1]) * (abs($q) + abs($r)) <=
+					$epsilon * abs($p) * (
+						  abs($h[$m - 1][$m - 1]) +
+						  abs($z) +
+						  abs($h[$m + 1][$m + 1])
+					)
+				  );
+			}
+
+			for (my $i = $m + 2; $i <= $n; $i++)
+			{
+				$h[$i][$i - 2] = 0.0;
+			}
+			for (my $i = $m + 3; $i <= $n; $i++)
+			{
+				$h[$i][$i - 3] = 0.0;
+			}
+
+			#
+			# Double QR step involving rows $l to $n and
+			# columns $m to $n.
+			#
+			for (my $k = $m; $k <= $na; $k++)
+			{
+				my $notlast = ($k != $na);
+				if ($k != $m)
+				{
+					$p = $h[$k][$k - 1];
+					$q = $h[$k + 1][$k - 1];
+					$r = ($notlast)? $h[$k + 2][$k - 1]: 0.0;
+
+					$x = abs($p) + abs($q) + abs($r);
+					next if ( $x == 0.0 );
+
+					$p = $p / $x;
+					$q = $q / $x;
+					$r = $r / $x;
+				}
+
+				$s = sqrt($p * $p + $q * $q + $r * $r);
+				$s = -$s if ($p < 0.0);
+
+				if ($k != $m)
+				{
+					$h[$k][ $k - 1 ] = -$s * $x;
+				}
+				elsif ($l != $m)
+				{
+					$h[$k][$k - 1] = -$h[$k][$k - 1];
+				}
+
+				$p += $s;
+				$x = $p / $s;
+				$y = $q / $s;
+				$z = $r / $s;
+				$q /= $p;
+				$r /= $p;
+
+				#
+				# Row modification.
+				#
+				for (my $j = $k; $j <= $n; $j++)
+				{
+					$p = $h[$k][$j] + $q * $h[$k + 1][$j];
+
+					if ($notlast)
+					{
+						$p = $p + $r * $h[ $k + 2 ][$j];
+						$h[ $k + 2 ][$j] -= $p * $z;
+					}
+
+					$h[ $k + 1 ][$j] -= $p * $y;
+					$h[$k][$j] -= $p * $x;
+				}
+
+				my $j = $k + 3;
+				$j = $n if $j > $n;
+
+				#
+				# Column modification.
+				#
+				for (my $i = $l; $i <= $j; $i++)
+				{
+					$p = $x * $h[$i][$k] + $y * $h[$i][$k + 1];
+
+					if ($notlast)
+					{
+						$p += $z * $h[$i][$k + 2];
+						$h[$i][$k + 2] -= $p * $r;
+					}
+
+					$h[$i][$k + 1] -= $p * $q;
+					$h[$i][$k] -= $p;
+				}
+			}	# for $k
+		}	# while $its
+	}	# while $n
+	return @w;
+}
+
+#
+# A debugging aid.
+#
+sub show_matrix
+{
+	my $a = shift;
+	my @rows = @$a;
+	shift (@rows);
+	foreach my $row (@rows)
+	{
+		warn join ( ',', @{$row}[ 1 .. @$a - 1 ] ) . "\n";
+	}
+}
+
 #
 # @x = poly_roots(@coefficients)
 #
+# Coefficients are fed in higest degree first.  Equation 5x**5 + 4x**4 + 2x + 8
+# would be fed in with @x = poly_roots(5, 4, 0, 0, 2, 8);
 #
-sub poly_roots
+sub poly_roots(@)
 {
 	my(@coefficients) = @_;
 	my(@x) = ();
@@ -264,7 +716,7 @@ sub poly_roots
 	#
 	# Check for zero coefficients in the higher-powered terms.
 	#
-	shift @coefficients while (@coefficients and $coefficients[0] <= $epsilon);
+	shift @coefficients while (@coefficients and abs($coefficients[0]) < $epsilon);
 
 	if (@coefficients == 0)
 	{
@@ -275,15 +727,31 @@ sub poly_roots
 	#
 	# How about zero coefficients in the low terms?
 	#
-	while (@coefficients and $coefficients[$#coefficients] <= $epsilon)
+	while (@coefficients and abs($coefficients[$#coefficients]) < $epsilon)
 	{
 		push @x, 0;
 		pop @coefficients;
 	}
 
-	if ($#coefficients > 4 or $#coefficients < 1)
+	#
+	# If the remaining polynomial is a quintic or higher, or
+	# if use_hessenberg is set, continue with the matrix
+	# calculation.
+	#
+	if ($use_hessenberg or $#coefficients > 4)
 	{
-		carp "Cannot find the roots of polynomials of degree 5 or higher\n";
+		my $matrix_ref = build_companion(@coefficients);
+
+		if ($debug_module)
+		{
+			carp "Balanced Companion:\n";
+			show_matrix($matrix_ref);
+		}
+
+		#
+		# QR iterations from the matrix.
+		#
+		push @x, hqr_eigen_hessenberg($matrix_ref);
 	}
 	elsif ($#coefficients == 4)
 	{
@@ -322,6 +790,17 @@ Math::Polynomial::Solve - Find the roots of polynomial equations.
 or
 
   use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial::Solve qw(poly_roots get_hessenberg set_hessenberg);
+
+  #
+  # Force the use of the matrix method.
+  #
+  set_hessenberg(1);
+  my @x = poly_roots(@coefficients);
+
+or
+
+  use Math::Complex;  # The roots may be complex numbers.
   use Math::Polynomial::Solve
 	qw(linear_roots quadratic_roots cubic_roots quartic_roots);
 
@@ -340,29 +819,43 @@ or
 =head1 DESCRIPTION
 
 This package supplies a set of functions that find the roots of
-polynomials up to the quartic. There are no solutions for powers higher
-than that at this time (partly because there are no general solutions
-for fifth and higher powers).
+polynomials. Polynomials up to the quartic may be solved directly by
+numerical formulae. Polynomials of fifth and higher powers will be
+solved by an iterative method, as there are no general solutions
+for fifth and higher powers.
 
 The linear, quadratic, cubic, and quartic *_roots() functions all expect
 to have a non-zero value for the $a term.
 
-Passing a zero constant term means that the first value returned from
-the function will always be zero, for all functions.
+If the constant term is zero then the first value returned in the list
+of answers will always be zero, for all functions.
+
+=head2 set_hessenberg()
+
+Sets or removes the condition that forces the use of the Hessenberg matrix
+regardless of the polynomial's degree.  A non-zero argument forces the
+use of the matrix method, a zero removes it.
+
+=head2 get_hessenberg()
+
+Returns 1 or 0 depending upon whether the Hessenberg matrix method is
+always in use or not.
 
 =head2 poly_roots()
 
-A generic function that calls one of the other root-finding functions,
-depending on the degree of the polynomial. Returns the solution for
-polynomials of degree 1 to degree 4.
+A generic function that may call one of the other root-finding functions,
+or a polynomial solving method using a Hessenberg matrix, depending on the
+degree of the polynomial.  You may force it to use the matrix method regardless
+of the degree of the polynomial by calling C<set_hessenberg(1)>.
+Otherwise it will use the specialized root functions for polynomials of degree 1 to 4.
 
 Unlike the other root-finding functions, it will check for coefficients
 of zero for the highest power, and 'step down' the degree of the
 polynomial to the appropriate case. Additionally, it will check for
 coefficients of zero for the lowest power terms, and add zeros to its
-root list before calling one of the root-finding functions. Therefore,
-it is possible to solve a polynomial of degree higher than 4, as long as
-it meets these rather specialized conditions.
+root list before calling one of the root-finding functions. Thus
+it is possible to solve a polynomial of degree higher than 4 without using the matrix
+method, as long as it meets these rather specialized conditions.
 
 =head2 linear_roots()
 
@@ -379,7 +872,7 @@ Gives the roots of the quadratic equation
 
     ax**2 + bx + c = 0
 
-using the well-known quadratic formula. A two-element list is returned.
+using the well-known quadratic formula. Returns a two-element list.
 
 =head2 cubic_roots()
 
@@ -388,7 +881,7 @@ Gives the roots of the cubic equation
     ax**3 + bx**2 + cx + d = 0
 
 by the method described by R. W. D. Nickalls (see the Acknowledgments
-section below). A three-element list is returned. The first element will
+section below). Returns a three-element list. The first element will
 always be real. The next two values will either be both real or both
 complex numbers.
 
@@ -398,8 +891,8 @@ Gives the roots of the quartic equation
 
     ax**4 + bx**3 + cx**2 + dx + e = 0
 
-using Ferrari's method (see the Acknowledgments section below). A
-four-element list is returned. The first two elements will be either
+using Ferrari's method (see the Acknowledgments section below). Returns
+a four-element list. The first two elements will be either
 both real or both complex. The next two elements will also be alike in
 type.
 
@@ -414,43 +907,66 @@ There are no default exports. The functions may be named in an export list.
 The cubic is solved by the method described by R. W. D. Nickalls, "A New
 Approach to solving the cubic: Cardan's solution revealed," The
 Mathematical Gazette, 77, 354-359, 1993. This article is available on
-the web at http://www.m-a.org.uk/eb/mg/mg077ch.pdf.
+several different web sites, including L<http://www.2dcurves.com/cubic/> and
+L<http://www.m-a.org.uk/resources/periodicals/online_articles_keyword_index/>.
+There is also a nice discussion of his paper at L<http://www.sosmath.com/algebra/factor/fac111/fac111.html>.
 
 Dr. Nickalls was kind enough to send me his article, with notes and
 revisions, and directed me to a Matlab script that was based on that
 article, written by Herman Bruyninckx, of the Dept. Mechanical Eng.,
 Div. PMA, Katholieke Universiteit Leuven, Belgium. This function is an
 almost direct translation of that script, and I owe Herman Bruyninckx
-for creating it in the first place. It may be found on the web at
-http://www.mech.kuleuven.ac.be/~bruyninc/matlab/cubic.ml
+for creating it in the first place. 
 
 Dick Nickalls, dicknickalls@compuserve.com
 
 Herman Bruyninckx, Herman.Bruyninckx@mech.kuleuven.ac.be,
-http://www.mech.kuleuven.ac.be/~bruyninc
+has web page at L<http://www.mech.kuleuven.ac.be/~bruyninc>.
+His matlab cubic solver is at L<http://people.mech.kuleuven.ac.be/~bruyninc/matlab/cubic.m>.
 
 =head2 The quartic
 
 The method for quartic solution is Ferrari's, as described in the web
-page Karl's Calculus Tutor, http://www.netsrq.com/~hahn/quartic.html.
+page Karl's Calculus Tutor at L<http://www.karlscalculus.org/quartic.html>.
 I also made use of some short cuts mentioned in web page Ask Dr. Math FAQ,
-http://forum.swarthmore.edu/dr.math/faq/faq.cubic.equations.html.
+at L<http://forum.swarthmore.edu/dr.math/faq/faq.cubic.equations.html>.
 
-=head2 Other functionality
+=head2 Quintic and higher.
 
+Back when this module could only solve polynomials of degrees 1 through 4,
 Matz Kindahl, the author of Math::Polynomial, suggested the poly_roots()
-function.
+function. Later on, Nick Ing-Simmons, who was working on a perl binding
+to the GNU Scientific Library, sent a perl translation of Hiroshi
+Murakami's Fortran implementation of the QR Hessenberg algorithm, and it
+fit very well into the poly_roots() function. Quintics and higher degree
+polynomials can now be solved, albeit through numeric analysis methods.
+
+Hiroshi Murakami's Fortran routines may be found at:
+L<http://netlib.bell-labs.com/netlib/search.html> using a search string of "companion".
+
+He references the following articles:
+
+R. S. Martin, G. Peters and J. H. Wilkinson, "The QR Algorithm for Real Hessenberg
+Matrices", Numer. Math. 14, 219-231(1970).
+
+B. N. Parlett and C. Reinsch, "Balancing a Matrix for Calculation of Eigenvalues
+and Eigenvectors", Numer. Math. 13, 293-304(1969).
+
+Alan Edelman and H. Murakami, "Polynomial Roots from Companion Matrix
+Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
+
+For starting out, you may want to read
+
+Numerical Recipes in C, by William Press, Brian P. Flannery, Saul A. Teukolsky,
+and William T. Vetterling, Cambridge University Press.
 
 =head1 SEE ALSO
 
-Forsyth, George E., Michael A. Malcolm, and Cleve B. Moler (1977),
+Forsythe, George E., Michael A. Malcolm, and Cleve B. Moler (1977),
 Computer Methods for Mathematical Computations, Prentice-Hall.
 
 =head1 AUTHOR
 
-John M. Gamble, jgamble@ripco.com
+John M. Gamble may be found at B<jgamble@ripco.com>
 
 =cut
-
-1;
-__END__

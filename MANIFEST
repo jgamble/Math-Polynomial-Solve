@@ -4,8 +4,11 @@ MANIFEST
 Makefile.PL
 Solve.pm
 README
+t/complex.pl
+t/coef.pl
 t/cubic.t
-t/format.pl
-t/poly.t
+t/poly00.t
+t/poly01.t
+t/poly02.t
 t/quadratic.t
 t/quartic.t

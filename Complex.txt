@@ -11,7 +11,8 @@ the variable.  E.g.,
 
 will print out 3 instead of 0.  If you are testing a variable to see if
 it is real or complex, don't use Im(), use the ref operator on the
-variable, and see if the resulting string is "Math::Complex".
+variable, and see if the resulting string is "Math::Complex".  This
+bug has been fixed in version 5.6.1.
 
 Secondly, beware accidental stringification.  I managed to do that in
 one of my tests, and lost a good deal of time trying to find out why I
@@ -19,32 +20,38 @@ was getting strange results when I used (as it turned out) Re() and Im()
 on string variables, rather than Math::Complex variables.  This is time
 I could have saved if I had only turned the warnings pragma on.
 
+The functions Re() and Im(), by the way, respectively return the real and
+imaginary parts of the complex number.  This may prove useful if you are
+using this module to write to a file that will be read by other programs.
+
 
 FORMATTING COMPLEX NUMBERS
 
 Some may want to extend their options for formatting complex numbers. 
-Here are two functions for the cartesian form that are useful.
+I have provided two functions for the cartesian form that are in the
+file complex.pl in the 't' test subdirectory.
 
-The function cartesian_format_signed($real_format, $im_format, @numbers)
-formats the numbers, taking into account the sign of the imaginary part
-when joining the two formats together.  For example:
+The functions are
+	cartesian_format_signed($re_format, $im_format, @numbers)
+and
+	cartesian_format($re_format, $im_format, @numbers)
+
+They work identically except for those times when the imaginary part
+of the complex number is negative.  The first form uses the sign of
+the imaginary part in combining the two parts.  For example:
 
 print cartesian_format_signed("%.15g ", " %.15gj", cplx(6.8, 1.1414)), "\n";
 6.8 + 1.1414j
 
-print cartesian_format_signed("%.15g ", " %.15gj", cplx(6.8, 1.1414)), "\n";
+print cartesian_format_signed("%.15g ", " %.15gj", cplx(6.8, -1.1414)), "\n";
 6.8 - 1.1414j
 
-print cartesian_format_signed("%.15g ", " j %.15g", cplx(6.8, -1.1414)), "\n";
-6.8 + j 1.1414
 
-print cartesian_format_signed("%.15g ", " j %.15g", cplx(6.8, -1.1414)), "\n";
-6.8 - j 1.1414
+The second form simply formats the individual parts as requested in the
+formatting strings:
 
-
-The function cartesian_format($real_format, $im_format, @numbers) simply
-formats the numbers' parts, taking no notice of the sign of the
-imaginary part when joining the two formats together.  For example:
+print cartesian_format("%.15g + ", "%.15gj", cplx(6.8, -1.1414)), "\n";
+6.8 + -1.1414j
 
 print cartesian_format("[%.15g, ", "%.15g]", cplx(6.8, 1.1414)), "\n";
 [6.8, 1.1414]
@@ -52,90 +59,7 @@ print cartesian_format("[%.15g, ", "%.15g]", cplx(6.8, 1.1414)), "\n";
 print cartesian_format("[%.15g, ", "%.15g]", cplx(6.8, -1.1414)), "\n";
 [6.8, -1.1414]
 
-print cartesian_format("%.15g + ", "%.15gj", cplx(6.8, -1.1414)), "\n";
-6.8 + -1.1414j
 
+Using undefs for the format strings gets you a default format of "%.15g"
+for the real and "%.15gi" for the imaginary.
 
-You can, of course, create equivalent functions for the polar form.
-
-cartesian_format_signed(undef, undef, $x);
-
-is equivalent to
-
-cartesian_format_signed("%.15g", "%.15gi", $x);
-
-and
-
-cartesian_format(undef, undef, $x);
-
-is equivalent to
-
-cartesian_format("%.15g", " + %.15gi", $x);
-
-#
-# A couple of pretty-format functions.
-#
-use Math::Complex;
-
-sub cartesian_format_signed($$@)
-{
-	my($fmt_real, $fmt_im, @numbers) = @_;
-	my(@cfn, $n, $r, $i, $s);
-
-	$fmt_real ||= "%.15g";	# Provide a default real format
-	$fmt_im ||= "%.15gi";	# Provide a default im format
-
-	foreach $n (@numbers)
-	{
-		#
-		# Is the number part of the Complex package?
-		#
-		if (ref($n) eq "Math::Complex")
-		{
-			$r = sprintf($fmt_real, Re($n));
-			$i = sprintf($fmt_im, abs(Im($n)));
-			$s = ('+', '+', '-')[Im($n) <=> 0];
-		}
-		else
-		{
-			$r = sprintf($fmt_real, $n);
-			$i = sprintf($fmt_im, 0);
-			$s = '+';
-		}
-
-		push @cfn, $r . $s . $i;
-	}
-
-	return wantarray? @cfn: $cfn[0];
-}
-
-sub cartesian_format($$@)
-{
-	my($fmt_real, $fmt_im, @numbers) = @_;
-	my(@cfn, $n, $r, $i);
-
-	$fmt_real ||= "%.15g";		# Provide a default real format
-	$fmt_im ||= " + %.15gi";	# Provide a default im format
-
-	foreach $n (@numbers)
-	{
-		#
-		# Is the number part of the Complex package?
-		#
-		if (ref($n) eq "Math::Complex")
-		{
-			$r = sprintf($fmt_real, Re($n));
-			$i = sprintf($fmt_im, Im($n));
-		}
-		else
-		{
-			$r = sprintf($fmt_real, $n);
-			$i = sprintf($fmt_im, 0);
-		}
-
-		push @cfn, $r . $i;
-	}
-
-	return wantarray? @cfn: $cfn[0];
-}
-1;

@@ -20,7 +20,8 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
-require "t/format.pl";
+require "t/complex.pl";
+require "t/coef.pl";
 
 my @x = quartic_roots(1,4,6,4,1);
 my $b = -$x[0] - $x[1] - $x[2] - $x[3];

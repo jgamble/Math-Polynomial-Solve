@@ -1,23 +1,42 @@
-Math::Polynomial::Solve, version 1.00.
+	Math::Polynomial::Solve, version 2.00, 10 Feb 2004.
+----------------------------------------------------------------
 
-Copyright (c) 2001 John M. Gamble. All rights reserved. This program is
+Copyright (c) 2004 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
-This package works with perl version 5.004_04. It is written in pure
-perl.
-
 This package provides a set of functions that find the roots of
-polynomials up to degree 4.  We are limited to that degree because there
-is no exact solution for polynomials of 5th degree or higher, and I have
-not implemented a numerical root-finder yet.
+polynomials up to degree 4 using the classical methods. Polynomials
+of degrees 5 and higher are solved by an implementation of the QR
+Hessenberg algorithm.
 
 The solution for the cubic is based on an article by R. W. D. Nickalls,
 "A New Approach to solving the cubic: Cardan's solution revealed," The
 Mathematical Gazette, 77, 354-359, 1993. This article is available on
-the web at http://www.m-a.org.uk/eb/mg/mg077ch.pdf.
+the web at several web sites, including <http://www.2dcurves.com/cubic/>.
+A web search for Nickalls + cubic will find other web sites.
 
 The solution for the quartic is based on Ferrari's method, as described
 in the web page Karl's Calculus Tutor,
-http://www.netsrq.com/~hahn/quartic.html.
+<http://www.karlscalculus.org/quartic.html>.
 
+Version 1.01 of this package worked with perl version 5.004_04. The
+current version may work with that version of perl as well, but I had
+no way to test this. Consequently, the requirement is set for version
+5.6 of perl.
+
+Installation:
+----------------------------------------------------------------
+The usual way.  Unpack the archive:
+	gzip -d Math-Polynomial-Solve-2.00.tar.gz
+	tar xvf Math-Polynomial-Solve-2.00.tar
+
+Go into the resulting directory, and type:
+	perl Makefile.PL
+	make
+
+Run the tests:
+	make test
+
+Install the module:
+	make install

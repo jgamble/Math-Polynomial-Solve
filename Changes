@@ -3,3 +3,50 @@ Revision history for Perl extension Math::Polynomial::Solve.
 1.00 Wed Feb 14 17:51:04 2001
 	- original version
 
+1.01
+	- Web site address of Karl's Calculus Tutor has changed.  Document
+	  changed with it.
+	- Code that popped off leading zero coefficients was flawed.
+	  Negative values could get popped off too since the check was
+	      $coefficients[0] <= $epsilon
+	  instead of
+	      abs($coefficients[0]) <= $epsilon.
+	- Began writing code for symbolic solutions.
+	- And then I got the e-mail from Nick Ing-Simmons.
+
+1.90 March 17 2003
+	Nick Ing-Simmons had been working on a perl binding to the GNU
+	Scientific Library that performed, among other things, polynomial
+	solving.  He graciously (indeed, FAR beyond the call of duty)
+	provided a perl version the Fortran code written by Hiroshi
+	Murakami, and gave me permission to use the perl version of the code
+	in this module (as Hiroshi Murakami gave permission to Nick Ing-Simmons).
+	For further information on his efforts, see Math::GSL::Polynomial.
+	Putting in the code resulted in:
+	- Some formatting changes.  Sorry, I'm a tab user.
+	- Removal of some redundant code.  Math::Polynomial::Solve
+	  already calculated epsilon, and the wrapper function already
+	  removed leading zero coefficients.
+	- Coefficients to be passed in from higher power to lower,
+	  rather than the reverse.  This matches current usage in this
+	  module.
+	- Roots to be returned as Complex number objects, rather than paired
+	  real and imaginary parts.
+	- An early return for the really simple case.
+
+1.99 April 30 2003
+	- More documentation changes, including updating links to Dr.
+	  Nickalls's paper.
+	- Added many, many more tests.
+	- Added the set_ and get_hessenberg() functions.
+	- Put some code that was in a text file in one of the helper
+	  perl files.
+
+2.00 Feb 18 2004
+	- For some idiotic reason, I thought that I had already uploaded the
+	  module to CPAN.  Time to rectify that mistake.
+	- Well, as long as I'm here, reviewed the code again, and found some
+	  inconsistant epsilon comparisons ('<' vs. '<=').  Changed them all
+	  to '<'.
+	- Double-checked the links too.  Dr. Nickall's article keeps moving
+	  around
