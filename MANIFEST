@@ -1,0 +1,11 @@
+Changes
+Complex.txt
+MANIFEST
+Makefile.PL
+Solve.pm
+README
+t/cubic.t
+t/format.pl
+t/poly.t
+t/quadratic.t
+t/quartic.t
