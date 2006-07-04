@@ -50,3 +50,25 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  to '<'.
 	- Double-checked the links too.  Dr. Nickall's article keeps moving
 	  around
+     Apr 3 2006
+	- Upgraded the test files to use Test::Simple.
+	- Moved the internal structure of the module directory around
+	  to match the current layout made by the current h2xs.
+	- Added a Build.PL file.
+	- Generated a Meta.yml file and a Makefile.PL from Build.PL
+	- Added new tests to cubic.t to cover catastrophic
+	  cancellation conditions.
+	- Re-factored an expression in the ($dis < -$epsilon) branch
+	  of cubic_roots(), in preparation for tracking down the
+	  cancellation error.  This is the branch that was failing
+	  the tests for certain values of the leading coefficient
+	  (a negative, for one thing).  Wouldn't you know, the tests
+	  passed after doing this.  I suspect that this will not be the
+	  final chapter in this story.
+	- Updated the link to www.2dcurves.com in the documentation.
+     Jun 26 2006
+	- Added a test to poly1.t (x**5 + x + 1).  Nothing special
+	  except that it's solvable in radicals, and there was an
+	  article on Galois theory that missed that.
+2.10 Jul 4 2006
+	- Released.

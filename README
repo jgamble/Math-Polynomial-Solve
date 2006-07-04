@@ -1,19 +1,21 @@
-	Math::Polynomial::Solve, version 2.00, 10 Feb 2004.
+	Math::Polynomial::Solve, version 2.10, 3 Apr 2006.
 ----------------------------------------------------------------
 
-Copyright (c) 2004 John M. Gamble. All rights reserved. This program is
+Copyright (c) 2006 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
 This package provides a set of functions that find the roots of
-polynomials up to degree 4 using the classical methods. Polynomials
-of degrees 5 and higher are solved by an implementation of the QR
-Hessenberg algorithm.
+polynomials up to degree 4 using the classical methods. These polynomials
+and polynomials of degrees 5 and higher may also be solved by an
+implementation of the QR Hessenberg algorithm.
 
 The solution for the cubic is based on an article by R. W. D. Nickalls,
 "A New Approach to solving the cubic: Cardan's solution revealed," The
 Mathematical Gazette, 77, 354-359, 1993. This article is available on
-the web at several web sites, including <http://www.2dcurves.com/cubic/>.
+the web at several web sites, including
+<http://www.2dcurves.com/cubic/cubic.html> and my own web site
+<http://pages.ripco.net/~jgamble/docs/nickallscubic.pdf>.
 A web search for Nickalls + cubic will find other web sites.
 
 The solution for the quartic is based on Ferrari's method, as described
@@ -28,8 +30,11 @@ no way to test this. Consequently, the requirement is set for version
 Installation:
 ----------------------------------------------------------------
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.00.tar.gz
-	tar xvf Math-Polynomial-Solve-2.00.tar
+	gzip -d Math-Polynomial-Solve-2.10.tar.gz
+	tar xvf Math-Polynomial-Solve-2.10.tar
+
+This package now makes use of Module::Build, and the Build.PL script,
+but you can still use Makefile.PL, which is provided:
 
 Go into the resulting directory, and type:
 	perl Makefile.PL
@@ -40,3 +45,15 @@ Run the tests:
 
 Install the module:
 	make install
+
+Alternatively:
+	perl Build.PL
+	Build
+
+Run the tests:
+	Build test
+
+Install the module:
+	Build install
+
+See the documentation for Module::Build for more information.
