@@ -6,6 +6,8 @@ Makefile.PL
 META.yml
 lib/Math/Polynomial/Solve.pm
 README
+eg/cubic.m
+eg/poly.pl
 t/coef.pl
 t/cubic.t
 t/pod.t

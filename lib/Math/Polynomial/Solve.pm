@@ -6,8 +6,9 @@ use Math::Complex;
 use Carp;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $epsilon $use_hessenberg);
-use vars qw($debug_cubic  $debug_quartic  $debug_poly);
 use strict;
+use warnings;
+#use Smart::Comments;
 
 @ISA = qw(Exporter);
 
@@ -24,16 +25,13 @@ use strict;
 	set_hessenberg
 );
 
-$VERSION = '2.10';
+$VERSION = '2.11';
 $use_hessenberg = 0;	# Set to 1 to force its use regardless of polynomial degree.
-$debug_cubic = 0;
-$debug_quartic = 0;
-$debug_poly = 0;
 
 #
-# Set up the epsilon variable, the value that in the floating-point math
-# of the computer is the smallest value a variable can have before it is
-# indistinguishable from zero when adding it to one.
+# Set up the epsilon variable, the value that is, in the floating-point
+# math of the computer, the smallest value a variable can have before
+# it is indistinguishable from zero when adding it to one.
 #
 
 BEGIN
@@ -47,7 +45,7 @@ BEGIN
 		$epsilon2 /= 2.0;
 	}
 
-	print "\$Math::Polynomial::Solve::epsilon = ", $epsilon, "\n" if ($debug_poly);
+	#### $Math::Polynomial::Solve::epsilon
 }
 
 #
@@ -133,16 +131,16 @@ sub cubic_roots(@)
 	my $twothirds_pi = (2 * pi)/3;
 
 	#
-	#              Debug
-	# print "two_a      = $two_a\n" if ($debug_cubic);
-	# print "delta_sq   = $delta_sq\n" if ($debug_cubic);
-	# print "h_sq       = $h_sq\n" if ($debug_cubic);
-	# print "dis        = $dis\n" if ($debug_cubic);
+	###            cubic_roots() calculations...
+	#### $two_a
+	#### $delta_sq
+	#### $h_sq
+	#### $dis
 	#
 	if ($dis > $epsilon)
 	{
-		print "Cubic branch 1: (\$dis >  0) " if ($debug_cubic);
-
+		#
+		### Cubic branch 1: (\$dis >  0)
 		#
 		# One real root, two complex roots.
 		#
@@ -162,8 +160,8 @@ sub cubic_roots(@)
 	}
 	elsif ($dis < -$epsilon)
 	{
-		print "Cubic branch 2: (\$dis <  0) " if ($debug_cubic);
-
+		#
+		### Cubic branch 2: (\$dis <  0)
 		#
 		# Three distinct real roots.
 		#
@@ -177,8 +175,8 @@ sub cubic_roots(@)
 	}
 	else
 	{
-		print "Cubic branch 3: (\$dis == 0) " if ($debug_cubic);
-
+		#
+		### Cubic branch 3: (\$dis == 0)
 		#
 		# abs($dis) <= $epsilon (effectively zero).
 		#
@@ -239,8 +237,8 @@ sub quartic_roots(@)
 
 	if (abs($h) < $epsilon)
 	{
-		print "Quartic branch 1: (\$h == 0)\n" if ($debug_quartic);
-
+		#
+		### Quartic branch 1: (\$h == 0)
 		#
 		# Special case: h == 0.  We have a cubic times y.
 		#
@@ -248,8 +246,8 @@ sub quartic_roots(@)
 	}
 	elsif (abs($g) < $epsilon)
 	{
-		print "Quartic branch 2: (\$g == 0)\n" if ($debug_quartic);
-
+		#
+		### "Quartic branch 2: (\$g == 0)
 		#
 		# Another special case: g == 0.  We have a quadratic
 		# with y-squared.
@@ -261,8 +259,8 @@ sub quartic_roots(@)
 	}
 	else
 	{
-		print "Quartic branch 3: Ferrari's method.\n" if ($debug_quartic);
-
+		#
+		### Quartic branch 3, Ferrari's method...
 		#
 		# Special cases don't apply, so continue on with Ferrari's
 		# method.  This involves setting up the resolvant cubic
@@ -277,10 +275,10 @@ sub quartic_roots(@)
 		# Take a root of that equation, and get the
 		# quadratics from it.
 		#
-		my($z);
+		my $z;
 		($z, undef, undef) = cubic_roots(1, 2*$f, $f*$f - 4*$h, -$g*$g);
 
-		print STDERR "\n\tz = $z\n" if ($debug_quartic);
+		### $z
 
 		my $alpha = sqrt($z);
 		my $rho = $g/$alpha;
@@ -320,6 +318,8 @@ sub build_companion(@)
 	my $n = $#coefficients;
 	my @h;			# The matrix.
 
+	#
+	#### build_companion called with: @coefficients
 	#
 	# First step:  Divide by the leading coefficient.
 	#
@@ -542,7 +542,7 @@ sub hqr_eigen_hessenberg($)
 				$p = ( $y - $x ) / 2;
 				$q = $p * $p + $w;
 				$y = sqrt( abs($q) );
-				$x = $x + $t;
+				$x += $t;
 
 				if ($q > 0.0)
 				{
@@ -574,9 +574,10 @@ sub hqr_eigen_hessenberg($)
 				#
 				# Form exceptional shift.
 				#
-				carp "exceptional shift \@ $its" if ($debug_poly);
+				#### Exceptional shift at: $its
+				#
 
-				$t = $t + $x;
+				$t += $x;
 				for (my $i = 1; $i <= $n; $i++)
 				{
 					$h[$i][$i] -= $x;
@@ -604,9 +605,9 @@ sub hqr_eigen_hessenberg($)
 				$r = $h[$m + 2][$m + 1];
 
 				$s = abs($p) + abs($q) + abs($r);
-				$p = $p / $s;
-				$q = $q / $s;
-				$r = $r / $s;
+				$p /= $s;
+				$q /= $s;
+				$r /= $s;
 
 				last if ($m == $l);
 				last if (
@@ -644,9 +645,9 @@ sub hqr_eigen_hessenberg($)
 					$x = abs($p) + abs($q) + abs($r);
 					next if ( $x == 0.0 );
 
-					$p = $p / $x;
-					$q = $q / $x;
-					$r = $r / $x;
+					$p /= $x;
+					$q /= $x;
+					$r /= $x;
 				}
 
 				$s = sqrt($p * $p + $q * $q + $r * $r);
@@ -654,11 +655,11 @@ sub hqr_eigen_hessenberg($)
 
 				if ($k != $m)
 				{
-					$h[$k][ $k - 1 ] = -$s * $x;
+					$h[$k][$k - 1] = -$s * $x;
 				}
 				elsif ($l != $m)
 				{
-					$h[$k][$k - 1] = -$h[$k][$k - 1];
+					$h[$k][$k - 1] *= -1;
 				}
 
 				$p += $s;
@@ -677,7 +678,7 @@ sub hqr_eigen_hessenberg($)
 
 					if ($notlast)
 					{
-						$p = $p + $r * $h[ $k + 2 ][$j];
+						$p += $r * $h[ $k + 2 ][$j];
 						$h[ $k + 2 ][$j] -= $p * $z;
 					}
 
@@ -711,20 +712,6 @@ sub hqr_eigen_hessenberg($)
 }
 
 #
-# A debugging aid.
-#
-sub show_matrix
-{
-	my $a = shift;
-	my @rows = @$a;
-	shift (@rows);
-	foreach my $row (@rows)
-	{
-		warn join ( ',', @{$row}[ 1 .. @$a - 1 ] ) . "\n";
-	}
-}
-
-#
 # @x = poly_roots(@coefficients)
 #
 # Coefficients are fed in highest degree first.  Equation 5x**5 + 4x**4 + 2x + 8
@@ -736,9 +723,11 @@ sub poly_roots(@)
 	my(@x) = ();
 
 	#
+	#### @coefficients
+	#
 	# Check for zero coefficients in the higher-powered terms.
 	#
-	shift @coefficients while ($#coefficients and abs($coefficients[0]) < $epsilon);
+	shift @coefficients while (@coefficients and abs($coefficients[0]) < $epsilon);
 
 	if (@coefficients == 0)
 	{
@@ -760,15 +749,14 @@ sub poly_roots(@)
 	# if use_hessenberg is set, continue with the matrix
 	# calculation.
 	#
-	if (($use_hessenberg and $#coefficients > 0) or $#coefficients > 4)
+	### $use_hessenberg
+	#
+	if ($use_hessenberg or $#coefficients > 4)
 	{
 		my $matrix_ref = build_companion(@coefficients);
 
-		if ($debug_poly)
-		{
-			carp "Balanced Companion:\n";
-			show_matrix($matrix_ref);
-		}
+		#### Balanced Companion Matrix (row and column 0 will be undefs)...
+		#### $matrix_ref
 
 		#
 		# QR iterations from the matrix.
@@ -937,9 +925,6 @@ L<http://www.m-a.org.uk/resources/periodicals/online_articles_keyword_index/>.
 There is also a nice discussion of his paper at
 L<http://www.sosmath.com/algebra/factor/fac111/fac111.html>.
 
-The paper is also downloadable from CPAN by choosing the module
-Math-Polynomial-Solve-Doc.  This module is a documents-only package.
-
 Dr. Nickalls was kind enough to send me his article, with notes and
 revisions, and directed me to a Matlab script that was based on that
 article, written by Herman Bruyninckx, of the Dept. Mechanical Eng.,
@@ -953,6 +938,9 @@ Herman Bruyninckx, Herman.Bruyninckx@mech.kuleuven.ac.be,
 has web page at L<http://www.mech.kuleuven.ac.be/~bruyninc>.
 His matlab cubic solver is at
 L<http://people.mech.kuleuven.ac.be/~bruyninc/matlab/cubic.m>.
+
+Andy Stein has written a version of cubic.m that will work with
+vectors.  It is included with this package in the eg directory.
 
 =head2 The quartic
 

@@ -70,5 +70,15 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- Added a test to poly1.t (x**5 + x + 1).  Nothing special
 	  except that it's solvable in radicals, and there was an
 	  article on Galois theory that missed that.
-2.10 Jul 4 2006
-	- Released.
+     Feb 19 2007
+	- Andy Stein sent me cubic.m, an update to Herman Bruyninckx's
+	  matlab script. The script is in the eg directory.
+	- Change all debugging code to use Smart::Comments.
+	  Replaces not only debug print statements but also the
+	  show_matrix() subroutine.
+	- Found some "$var = $var op ..." code that is now
+	  "$var op= ..." in hqr_eigen_hessenberg().
+	- More documentation changes.
+	- Found a spot where $#coefficients was used where @coefficients
+	  would be less likely to cause an infinite loop.
+
