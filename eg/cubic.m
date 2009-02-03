@@ -66,3 +66,5 @@ ii = find(dis<eps & dis >= -eps);
   x(ii,1) = xN(ii) + delta; 
   x(ii,2) = xN(ii) + delta; 
   x(ii,3) = xN(ii) - 2*delta;
+
+endfunction

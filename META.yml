@@ -1,11 +1,22 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Math-Polynomial-Solve
-version:      2.11
-version_from: lib/Math/Polynomial/Solve.pm
-installdirs:  site
+---
+name: Math-Polynomial-Solve
+version: 2.12
+author:
+  - 'John M. Gamble <jgamble@cpan.org>'
+abstract: Find the roots of polynomial equations.
+license: perl
+resources:
+  license: ~
 requires:
-    Test::Simple:                  0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+  Math::Complex: 1.36
+  perl: 5.6.0
+build_requires:
+  Test::Simple: 0
+provides:
+  Math::Polynomial::Solve:
+    file: lib/Math/Polynomial/Solve.pm
+    version: 2.12
+generated_by: Module::Build version 0.31012
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

@@ -25,7 +25,7 @@ use warnings;
 	set_hessenberg
 );
 
-$VERSION = '2.11';
+$VERSION = '2.12';
 $use_hessenberg = 0;	# Set to 1 to force its use regardless of polynomial degree.
 
 #
@@ -986,6 +986,6 @@ Computer Methods for Mathematical Computations, Prentice-Hall.
 
 =head1 AUTHOR
 
-John M. Gamble may be found at B<jgamble@ripco.com>
+John M. Gamble may be found at B<jgamble@cpan.org>
 
 =cut

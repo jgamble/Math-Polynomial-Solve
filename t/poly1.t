@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl poly1.t'
 
-use Test::Simple tests => 8;
+use Test::Simple tests => 9;
 
 use Math::Polynomial::Solve qw(poly_roots);
 use Math::Complex;
@@ -17,6 +17,7 @@ my @case = (
 	[1, 5, 10, 10, 5, 1],
 	[1, 0, 0, 0, 1, 1],		# Two of the roots are cube roots of 1
 	[1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 20, 16],
 	[1, 0, -3, -4, 3, 6, 2],
 	[-1, 0, 3, 4, -3, -6, -2],
 	[4, -20, -7, 49, -70, 7, -53, 90],	# (4x**2 - 8x + 9)(x + 2)(x - 5)(x**3 - 1)

@@ -4,10 +4,13 @@ use warnings;
 
 my $build = Module::Build->new(
 	module_name => 'Math::Polynomial::Solve',
-	dist_author => 'John M. Gamble <jgamble@ripco.com>',
+	dist_author => 'John M. Gamble <jgamble@cpan.org>',
 	dist_version_from => 'lib/Math/Polynomial/Solve.pm',  
 
-	requires => { perl=> '5.6.0' },
+	requires => {
+		perl=> '5.6.0',
+		'Math::Complex'=> '1.36',
+	},
 	build_requires => { 'Test::Simple' => 0 },
 
 	include_dirs => [ '.' ],

@@ -81,4 +81,12 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- More documentation changes.
 	- Found a spot where $#coefficients was used where @coefficients
 	  would be less likely to cause an infinite loop.
-
+2.10 Jul 4 2006
+	- Released.
+2.11 Sep 5 2008
+	- Added some quadratic tests.
+2.12 Jan 28 2009
+	- Add "requires" item in Build.PL to insist on a Math::Complex
+	  version greater than 1.36.  This makes the Complex.txt file
+	  unnecessary since I won't have to explain about the old
+	  bug in the im() function.
