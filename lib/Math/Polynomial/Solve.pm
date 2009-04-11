@@ -25,15 +25,22 @@ use warnings;
 	set_hessenberg
 );
 
-$VERSION = '2.12';
-$use_hessenberg = 0;	# Set to 1 to force its use regardless of polynomial degree.
+$VERSION = '2.50';
+
+#
+# Set to 1 to force poly_roots() to use the QR Hessenberg method
+# regardless of the degree of the polynomial.  If set to zero,
+# poly_roots() uses one of the specialized routines (linerar_roots(),
+# quadratic_roots(), etc) if the degree of the polynomial is less than
+# five.
+#
+$use_hessenberg = 1;
 
 #
 # Set up the epsilon variable, the value that is, in the floating-point
 # math of the computer, the smallest value a variable can have before
 # it is indistinguishable from zero when adding it to one.
 #
-
 BEGIN
 {
 	my $epsilon2 = 0.25;
@@ -803,9 +810,15 @@ or
   use Math::Polynomial::Solve qw(poly_roots get_hessenberg set_hessenberg);
 
   #
-  # Force the use of the matrix method.
+  # Find roots using the matrix method.
   #
-  set_hessenberg(1);
+  my @x = poly_roots(@coefficients);
+
+  #
+  # Alternatively, use the classical methods instead of the matrix
+  # method if the polynomial degree is less than five.
+  #
+  set_hessenberg(0);
   my @x = poly_roots(@coefficients);
 
 or
@@ -813,6 +826,10 @@ or
   use Math::Complex;  # The roots may be complex numbers.
   use Math::Polynomial::Solve
 	qw(linear_roots quadratic_roots cubic_roots quartic_roots);
+
+  #
+  # Find the polynomial roots using the classic methods.
+  #
 
   # Find the roots of ax + b
   my @x1 = linear_roots($a, $b);
@@ -840,20 +857,26 @@ to have a non-zero value for the $a term.
 If the constant term is zero then the first value returned in the list
 of answers will always be zero, for all functions.
 
+=head2 get_hessenberg()
+
+Returns 1 or 0 depending upon whether poly_roots() always makes use of
+the Hessenberg matrix method or not.
+
 =head2 set_hessenberg()
 
 Sets or removes the condition that forces the use of the Hessenberg matrix
-regardless of the polynomial's degree.  A non-zero argument forces the
-use of the matrix method, a zero removes it.
-
-=head2 get_hessenberg()
-
-Returns 1 or 0 depending upon whether the Hessenberg matrix method is
-always in use or not.
+regardless of the polynomial's degree.  A zero argument forces the
+use of classical methods for polynomials of degree less than five, a
+non-zero argument forces poly_roots() to always use the matrix method.
 
 =head2 poly_roots()
 
-A generic function that may call one of the other root-finding functions,
+By default, poly_roots() will use the Hessenberg matrix method for solving
+polynomials.  This is a complete change from the default behavior in versions
+less than version 2.50.
+
+If the function C<set_hessenberg> is called with an argument of 0,
+poly_roots becomes a generic function that may call one of the other root-finding functions,
 or a polynomial solving method using a Hessenberg matrix, depending on the
 degree of the polynomial.  You may force it to use the matrix method regardless
 of the degree of the polynomial by calling C<set_hessenberg(1)>.
@@ -918,8 +941,11 @@ There are no default exports. The functions may be named in an export list.
 
 The cubic is solved by the method described by R. W. D. Nickalls, "A New
 Approach to solving the cubic: Cardan's solution revealed," The
-Mathematical Gazette, 77, 354-359, 1993. This article is available on
-several different web sites, including
+Mathematical Gazette, 77, 354-359, 1993. Dr. Nickalls has made his paper
+available at
+L<http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
+
+This article is also available on several other web sites, including
 L<http://www.2dcurves.com/cubic/cubic.html> and
 L<http://www.m-a.org.uk/resources/periodicals/online_articles_keyword_index/>.
 There is also a nice discussion of his paper at
@@ -932,7 +958,7 @@ Div. PMA, Katholieke Universiteit Leuven, Belgium. This function is an
 almost direct translation of that script, and I owe Herman Bruyninckx
 for creating it in the first place. 
 
-Dick Nickalls, dicknickalls@compuserve.com
+Dick Nickalls, dick@nickalls.org
 
 Herman Bruyninckx, Herman.Bruyninckx@mech.kuleuven.ac.be,
 has web page at L<http://www.mech.kuleuven.ac.be/~bruyninc>.

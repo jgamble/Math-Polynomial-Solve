@@ -89,4 +89,10 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- Add "requires" item in Build.PL to insist on a Math::Complex
 	  version greater than 1.36.  This makes the Complex.txt file
 	  unnecessary since I won't have to explain about the old
-	  bug in the im() function.
+	  bug in the Im() function.
+2.50 Mar 7 2009
+	- Function poly_roots() now uses the QR Hessenberg method by
+	  default.  To return to the old version's behavior, use
+	  set_hessenberg(0).
+	- Update tests and documentation to reflect this.
+	- Update Dr. Nickalls' e-mail address and his paper's url.

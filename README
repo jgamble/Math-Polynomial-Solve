@@ -1,22 +1,19 @@
-	Math::Polynomial::Solve, version 2.10, 3 Apr 2006.
+	Math::Polynomial::Solve, version 2.50, 7 Mar 2009.
 ----------------------------------------------------------------
 
-Copyright (c) 2006 John M. Gamble. All rights reserved. This program is
+Copyright (c) 2009 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
 This package provides a set of functions that find the roots of
-polynomials up to degree 4 using the classical methods. These polynomials
-and polynomials of degrees 5 and higher may also be solved by an
+polynomials up to degree 4 using the classical methods, and a function
+for solving polynomials of any degree with an implementation by an
 implementation of the QR Hessenberg algorithm.
 
-The solution for the cubic is based on an article by R. W. D. Nickalls,
-"A New Approach to solving the cubic: Cardan's solution revealed," The
-Mathematical Gazette, 77, 354-359, 1993. This article is available on
-the web at several web sites, including
-<http://www.2dcurves.com/cubic/cubic.html> and my own web site
-<http://pages.ripco.net/~jgamble/docs/nickallscubic.pdf>.
-A web search for Nickalls + cubic will find other web sites.
+The cubic is solved by the method described by R. W. D. Nickalls, "A New
+Approach to solving the cubic: Cardan's solution revealed," The
+Mathematical Gazette, 77, 354-359, 1993. Dr. Nickalls has made his paper
+available at <http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
 
 The solution for the quartic is based on Ferrari's method, as described
 in the web page Karl's Calculus Tutor,
@@ -30,8 +27,8 @@ no way to test this. Consequently, the requirement is set for version
 Installation:
 ----------------------------------------------------------------
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.10.tar.gz
-	tar xvf Math-Polynomial-Solve-2.10.tar
+	gzip -d Math-Polynomial-Solve-2.50.tar.gz
+	tar xvf Math-Polynomial-Solve-2.50.tar
 
 This package now makes use of Module::Build, and the Build.PL script,
 but you can still use Makefile.PL, which is provided:
@@ -46,7 +43,7 @@ Run the tests:
 Install the module:
 	make install
 
-Alternatively:
+Alternatively, you can use Build.PL:
 	perl Build.PL
 	Build
 
