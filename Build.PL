@@ -4,6 +4,7 @@ use warnings;
 
 my $build = Module::Build->new(
 	module_name => 'Math::Polynomial::Solve',
+	abstract => 'Find the Roots of Polynomial Equations',
 	dist_author => 'John M. Gamble <jgamble@cpan.org>',
 	dist_version_from => 'lib/Math/Polynomial/Solve.pm',  
 

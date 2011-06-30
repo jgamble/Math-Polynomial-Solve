@@ -1,7 +1,7 @@
-	Math::Polynomial::Solve, version 2.50, 7 Mar 2009.
+	Math::Polynomial::Solve, version 3.00, 19 Apr 2010.
 ----------------------------------------------------------------
 
-Copyright (c) 2009 John M. Gamble. All rights reserved. This program is
+Copyright (c) 2010 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
@@ -45,12 +45,12 @@ Install the module:
 
 Alternatively, you can use Build.PL:
 	perl Build.PL
-	Build
+	perl Build
 
 Run the tests:
-	Build test
+	perl Build test
 
 Install the module:
-	Build install
+	perl Build install
 
 See the documentation for Module::Build for more information.

@@ -2,7 +2,7 @@
 # Tests of the poly_roots() function, all of polynomials of degree
 # four or less.
 #
-use Test::Simple tests => 20;
+use Test::Simple tests => 22;
 
 use Math::Polynomial::Solve qw(poly_roots set_hessenberg);
 use Math::Complex;
@@ -20,6 +20,7 @@ my @case = (
 	[-1, 0, 30, 0, -289],
 	[1, 0, -30, 0, 289,  0,  0,  0],
 	[289, 0, -30, 0, 1],
+	[1, 12, 46, 60, 25],
 );
 
 #

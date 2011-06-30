@@ -1,46 +1,60 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
-1.00 Wed Feb 14 17:51:04 2001
-	- original version
+2.51
+     Jun 1 2010
+	- Jean Connelly found a quartic where $g is greater than $epsilon,
+	  but $g**2 isn't. Since it's the squared value that's used in
+	  Ferrari's method, we eventually wind up dividing by zero.
+	  This is a floating point representation sample that slipped
+	  past my tests (which up to now were all based on integers).
+	  Changed the check to use $g**2, since that's what we're
+	  protecting ourselves from anyway.
+	- Connelly's case is 0.9216 times an integer coeffecient set. Put
+	  the integer version in poly0.t, and then created the floating point
+	  tests in the new file polyfp0.t by taking the poly0.t tests and
+	  multiplying everything by 0.9216. I'll extend this later.
+	- Added Dr. Nickall's quartic article to the distribution. Both of
+	  his articles are in the subdirectory "reference".
+     Apr 19 2010
+	- Bowed to convention and reversed the order of the Change entries.
+	  (And moved an obviously out-of-place Change entry to its proper
+	  position).
+	- Added Dr. Nickall's article to the distribution, with his permission.
+	- Abandoned backward compatibility with perl version 5.05, which was
+	  present despite the 5.6 requirement in Build.PL (I was supporting
+	  the module on a very old server). The module now requires version 5.6,
+	  which admittedly isn't cutting edge but does allow more modern
+	  constructs like 'our'.
 
-1.01
-	- Web site address of Karl's Calculus Tutor has changed.  Document
-	  changed with it.
-	- Code that popped off leading zero coefficients was flawed.
-	  Negative values could get popped off too since the check was
-	      $coefficients[0] <= $epsilon
-	  instead of
-	      abs($coefficients[0]) <= $epsilon.
-	- Began writing code for symbolic solutions.
-	- And then I got the e-mail from Nick Ing-Simmons.
+2.50 Mar 7 2009
+	- Function poly_roots() now uses the QR Hessenberg method by
+	  default.  To return to the old version's behavior, use
+	  set_hessenberg(0).
+	- Update tests and documentation to reflect this.
+	- Update Dr. Nickalls' e-mail address and his paper's url.
 
-1.90 March 17 2003
-	Nick Ing-Simmons had been working on a perl binding to the GNU
-	Scientific Library that performed, among other things, polynomial
-	solving.  He graciously (indeed, FAR beyond the call of duty)
-	provided a perl version the Fortran code written by Hiroshi
-	Murakami, and gave me permission to use the perl version of the code
-	in this module (as Hiroshi Murakami gave permission to Nick Ing-Simmons).
-	For further information on his efforts, see Math::GSL::Polynomial.
-	Putting in the code resulted in:
-	- Some formatting changes.  Sorry, I'm a tab user.
-	- Removal of some redundant code.  Math::Polynomial::Solve
-	  already calculated epsilon, and the wrapper function already
-	  removed leading zero coefficients.
-	- Coefficients to be passed in from higher power to lower,
-	  rather than the reverse.  This matches current usage in this
-	  module.
-	- Roots to be returned as Complex number objects, rather than paired
-	  real and imaginary parts.
-	- An early return for the really simple case.
+2.12 Jan 28 2009
+	- Add "requires" item in Build.PL to insist on a Math::Complex
+	  version greater than 1.36.  This makes the Complex.txt file
+	  unnecessary since I won't have to explain about the old
+	  bug in the Im() function.
 
-1.99 April 30 2003
-	- More documentation changes, including updating links to Dr.
-	  Nickalls's paper.
-	- Added many, many more tests.
-	- Added the set_ and get_hessenberg() functions.
-	- Put some code that was in a text file in one of the helper
-	  perl files.
+2.11 Feb 19 2007
+	- Andy Stein sent me cubic.m, an update to Herman Bruyninckx's
+	  matlab script. The script is in the eg directory.
+	- Change all debugging code to use Smart::Comments.
+	  Replaces not only debug print statements but also the
+	  show_matrix() subroutine.
+	- Found some "$var = $var op ..." code that is now
+	  "$var op= ..." in hqr_eigen_hessenberg().
+	- More documentation changes.
+	- Found a spot where $#coefficients was used where @coefficients
+	  would be less likely to cause an infinite loop.
+     Sep 5 2008
+	- Added some quadratic tests.
+
+2.10 Jul 4 2006
+	- Released.
 
 2.00 Feb 18 2004
 	- For some idiotic reason, I thought that I had already uploaded the
@@ -70,29 +84,46 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- Added a test to poly1.t (x**5 + x + 1).  Nothing special
 	  except that it's solvable in radicals, and there was an
 	  article on Galois theory that missed that.
-     Feb 19 2007
-	- Andy Stein sent me cubic.m, an update to Herman Bruyninckx's
-	  matlab script. The script is in the eg directory.
-	- Change all debugging code to use Smart::Comments.
-	  Replaces not only debug print statements but also the
-	  show_matrix() subroutine.
-	- Found some "$var = $var op ..." code that is now
-	  "$var op= ..." in hqr_eigen_hessenberg().
-	- More documentation changes.
-	- Found a spot where $#coefficients was used where @coefficients
-	  would be less likely to cause an infinite loop.
-2.10 Jul 4 2006
-	- Released.
-2.11 Sep 5 2008
-	- Added some quadratic tests.
-2.12 Jan 28 2009
-	- Add "requires" item in Build.PL to insist on a Math::Complex
-	  version greater than 1.36.  This makes the Complex.txt file
-	  unnecessary since I won't have to explain about the old
-	  bug in the Im() function.
-2.50 Mar 7 2009
-	- Function poly_roots() now uses the QR Hessenberg method by
-	  default.  To return to the old version's behavior, use
-	  set_hessenberg(0).
-	- Update tests and documentation to reflect this.
-	- Update Dr. Nickalls' e-mail address and his paper's url.
+
+1.99 April 30 2003
+	- More documentation changes, including updating links to Dr.
+	  Nickalls's paper.
+	- Added many, many more tests.
+	- Added the set_ and get_hessenberg() functions.
+	- Put some code that was in a text file in one of the helper
+	  perl files.
+
+1.90 March 17 2003
+	Nick Ing-Simmons had been working on a perl binding to the GNU
+	Scientific Library that performed, among other things, polynomial
+	solving.  He graciously (indeed, FAR beyond the call of duty)
+	provided a perl version the Fortran code written by Hiroshi
+	Murakami, and gave me permission to use the perl version of the code
+	in this module (as Hiroshi Murakami gave permission to Nick Ing-Simmons).
+	For further information on his efforts, see Math::GSL::Polynomial.
+	Putting in the code resulted in:
+	- Some formatting changes.  Sorry, I'm a tab user.
+	- Removal of some redundant code.  Math::Polynomial::Solve
+	  already calculated epsilon, and the wrapper function already
+	  removed leading zero coefficients.
+	- Coefficients to be passed in from higher power to lower,
+	  rather than the reverse.  This matches current usage in this
+	  module.
+	- Roots to be returned as Complex number objects, rather than paired
+	  real and imaginary parts.
+	- An early return for the really simple case.
+
+1.01
+	- Web site address of Karl's Calculus Tutor has changed.  Document
+	  changed with it.
+	- Code that popped off leading zero coefficients was flawed.
+	  Negative values could get popped off too since the check was
+	      $coefficients[0] <= $epsilon
+	  instead of
+	      abs($coefficients[0]) <= $epsilon.
+	- Began writing code for symbolic solutions.
+	- And then I got the e-mail from Nick Ing-Simmons.
+
+1.00 Wed Feb 14 17:51:04 2001
+	- original version
+

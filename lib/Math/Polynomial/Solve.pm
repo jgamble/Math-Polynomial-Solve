@@ -1,11 +1,11 @@
 package Math::Polynomial::Solve;
 
-require 5.005;
+require 5.006;
 
 use Math::Complex;
 use Carp;
 use Exporter;
-use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION $epsilon $use_hessenberg);
+use vars qw(@ISA @EXPORT @EXPORT_OK);
 use strict;
 use warnings;
 #use Smart::Comments;
@@ -25,7 +25,7 @@ use warnings;
 	set_hessenberg
 );
 
-$VERSION = '2.50';
+our $VERSION = '2.51';
 
 #
 # Set to 1 to force poly_roots() to use the QR Hessenberg method
@@ -34,17 +34,19 @@ $VERSION = '2.50';
 # quadratic_roots(), etc) if the degree of the polynomial is less than
 # five.
 #
-$use_hessenberg = 1;
+our $use_hessenberg = 1;
 
 #
 # Set up the epsilon variable, the value that is, in the floating-point
 # math of the computer, the smallest value a variable can have before
 # it is indistinguishable from zero when adding it to one.
 #
+our $epsilon;
+
 BEGIN
 {
-	my $epsilon2 = 0.25;
-	$epsilon = 0.5;
+	$epsilon = 0.25;
+	my $epsilon2 = $epsilon/2;
 
 	while (1.0 + $epsilon2 > 1.0)
 	{
@@ -147,7 +149,7 @@ sub cubic_roots(@)
 	if ($dis > $epsilon)
 	{
 		#
-		### Cubic branch 1: (\$dis >  0)
+		### Cubic branch 1, $dis is greater than  0...
 		#
 		# One real root, two complex roots.
 		#
@@ -168,7 +170,7 @@ sub cubic_roots(@)
 	elsif ($dis < -$epsilon)
 	{
 		#
-		### Cubic branch 2: (\$dis <  0)
+		### Cubic branch 2, $dis is less than  0...
 		#
 		# Three distinct real roots.
 		#
@@ -183,7 +185,7 @@ sub cubic_roots(@)
 	else
 	{
 		#
-		### Cubic branch 3: (\$dis == 0)
+		### Cubic branch 3, $dis equals 0, within epsilon...
 		#
 		# abs($dis) <= $epsilon (effectively zero).
 		#
@@ -228,7 +230,6 @@ sub quartic_roots(@)
 	#
 	# (This is done by setting x = y - b/4).
 	#
-
 	my $b4 = $b/4;
 
 	#
@@ -241,23 +242,34 @@ sub quartic_roots(@)
 	my $h = $e +
 		$b4 * (-$d + $b4 * ($c - 3 * $b4 * $b4));
 
-
+	#
+	###            quartic_roots calculations
+	#### $b4
+	#### $f
+	#### $g
+	#### $h
+	#
 	if (abs($h) < $epsilon)
 	{
 		#
-		### Quartic branch 1: (\$h == 0)
+		### Quartic branch 1, $h equals 0, within epsilon...
 		#
 		# Special case: h == 0.  We have a cubic times y.
 		#
 		@x = (0, cubic_roots(1, 0, $f, $g));
 	}
-	elsif (abs($g) < $epsilon)
+	elsif (abs($g * $g) < $epsilon)
 	{
 		#
-		### "Quartic branch 2: (\$g == 0)
+		### "Quartic branch 2, $g equals 0, within epsilon...
 		#
 		# Another special case: g == 0.  We have a quadratic
 		# with y-squared.
+		#
+		# (We check $g**2 because that's what the constant
+		# value actually is in Ferrari's method, and it is
+		# possible for $g to be outside of epsilon while
+		# $g**2 is inside, i.e., "zero").
 		#
 		my($p, $q) = quadratic_roots(1, $f, $h);
 		$p = sqrt($p);
@@ -941,15 +953,7 @@ There are no default exports. The functions may be named in an export list.
 
 The cubic is solved by the method described by R. W. D. Nickalls, "A New
 Approach to solving the cubic: Cardan's solution revealed," The
-Mathematical Gazette, 77, 354-359, 1993. Dr. Nickalls has made his paper
-available at
-L<http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
-
-This article is also available on several other web sites, including
-L<http://www.2dcurves.com/cubic/cubic.html> and
-L<http://www.m-a.org.uk/resources/periodicals/online_articles_keyword_index/>.
-There is also a nice discussion of his paper at
-L<http://www.sosmath.com/algebra/factor/fac111/fac111.html>.
+Mathematical Gazette, 77, 354-359, 1993.
 
 Dr. Nickalls was kind enough to send me his article, with notes and
 revisions, and directed me to a Matlab script that was based on that
@@ -957,6 +961,16 @@ article, written by Herman Bruyninckx, of the Dept. Mechanical Eng.,
 Div. PMA, Katholieke Universiteit Leuven, Belgium. This function is an
 almost direct translation of that script, and I owe Herman Bruyninckx
 for creating it in the first place. 
+
+
+With version 2.51 of this module, Dr. Nikalls's paper is included
+in the references directory. Dr. Nickalls has also made his paper
+available at
+L<http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
+
+This article is also available on L<http://www.2dcurves.com/cubic/cubic.html>,
+and there is a nice discussion of his method at
+L<http://www.sosmath.com/algebra/factor/fac111/fac111.html>.
 
 Dick Nickalls, dick@nickalls.org
 
@@ -1003,7 +1017,8 @@ Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
 For starting out, you may want to read
 
 Numerical Recipes in C, by William Press, Brian P. Flannery, Saul A. Teukolsky,
-and William T. Vetterling, Cambridge University Press.
+and William T. Vetterling, Cambridge University Press. They have a web site for
+their book, L<http://www.nr.com/>.
 
 =head1 SEE ALSO
 

@@ -7,10 +7,13 @@ lib/Math/Polynomial/Solve.pm
 README
 eg/cubic.m
 eg/poly.pl
+reference/cubic1993.pdf
+reference/quartic2009.pdf
 t/coef.pl
 t/cubic.t
 t/pod.t
 t/poly0.t
 t/poly1.t
+t/polyfp0.t
 t/quadratic.t
 t/quartic.t
