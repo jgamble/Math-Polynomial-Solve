@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 3.00, 19 Apr 2010.
+	Math::Polynomial::Solve, version 2.52, 16 Jun 2010.
 ----------------------------------------------------------------
 
 Copyright (c) 2010 John M. Gamble. All rights reserved. This program is
@@ -18,11 +18,6 @@ available at <http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
 The solution for the quartic is based on Ferrari's method, as described
 in the web page Karl's Calculus Tutor,
 <http://www.karlscalculus.org/quartic.html>.
-
-Version 1.01 of this package worked with perl version 5.004_04. The
-current version may work with that version of perl as well, but I had
-no way to test this. Consequently, the requirement is set for version
-5.6 of perl.
 
 Installation:
 ----------------------------------------------------------------

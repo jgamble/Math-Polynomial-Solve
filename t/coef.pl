@@ -17,7 +17,7 @@ sub prodof
 sub fltcmp
 {
 	my($a, $b) = @_;
-	my($flt) = 0.5/16777216;	# a good enough value for testing.
+	my($flt) = 0.25/16777216;	# a good enough value for testing.
 
 	return -1 if ($a + $flt < $b);
 	return 1 if ($a - $flt > $b);

@@ -1,5 +1,29 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.52
+     Jun 16 2010
+	- Added export tags. You can export the analytic functions
+	  linear_roots(), quadratic_roots(), cubic_roots(), and quartic_roots()
+	  via the :classical tag; poly_roots(), get_hessenberg(), and
+	  set_hessenbert() via the :numeric tag; and poly_evaluate() and
+	  simplified_form() via the :utility tag.
+	- Fixed spelling error, mostly in the comments: it's "resolvent" cubic,
+	  not "resolvant".
+	- Documentation upgrade, particularly for poly_roots(), which was
+	  worded a little funny given the change from the default solving
+	  method in version 2.50. Added documentation for the new export tags
+	  and the new functions.
+     Jun 15 2010
+	- Strunk & White'd the possesive form of Dr. Nickalls's name.
+	  (I'm not sure how Strunk & White would react to verbing their names.)
+	  I had randomly dropped the 's' before or after the apostrophe.
+	- Opened up the internals a bit by providing a a simplified_form()
+	  function that removes leading zero coefficients and divides the
+	  remaining coefficients by the coefficient of the highest power.
+     Jun 14 2010
+	- Added an poly_evaluate() function to return y values of the
+	  polynomial at given x values. Partly done for my own testing but
+	  it's too useful not to provide generally.
 2.51
      Jun 1 2010
 	- Jean Connelly found a quartic where $g is greater than $epsilon,
@@ -13,13 +37,13 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  the integer version in poly0.t, and then created the floating point
 	  tests in the new file polyfp0.t by taking the poly0.t tests and
 	  multiplying everything by 0.9216. I'll extend this later.
-	- Added Dr. Nickall's quartic article to the distribution. Both of
+	- Added Dr. Nickalls's quartic article to the distribution. Both of
 	  his articles are in the subdirectory "reference".
      Apr 19 2010
 	- Bowed to convention and reversed the order of the Change entries.
 	  (And moved an obviously out-of-place Change entry to its proper
 	  position).
-	- Added Dr. Nickall's article to the distribution, with his permission.
+	- Added Dr. Nickalls's article to the distribution, with his permission.
 	- Abandoned backward compatibility with perl version 5.05, which was
 	  present despite the 5.6 requirement in Build.PL (I was supporting
 	  the module on a very old server). The module now requires version 5.6,
@@ -31,7 +55,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  default.  To return to the old version's behavior, use
 	  set_hessenberg(0).
 	- Update tests and documentation to reflect this.
-	- Update Dr. Nickalls' e-mail address and his paper's url.
+	- Update Dr. Nickalls's e-mail address and his paper's url.
 
 2.12 Jan 28 2009
 	- Add "requires" item in Build.PL to insist on a Math::Complex
@@ -62,7 +86,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- Well, as long as I'm here, reviewed the code again, and found some
 	  inconsistant epsilon comparisons ('<' vs. '<=').  Changed them all
 	  to '<'.
-	- Double-checked the links too.  Dr. Nickall's article keeps moving
+	- Double-checked the links too.  Dr. Nickalls's article keeps moving
 	  around
      Apr 3 2006
 	- Upgraded the test files to use Test::Simple.

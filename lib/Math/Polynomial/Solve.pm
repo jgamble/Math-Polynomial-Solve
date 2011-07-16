@@ -5,7 +5,7 @@ require 5.006;
 use Math::Complex;
 use Carp;
 use Exporter;
-use vars qw(@ISA @EXPORT @EXPORT_OK);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use strict;
 use warnings;
 #use Smart::Comments;
@@ -15,17 +15,27 @@ use warnings;
 #
 # Export only on request.
 #
-@EXPORT_OK = qw(
-	poly_roots
-	linear_roots
-	quadratic_roots
-	cubic_roots
-	quartic_roots
-	get_hessenberg
-	set_hessenberg
+%EXPORT_TAGS = (
+	'classical' => [ qw(
+		linear_roots
+		quadratic_roots
+		cubic_roots
+		quartic_roots
+	) ],
+	'numeric' => [ qw(
+		poly_roots
+		get_hessenberg
+		set_hessenberg
+	) ],
+	'utility' => [ qw(
+		poly_evaluate
+		simplified_form
+	) ],
 );
 
-our $VERSION = '2.51';
+@EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} },  @{ $EXPORT_TAGS{'numeric'} },  @{ $EXPORT_TAGS{'utility'} } );
+
+our $VERSION = '2.52';
 
 #
 # Set to 1 to force poly_roots() to use the QR Hessenberg method
@@ -226,7 +236,7 @@ sub quartic_roots(@)
 
 	#
 	# Second step: simplify the equation to the
-	# "resolvant cubic"  y**4 + fy**2 + gy + h.
+	# "resolvent cubic"  y**4 + fy**2 + gy + h.
 	#
 	# (This is done by setting x = y - b/4).
 	#
@@ -282,7 +292,7 @@ sub quartic_roots(@)
 		### Quartic branch 3, Ferrari's method...
 		#
 		# Special cases don't apply, so continue on with Ferrari's
-		# method.  This involves setting up the resolvant cubic
+		# method.  This involves setting up the resolvent cubic
 		# as the product of two quadratics.
 		#
 		# After setting up conditions that guarantee that the
@@ -802,6 +812,66 @@ sub poly_roots(@)
 	return @x;
 }
 
+#
+# @monic_polynomial = simplified_form(@coefficients);
+#
+# Return polynomial without any leading zero coefficients and in
+# a monic polynomial form (all coefficients divided by the coefficient
+# of the highest power).
+#
+sub simplified_form(@)
+{
+	my @coefficients = @_;
+
+	shift @coefficients while (scalar @coefficients and abs($coefficients[0]) < $epsilon);
+
+	if (scalar @coefficients == 0)
+	{
+		carp "All coefficients are zero\n";
+		return (0);
+	}
+
+	my $a = $coefficients[0];
+	$coefficients[$_] /= $a for (0..$#coefficients);
+
+	return @coefficients;
+}
+
+#
+# $eps = epsilon();
+#
+# Returns the epsilon value used internally by this module.
+#
+sub epsilon
+{
+	return $epsilon;
+}
+
+#
+# @results = poly_evaluate(\@coefficients, \@values);
+#
+# Returns a list of y-points on the polynomial for a corresponding
+# list of x-points.
+#
+sub poly_evaluate($$)
+{
+	my $coef_ref = shift;
+	my $value_ref = shift;
+
+	my @coefficients = @$coef_ref;
+	my @values = @$value_ref;
+
+	my @results = (shift @coefficients) x scalar @values;
+	foreach my $c (@coefficients)
+	{
+		foreach my $j (0..$#values)
+		{
+			$results[$j] = $results[$j] * $values[$j] + $c;
+		}
+	}
+	return @results;
+}
+
 1;
 __END__
 
@@ -840,7 +910,7 @@ or
 	qw(linear_roots quadratic_roots cubic_roots quartic_roots);
 
   #
-  # Find the polynomial roots using the classic methods.
+  # Find the polynomial roots using the classical methods.
   #
 
   # Find the roots of ax + b
@@ -855,12 +925,27 @@ or
   # Find the roots of ax**4 + bx**3 +cx**2 + dx + e
   my @x4 = quartic_roots($a, $b, $c, $d, $e);
 
+or
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial::Solve qw(poly_evaluate simplified_form);
+
+  my @polynomial = (89, 23, 23, 432, 27);
+
+  # Return a version of the polynomial with no leading zeroes
+  # and the leading coefficient equal to 1.
+  my @monic_form = simplified_form(@polynomial);
+
+  # Find the y-values of the polynomial at selected x-values.
+  my @xvals = (0, 1, 2, 3, 5, 7);
+  my @yvals = poly_evaluate(\@polynomial, \@xvals);
+
+
 =head1 DESCRIPTION
 
 This package supplies a set of functions that find the roots of
-polynomials. Polynomials up to the quartic may be solved directly by
-numerical formulae. Polynomials of fifth and higher powers will be
-solved by an iterative method, as there are no general solutions
+polynomials, along with some utility functions. Polynomials up to the quartic
+may be solved directly by numerical formulae. Polynomials of fifth and higher
+powers will be solved by an iterative method, as there are no general solutions
 for fifth and higher powers.
 
 The linear, quadratic, cubic, and quartic *_roots() functions all expect
@@ -880,21 +965,12 @@ Sets or removes the condition that forces the use of the Hessenberg matrix
 regardless of the polynomial's degree.  A zero argument forces the
 use of classical methods for polynomials of degree less than five, a
 non-zero argument forces poly_roots() to always use the matrix method.
+The default state of the module is to always use the matrix method.
+This is a complete change from the default behavior in versions less than version 2.50.
 
 =head2 poly_roots()
 
-By default, poly_roots() will use the Hessenberg matrix method for solving
-polynomials.  This is a complete change from the default behavior in versions
-less than version 2.50.
-
-If the function C<set_hessenberg> is called with an argument of 0,
-poly_roots becomes a generic function that may call one of the other root-finding functions,
-or a polynomial solving method using a Hessenberg matrix, depending on the
-degree of the polynomial.  You may force it to use the matrix method regardless
-of the degree of the polynomial by calling C<set_hessenberg(1)>.
-Otherwise it will use the specialized root functions for polynomials of
-degree 1 to 4.
-
+Returns the roots of a polynomial equation, regardless of degree.
 Unlike the other root-finding functions, it will check for coefficients
 of zero for the highest power, and 'step down' the degree of the
 polynomial to the appropriate case. Additionally, it will check for
@@ -902,7 +978,14 @@ coefficients of zero for the lowest power terms, and add zeros to its
 root list before calling one of the root-finding functions. Thus
 it is possible to solve a polynomial of degree higher than 4 without
 using the matrix method, as long as it meets these rather specialized
-conditions.
+conditions and if there has been a call to set_hessenberg(0).
+
+By default, poly_roots() will use the Hessenberg matrix method for solving
+polynomials.
+
+If the function C<set_hessenberg> is called with an argument of 0,
+poly_roots() attempts to use one of the classical root-finding functions
+listed below, if the degree of the polynomial is four or less.
 
 =head2 linear_roots()
 
@@ -943,9 +1026,36 @@ a four-element list. The first two elements will be either
 both real or both complex. The next two elements will also be alike in
 type.
 
+=head2 poly_evaluate()
+
+Returns the values of the polynomial given a list of arguments. Unlike
+other functions, this takes the reference of the coefficient list, in
+order to feed multiple arguments (also passed in as a reference).
+
+    my @polynomial = (1, -12, 0, 8, 13);
+    my @xvals = (0, 1, 2, 3, 5, 7);
+    my @yvals = poly_evaluate(\@polynomial, \@xvals);
+
+    print "Polynomial: [", join(", ", @polynomial), "]\n";
+
+    for my $j (0..$#yvals) {
+         print "Evaluates at ", $xvals[$j], " to ", $yvals[$j], "\n";
+    }
+
+=head2 simplified_form()
+
+Return the polynomial adjusted by removing any leading zero coefficients
+and in a monic polynomial form (all coefficients divided by the coefficient
+of the highest power).
+
 =head2 EXPORT
 
 There are no default exports. The functions may be named in an export list.
+
+There are three export tags, B<classical>, which exports the functions
+linear_roots(), quadratic_roots(), cubic_roots(), and quartic_roots();
+B<numeric>, which exports poly_roots(), get_hessenbert(), and set_hessenberg();
+and B<utility> which exports poly_evaluate() and simplified_form().
 
 =head1 Acknowledgments
 
@@ -962,8 +1072,7 @@ Div. PMA, Katholieke Universiteit Leuven, Belgium. This function is an
 almost direct translation of that script, and I owe Herman Bruyninckx
 for creating it in the first place. 
 
-
-With version 2.51 of this module, Dr. Nikalls's paper is included
+Beginning with version 2.51 of this module, Dr. Nikalls's paper is included
 in the references directory. Dr. Nickalls has also made his paper
 available at
 L<http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.

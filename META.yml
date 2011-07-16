@@ -1,6 +1,6 @@
 ---
 name: Math-Polynomial-Solve
-version: 2.51
+version: 2.52
 author:
   - 'John M. Gamble <jgamble@cpan.org>'
 abstract: Find the roots of polynomial equations.
@@ -15,7 +15,7 @@ build_requires:
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.51
+    version: 2.52
 generated_by: Module::Build version 0.31012
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
