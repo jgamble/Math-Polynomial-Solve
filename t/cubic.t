@@ -1,10 +1,12 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl cubic.t'
 
-use Test::Simple tests => 18;
+use Test::Simple tests => 20;
 
 use Math::Polynomial::Solve qw(cubic_roots);
 use Math::Complex;
+use strict;
+use warnings;
 
 require "t/coef.pl";
 
@@ -17,6 +19,7 @@ my @case = (
 	[1, -6, 11, -6],
 	[1, 5, -62, -336],
 	[8, -24, 0, 6.25],
+	[729, -1, 1, 9],
 	[1, -2.5, 7/8, -1/16],
 # Same values as before, but negative
 	[-1, -3, -3, -1],
@@ -27,6 +30,7 @@ my @case = (
 	[-1, 6, -11, 6],
 	[-1, -5, 62, 336],
 	[-8, 24, 0, -6.25],
+	[-729, 1, -1, -9],
 	[-1, 2.5, -7/8, 1/16],
 );
 

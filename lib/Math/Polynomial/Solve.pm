@@ -26,16 +26,30 @@ use warnings;
 		poly_roots
 		get_hessenberg
 		set_hessenberg
+		get_substitution
+		set_substitution
+	) ],
+	'sturm' => [ qw(
+		poly_real_root_count
+		poly_sturm_chain
+		sturm_sign_chain
+		sturm_sign_count
 	) ],
 	'utility' => [ qw(
+		epsilon
+		poly_antiderivative
+		poly_derivative
+		poly_constmult
+		poly_divide
 		poly_evaluate
 		simplified_form
 	) ],
 );
 
-@EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} },  @{ $EXPORT_TAGS{'numeric'} },  @{ $EXPORT_TAGS{'utility'} } );
+@EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
+	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.52';
+our $VERSION = '2.54';
 
 #
 # Set to 1 to force poly_roots() to use the QR Hessenberg method
@@ -44,42 +58,72 @@ our $VERSION = '2.52';
 # quadratic_roots(), etc) if the degree of the polynomial is less than
 # five.
 #
-our $use_hessenberg = 1;
+my %option = (
+	hessenberg => 1,
+	varsubs => 0,
+	roots => 0,
+);
 
 #
 # Set up the epsilon variable, the value that is, in the floating-point
 # math of the computer, the smallest value a variable can have before
 # it is indistinguishable from zero when adding it to one.
 #
-our $epsilon;
+my $epsilon;
 
 BEGIN
 {
 	$epsilon = 0.25;
-	my $epsilon2 = $epsilon/2;
+	my $epsilon2 = $epsilon/2.0;
 
 	while (1.0 + $epsilon2 > 1.0)
 	{
 		$epsilon = $epsilon2;
 		$epsilon2 /= 2.0;
 	}
-
-	#### $Math::Polynomial::Solve::epsilon
 }
 
 #
-# Get/Set the flag that tells the module to use the QR Hessenberg
-# method regardless of the degree of the polynomial.
+# sign($x);
+#
+#
+sub sign($)
+{
+	my($x) = @_;
+	return 1 if ($x > 0);
+	return -1 if ($x < 0);
+	return 0;
+}
+
+#
+# $eps = epsilon();
+# $oldeps = epsilon($neweps);
+#
+# Returns the machine epsilon value used internally by this module.
+# If overriding the machine epsilon, returns the old value.
+#
+sub epsilon
+{
+	my $eps = $epsilon;
+	$epsilon = $_[0] if (scalar @_ > 0);
+	return $eps;
+}
+
+#
+# Get/Set the flags that tells the module to use the QR Hessenberg
+# method regardless of the degree of the polynomial; or to use
+# substitution to reduce the apparent polynomial degree.
 #
 sub get_hessenberg
 {
-	return $use_hessenberg;
+	return $option{hessenberg};
 }
 
 sub set_hessenberg
 {
-	$use_hessenberg = ($_[0])? 1: 0;
+	$option{hessenberg} = ($_[0])? 1: 0;
 }
+
 
 #
 # @x = linear_roots($a, $b)
@@ -92,7 +136,7 @@ sub linear_roots(@)
 	if (abs($a) < $epsilon)
 	{
 		carp "The coefficient of the highest power must not be zero!\n";
-		return (undef);
+		return ();
 	}
 
 	return wantarray? (-$b/$a): -$b/$a;
@@ -109,7 +153,7 @@ sub quadratic_roots(@)
 	if (abs($a) < $epsilon)
 	{
 		carp "The coefficient of the highest power must not be zero!\n";
-		return (undef, undef);
+		return ();
 	}
 
 	return (0, -$b/$a) if (abs($c) < $epsilon);
@@ -401,7 +445,7 @@ sub build_companion(@)
 	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
 	# from FORTRAN code by Hiroshi Murakami.
 	#
-	#  The fortran code is based on the Algol code "balance" from paper:
+	#  The Fortran code is based on the Algol code "balance" from paper:
 	#  "Balancing a Matrix for Calculation of Eigenvalues and Eigenvectors"
 	#  by B. N. Parlett and C. Reinsch, Numer. Math. 13, 293-304(1969).
 	#
@@ -520,7 +564,7 @@ sub hqr_eigen_hessenberg($)
 	# Eigenvalue Computation by the Householder QR method for the Real Hessenberg matrix.
 	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
 	# from FORTRAN code by Hiroshi Murakami.
-	# The fortran code is based on the Algol code "hqr" from the paper:
+	# The Fortran code is based on the Algol code "hqr" from the paper:
 	#   "The QR Algorithm for Real Hessenberg Matrices"
 	#   by R. S. Martin, G. Peters and J. H. Wilkinson,
 	#   Numer. Math. 14, 219-231(1970).
@@ -749,7 +793,7 @@ sub hqr_eigen_hessenberg($)
 sub poly_roots(@)
 {
 	my(@coefficients) = @_;
-	my(@x) = ();
+	my(@x, @zero_x);
 
 	#
 	#### @coefficients
@@ -769,18 +813,24 @@ sub poly_roots(@)
 	#
 	while (@coefficients and abs($coefficients[$#coefficients]) < $epsilon)
 	{
-		push @x, 0;
+		push @zero_x, 0;
 		pop @coefficients;
 	}
 
 	#
+	# Next do some minor analysis of the remaining coefficients.
+	# Whether we use this or not depends upon some internal flags.
+	#
+	# my %coef_reduc = poly_analysis(@coefficients);
+
+	#
 	# If the remaining polynomial is a quintic or higher, or
-	# if use_hessenberg is set, continue with the matrix
+	# if $option{hessenberg} is set, continue with the matrix
 	# calculation.
 	#
-	### $use_hessenberg
+	### %option
 	#
-	if ($use_hessenberg or $#coefficients > 4)
+	if ($option{hessenberg} or $#coefficients > 4)
 	{
 		my $matrix_ref = build_companion(@coefficients);
 
@@ -809,7 +859,46 @@ sub poly_roots(@)
 		push @x, linear_roots(@coefficients);
 	}
 
+	unshift @x, @zero_x;
 	return @x;
+}
+
+#
+# Nothing to see here, move along.
+#
+# STILL EXPERIMENTAL.
+#
+#
+# @x = map(root($_, 2), @x) if ($czop);
+#
+sub poly_analysis(@)
+{
+	my(@coefficients) = @_;
+	my $nzc = 0;		# Number of zero coefficients.
+	my $czop = 1;		# Coefficients zero at odd powers? (1==T,0==F).
+	for my $j (0..$#coefficients)
+	{
+		if (abs($coefficients[$j]) < $epsilon)
+		{
+			$nzc++;
+		}
+		else
+		{
+			$czop = 0 if ($j & 1);
+		}
+	}
+
+	#
+	# Don't bother substituting if we can use the roots() function.
+	#
+	$czop = 0 if ($nzc == 2);
+
+	if ($czop == 1)
+	{
+		my @even_coefs;
+		push @even_coefs, $coefficients[$_*2] for (0..$#coefficients/2);
+		@coefficients = @even_coefs;
+	}
 }
 
 #
@@ -838,20 +927,48 @@ sub simplified_form(@)
 }
 
 #
-# $eps = epsilon();
+# @derived = poly_derivative(@coefficients)
 #
-# Returns the epsilon value used internally by this module.
+# Returns the derivative of a polynomial. The constant value is
+# lost of course.
 #
-sub epsilon
+sub poly_derivative(@)
 {
-	return $epsilon;
+	my @coefficients = @_;
+	my $degree = $#coefficients;
+
+	return () if ($degree < 1);
+
+	$coefficients[$_] *= $degree-- for (0..$degree - 2);
+
+	pop @coefficients;
+	return @coefficients;
+}
+
+#
+# @integral = poly_antiderivative(@coefficients)
+#
+# Returns the antiderivative of a polynomial. The constant value is
+# always set to zero; to override this $integral[$#integral] = $const;
+#
+sub poly_antiderivative(@)
+{
+	my @coefficients = @_;
+	my $degree = scalar @coefficients;
+
+	return (0) if ($degree < 1);
+
+	$coefficients[$_] /= $degree-- for (0..$degree - 2);
+
+	push @coefficients, 0;
+	return @coefficients;
 }
 
 #
 # @results = poly_evaluate(\@coefficients, \@values);
 #
 # Returns a list of y-points on the polynomial for a corresponding
-# list of x-points.
+# list of x-points, using Horner's method.
 #
 sub poly_evaluate($$)
 {
@@ -862,6 +979,7 @@ sub poly_evaluate($$)
 	my @values = @$value_ref;
 
 	my @results = (shift @coefficients) x scalar @values;
+
 	foreach my $c (@coefficients)
 	{
 		foreach my $j (0..$#values)
@@ -871,6 +989,244 @@ sub poly_evaluate($$)
 	}
 	return @results;
 }
+
+#
+# ($q_ref, $r_ref) = poly_divide(\@coefficients1, \@coefficients2);
+#
+# Synthetic division for polynomials. Returns references to the quotient
+# and the remainder.
+#
+sub poly_divide($$)
+{
+	my $n_ref = shift;
+	my $d_ref = shift;
+
+	my @numerator = @$n_ref;
+	my @divisor = @$d_ref;
+	my @quotient;
+
+	#
+	# Just checking... removing any leading zeros.
+	#
+	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
+	shift @divisor while (@divisor and abs($divisor[0]) < $epsilon);
+
+	my $n_degree = $#numerator;
+	my $d_degree = $#divisor;
+	my $q_degree = $n_degree - $d_degree;
+
+	return ([0], \@numerator) if ($q_degree < 0);
+	return (undef, undef) if ($d_degree < 0);
+
+	#
+	###Dividing:
+	### @numerator
+	### by
+	### @divisor
+	#
+	my $lead_coefficient = $divisor[0];
+
+	#
+	# Perform the synthetic division. The remainder will
+	# be what's left in the numerator.
+	#
+	for my $j (0..$q_degree)
+	{
+		#
+		# Get the next term for the quotient. We shift
+		# off the lead numerator term, which would become
+		# zero due to subtraction anyway.
+		#
+		my $q = (shift @numerator)/$lead_coefficient;
+
+		push @quotient, $q;
+
+		for my $k (1..$d_degree)
+		{
+			$numerator[$k - 1] -= $q * $divisor[$k];
+		}
+	}
+
+	#
+	# And once again, check for leading zeros in the remainder.
+	#
+	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
+	push @numerator, 0 unless (@numerator);
+	return (\@quotient, \@numerator);
+}
+
+#
+# @new_coeffients = poly_constmult(\@coefficients, $multiplier);
+#
+sub poly_constmult($$)
+{
+	my($c_ref, $multiplier) = @_;
+	my @coefficients = @$c_ref;
+
+	return map($_ *= $multiplier, @coefficients);
+}
+
+#
+# @sturm_seq = poly_sturm_chain(@coefficients)
+#
+#
+sub poly_sturm_chain(@)
+{
+	my @coefficients = @_;
+	my $degree = $#coefficients;
+	my @chain;
+	my($q, $r);
+
+	my $f1 = [@coefficients];
+	my $f2 = [poly_derivative(@coefficients)];
+
+	push @chain, $f1;
+
+	return @chain if ($degree < 1);
+
+	push @chain, $f2;
+
+	return @chain if ($degree < 2);
+
+	do
+	{
+		($q, $r) = poly_divide($f1, $f2);
+		$f1 = $f2;
+		$f2 = [poly_constmult($r, -1)];
+		push @chain, $f2;
+	}
+	while ($#$r > 0);
+
+	#
+	## poly_sturm_chain:
+	### @chain
+	#
+	return @chain;
+}
+
+#
+# $root_count = poly_real_root_count(@coefficients);
+#
+# An all-in-one function for finding the number of real roots in
+# a polynomial. Use this if you don't intend to do anything else
+# requiring the Sturm chain.
+#
+sub poly_real_root_count(@)
+{
+	my(@coefficients) = @_;
+
+	my @chain = poly_sturm_chain(@coefficients);
+
+	return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+		sturm_sign_count(sturm_sign_plus_inf(\@chain));
+}
+
+#
+# @signs = sturm_minus_inf(\@chain);
+#
+# Return an array of signs from the chain at minus infinity.
+#
+sub sturm_sign_minus_inf($)
+{
+	my($chain_ref) = @_;
+	my @signs;
+
+	foreach my $c (@$chain_ref)
+	{
+		my @coefficients = @$c;
+		push @signs, ((($#coefficients & 1) == 1)? -1: 1) * sign($coefficients[0]);
+	}
+
+	return @signs
+}
+
+#
+# @signs = sturm_plus_inf(\@chain);
+#
+# Return an array of signs from the chain at infinity.
+#
+sub sturm_sign_plus_inf($)
+{
+	my($chain_ref) = @_;
+	my @signs;
+
+	foreach my $c (@$chain_ref)
+	{
+		my @coefficients = @$c;
+		push @signs, sign($coefficients[0]);
+	}
+
+	return @signs
+}
+
+#
+# @sign_chains = sturm_sign_chain(\@chain, \@xvals);
+#
+# Return an array of signs for each x-value passed in each function in
+# the Sturm chain.
+#
+sub sturm_sign_chain($$)
+{
+	my($chain_ref, $xvals_ref) = @_;
+	my $fn_count = $#$chain_ref;
+	my $x_count = $#$xvals_ref;
+	my @sign_chain;
+	my $col = 0;
+
+	push @sign_chain, [] for (0..$x_count);
+
+	foreach my $p_ref (@$chain_ref)
+	{
+		my @ysigns = map($_ = sign($_), poly_evaluate($p_ref, $xvals_ref));
+
+		#
+		# We just retrieved the signs of a single function across
+		# our x-vals. We want it the other way around; signs listed
+		# by x-val across functions.
+		#
+		# (list of lists)
+		# |
+		# v
+		#      f0   f1   f2   f3   f4   ...
+		# x0    -    -    +    -    +    (list 0)
+		#
+		# x1    +    -    -    +    +    (list 1)
+		#
+		# x2    +    -    +    +    +    (list 2)
+		#
+		# ...
+		#
+		for my $j (0..$x_count)
+		{
+			push @{$sign_chain[$j]}, shift @ysigns;
+		}
+
+		$col++;
+	}
+
+	return @sign_chain;
+}
+
+#
+# $sign_changes = sturm_sign_count(@signs);
+#
+# Count the number of changes from sign to sign in the array.
+#
+sub sturm_sign_count(@)
+{
+	my @sign_seq = @_;
+	my $scnt = 0;
+
+	my $s1 = shift @sign_seq;
+	for my $s2 (@sign_seq)
+	{
+		$scnt++ if ($s1 != $s2);
+		$s1 = $s2;
+	}
+
+	return $scnt;
+}
+
 
 1;
 __END__
@@ -889,7 +1245,7 @@ Math::Polynomial::Solve - Find the roots of polynomial equations.
 or
 
   use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve qw(poly_roots get_hessenberg set_hessenberg);
+  use Math::Polynomial::Solve qw(:numeric);  # See the EXPORT section
 
   #
   # Find roots using the matrix method.
@@ -906,8 +1262,7 @@ or
 or
 
   use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve
-	qw(linear_roots quadratic_roots cubic_roots quartic_roots);
+  use Math::Polynomial::Solve qw(:classical);  # See the EXPORT section
 
   #
   # Find the polynomial roots using the classical methods.
@@ -926,19 +1281,25 @@ or
   my @x4 = quartic_roots($a, $b, $c, $d, $e);
 
 or
-  use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve qw(poly_evaluate simplified_form);
 
-  my @polynomial = (89, 23, 23, 432, 27);
+  use Math::Polynomial::Solve qw(:utility);
+
+  my @coefficients = (89, 23, 23, 432, 27);
 
   # Return a version of the polynomial with no leading zeroes
   # and the leading coefficient equal to 1.
-  my @monic_form = simplified_form(@polynomial);
+  my @monic_form = simplified_form(@coefficients);
 
   # Find the y-values of the polynomial at selected x-values.
   my @xvals = (0, 1, 2, 3, 5, 7);
-  my @yvals = poly_evaluate(\@polynomial, \@xvals);
+  my @yvals = poly_evaluate(\@coefficients, \@xvals);
 
+or
+
+  use Math::Polynomial::Solve qw(:sturm);
+
+  # Find the number of unique real roots of the polynomial.
+  my $no_of_unique_roots = poly_real_root_count(@coefficients);
 
 =head1 DESCRIPTION
 
@@ -948,46 +1309,59 @@ may be solved directly by numerical formulae. Polynomials of fifth and higher
 powers will be solved by an iterative method, as there are no general solutions
 for fifth and higher powers.
 
-The linear, quadratic, cubic, and quartic *_roots() functions all expect
-to have a non-zero value for the $a term.
-
 If the constant term is zero then the first value returned in the list
 of answers will always be zero, for all functions.
 
-=head2 get_hessenberg()
+The leading coefficient C<$a> must always be non-zero for the classical
+functions C<linear_roots()>, C<quadratic_roots()>, C<cubic_roots()>, and
+C<quartic_roots()>.
 
-Returns 1 or 0 depending upon whether poly_roots() always makes use of
+Functions making use of the Sturm sequence are also available, letting you
+find the number of real roots present in a range of X values.
+
+In addition to the root-finding functions, the internal functions have
+also been exported for your use. See the L</"EXPORT"> section for a list of
+functions exported via the :utiltiy tag.
+
+=head2 Functions
+
+=head3 get_hessenberg()
+
+Returns 1 or 0 depending upon whether C<poly_roots()> always makes use of
 the Hessenberg matrix method or not.
 
-=head2 set_hessenberg()
+B<NOTE>: this function will be deprecated in future releases in
+favor of a hash-like option function.
+
+=head3 set_hessenberg()
 
 Sets or removes the condition that forces the use of the Hessenberg matrix
 regardless of the polynomial's degree.  A zero argument forces the
 use of classical methods for polynomials of degree less than five, a
-non-zero argument forces poly_roots() to always use the matrix method.
+non-zero argument forces C<poly_roots()> to always use the matrix method.
 The default state of the module is to always use the matrix method.
-This is a complete change from the default behavior in versions less than version 2.50.
+This is a complete change from the default behavior in versions less than v2.50.
 
-=head2 poly_roots()
+B<NOTE>: this function will be deprecated in future releases in
+favor of a hash-like option function.
+
+=head3 poly_roots()
 
 Returns the roots of a polynomial equation, regardless of degree.
 Unlike the other root-finding functions, it will check for coefficients
 of zero for the highest power, and 'step down' the degree of the
 polynomial to the appropriate case. Additionally, it will check for
 coefficients of zero for the lowest power terms, and add zeros to its
-root list before calling one of the root-finding functions. Thus
-it is possible to solve a polynomial of degree higher than 4 without
-using the matrix method, as long as it meets these rather specialized
-conditions and if there has been a call to set_hessenberg(0).
+root list before calling one of the root-finding functions.
 
-By default, poly_roots() will use the Hessenberg matrix method for solving
+By default, C<poly_roots()> will use the Hessenberg matrix method for solving
 polynomials.
 
-If the function C<set_hessenberg> is called with an argument of 0,
-poly_roots() attempts to use one of the classical root-finding functions
+If the function C<set_hessenberg()> is called with an argument of 0,
+C<poly_roots()> attempts to use one of the classical root-finding functions
 listed below, if the degree of the polynomial is four or less.
 
-=head2 linear_roots()
+=head3 linear_roots()
 
 Here for completeness's sake more than anything else. Returns the
 solution for
@@ -996,7 +1370,7 @@ solution for
 
 by returning C<-b/a>. This may be in either a scalar or an array context.
 
-=head2 quadratic_roots()
+=head3 quadratic_roots()
 
 Gives the roots of the quadratic equation
 
@@ -1004,33 +1378,126 @@ Gives the roots of the quadratic equation
 
 using the well-known quadratic formula. Returns a two-element list.
 
-=head2 cubic_roots()
+=head3 cubic_roots()
 
 Gives the roots of the cubic equation
 
     ax**3 + bx**2 + cx + d = 0
 
-by the method described by R. W. D. Nickalls (see the Acknowledgments
+by the method described by R. W. D. Nickalls (see the L</"Acknowledgments">
 section below). Returns a three-element list. The first element will
 always be real. The next two values will either be both real or both
 complex numbers.
 
-=head2 quartic_roots()
+=head3 quartic_roots()
 
 Gives the roots of the quartic equation
 
     ax**4 + bx**3 + cx**2 + dx + e = 0
 
-using Ferrari's method (see the Acknowledgments section below). Returns
+using Ferrari's method (see the L</"Acknowledgments"> section below). Returns
 a four-element list. The first two elements will be either
 both real or both complex. The next two elements will also be alike in
 type.
 
-=head2 poly_evaluate()
+=head3 poly_real_root_count()
+
+Return the number of I<unique>, I<real> roots of the polynomial.
+
+    $unique_roots = poly_real_root_count(@coefficients);
+
+For example, the equation C<(x + 3)**3> forms the polynomial C<x**3 + 9x**2 + 27x + 27>,
+but C<poly_real_root_count(1, 9, 27, 27)> will return 1 for that polynomial since all
+three roots are identical.
+
+This function is the all-in-one function to use instead of
+
+    my @chain = poly_sturm_chain(@coefficients);
+
+    return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+            sturm_sign_count(sturm_sign_plus_inf(\@chain));
+
+if you don't intend to use the Sturm chain for anything else.
+
+=head3 poly_sturm_chain()
+
+Returns the chain of Sturm functions used to evaluate the number of roots of a
+polynomial in a range of X values. See C<poly_real_root_count()> for an example.
+
+=head3 sturm_sign_minus_inf()
+
+=head3 sturm_sign_plus_inf()
+
+=head3 sturm_sign_chain()
+
+=head3 sturm_sign_count()
+
+Return an array of signs (or, an array of array of signs in the case of
+C<sturm_sign_chain()>) for use by C<sturm_sign_count()>.
+
+See C<poly_real_root_count()> for an example of the use of
+C<sturm_sign_minus_inf()> and C<sturm_sign_plus_inf()>.
+
+C<sturm_sign_chain()> may be used to determine the number of roots between a
+pair or more of X values.
+
+For example:
+
+    my @chain = poly_sturm_chain( @coef );
+    my @signs = sturm_sign_chain(\@chain, \@xvals);
+
+    print "Number of unique, real, roots between ", $xval[0], " and ", $xval[1],
+          " is ", sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+
+Or, to find the number of positive, unique, real, roots:
+
+    my @xvals = (0);
+    my @signs = sturm_sign_chain(\@chain, \@xvals);
+
+    print "Number of positve, unique, real, roots is ",
+          sturm_sign_count(@{$signs[0]}) - sturm_sign_count(sturm_sign_plus_inf(\@chain));
+
+=head3 poly_derivative()
+
+    @derivative = poly_derivative(@coefficients);
+
+Returns the coefficients of the first derivative of the polynomial. Because
+leading zeros are removed before returning the derivative, the resulting
+polynomial may be reduced by more than just one than the length of the original
+polynomial. Returns an empty list if the polynomial is a simple constant.
+
+=head3 poly_antiderivative()
+
+Returns the coefficients of the antiderivative of the polynomial. The
+constant term is set to zero; to override this use
+
+    @integral = poly_antiderivative(@coefficients);
+    $integral[$#integral] = $const_term;
+
+=head3 epsilon()
+
+Returns the machine epsilon value that was calculated when this module was loaded.
+
+The value may be changed, although this in general is not recommended.
+
+    my $old_epsilon = epsilon($new_epsilon);
+
+The previous value of epsilon may be saved to be restored later.
+
+The Wikipedia article at L<http://en.wikipedia.org/wiki/Machine_epsilon/> has
+more information on the subject.
+
+=head3 simplified_form()
+
+Return the polynomial adjusted by removing any leading zero coefficients
+and placing it in a monic polynomial form (all coefficients divided by the
+coefficient of the highest power).
+
+=head3 poly_evaluate()
 
 Returns the values of the polynomial given a list of arguments. Unlike
-other functions, this takes the reference of the coefficient list, in
-order to feed multiple arguments (also passed in as a reference).
+the above functions, this takes the reference of the coefficient list, in
+order to feed the multiple x-values (that are also passed in as a reference).
 
     my @polynomial = (1, -12, 0, 8, 13);
     my @xvals = (0, 1, 2, 3, 5, 7);
@@ -1039,23 +1506,62 @@ order to feed multiple arguments (also passed in as a reference).
     print "Polynomial: [", join(", ", @polynomial), "]\n";
 
     for my $j (0..$#yvals) {
-         print "Evaluates at ", $xvals[$j], " to ", $yvals[$j], "\n";
+        print "Evaluates at ", $xvals[$j], " to ", $yvals[$j], "\n";
     }
 
-=head2 simplified_form()
+=head3 poly_constmult()
 
-Return the polynomial adjusted by removing any leading zero coefficients
-and in a monic polynomial form (all coefficients divided by the coefficient
-of the highest power).
+Simple function to multiply all of the coefficients by a constant. Like
+C<poly_evaluate()>, uses the reference of the coefficient list.
 
-=head2 EXPORT
+    my @polynomial = (1, 7, 0, 12, 19);
+    my @polynomial3 = poly_constmult(\@polynomial, 3);
+
+=head3 poly_divide()
+
+Divide one polynomial by another. Like C<poly_evaluate()>, the function takes
+a reference to the coefficient list. It returns a reference to both a quotient
+and a remainder.
+
+    my @polynomial = (1, -13, 59, -87);
+    my @polydiv = (3, -26, 59);
+    my($q, $r) = poly_divide(\@polynomial, \@polydiv);
+    my @quotient = @$q;
+    my @remainder = @$r;
+
+=head1 EXPORT
 
 There are no default exports. The functions may be named in an export list.
 
-There are three export tags, B<classical>, which exports the functions
-linear_roots(), quadratic_roots(), cubic_roots(), and quartic_roots();
-B<numeric>, which exports poly_roots(), get_hessenbert(), and set_hessenberg();
-and B<utility> which exports poly_evaluate() and simplified_form().
+There are also four export tags.
+
+=over 3
+
+=item classical
+
+Exports the four root-finding functions for polynomials of degree less than
+five: C<linear_roots()>, C<quadratic_roots()>, C<cubic_roots()>, C<quartic_roots()>.
+
+=item numeric
+
+Exports the root-finding function and the functions that affect its behavior:
+C<poly_roots()>, C<get_hessenberg()> and C<set_hessenberg()>. Note that
+C<get_hessenberg()> and C<set_hessenberg()> will be deprecated in the next release.
+
+=item sturm
+
+Exports the functions that provide the Sturm functions: C<poly_sturm_chain()>,
+C<poly_real_root_count()>, C<sturm_sign_count()>, C<sturm_sign_minus_inf()>,
+C<sturm_sign_plus_inf()>, and C<sturm_sign_chain()>. 
+
+=item utility
+
+Exports the functions that are used internally by other functions, and which
+might be useful to you as well: C<epsilon()>, C<poly_evaluate()>,
+C<poly_derivative()>, C<poly_antiderivatve()>, C<poly_constmult()>,
+C<poly_divide()>, and C<simplified_form()>.
+
+=back
 
 =head1 Acknowledgments
 
@@ -1072,9 +1578,8 @@ Div. PMA, Katholieke Universiteit Leuven, Belgium. This function is an
 almost direct translation of that script, and I owe Herman Bruyninckx
 for creating it in the first place. 
 
-Beginning with version 2.51 of this module, Dr. Nikalls's paper is included
-in the references directory. Dr. Nickalls has also made his paper
-available at
+Beginning with version 2.51, Dr. Nikalls's paper is included in the references
+directory of this package. Dr. Nickalls has also made his paper available at
 L<http://www.nickalls.org/dick/papers/maths/cubic1993.pdf>.
 
 This article is also available on L<http://www.2dcurves.com/cubic/cubic.html>,
@@ -1101,11 +1606,11 @@ at L<http://forum.swarthmore.edu/dr.math/faq/faq.cubic.equations.html>.
 =head2 Quintic and higher.
 
 Back when this module could only solve polynomials of degrees 1 through 4,
-Matz Kindahl, the author of Math::Polynomial, suggested the poly_roots()
+Matz Kindahl, the author of Math::Polynomial, suggested the C<poly_roots()>
 function. Later on, Nick Ing-Simmons, who was working on a perl binding
 to the GNU Scientific Library, sent a perl translation of Hiroshi
 Murakami's Fortran implementation of the QR Hessenberg algorithm, and it
-fit very well into the poly_roots() function. Quintics and higher degree
+fit very well into the C<poly_roots()> function. Quintics and higher degree
 polynomials can now be solved, albeit through numeric analysis methods.
 
 Hiroshi Murakami's Fortran routines were at
@@ -1125,14 +1630,28 @@ Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
 
 For starting out, you may want to read
 
-Numerical Recipes in C, by William Press, Brian P. Flannery, Saul A. Teukolsky,
-and William T. Vetterling, Cambridge University Press. They have a web site for
-their book, L<http://www.nr.com/>.
+William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling I<Numerical Recipes in C>.
+Cambridge University Press, 1988.
+They have a web site for their book, L<http://www.nr.com/>.
+
+=head2 Sturm's Sequence
+
+Dörrie, Heinrich. I<100 Great Problems of Elementary Mathematics; Their History and Solution>.
+New York: Dover Publications, 1965. Translated by David Antin.
+
+Discusses Charles Sturm's 1829 paper with an eye towards mathematical proof
+rather than an algorithm, but is still very useful.
+
+Glassner, Andrew S. I<Graphics Gems>. Boston: Academic Press, 1990. 
+
+The chapter "Using Sturm Sequences to Bracket Real Roots
+of Polynomial Equations" (by D. G. Hook and P. R. McAree) has a clearer
+description of the actual steps needed to implement Sturm's method.
 
 =head1 SEE ALSO
 
-Forsythe, George E., Michael A. Malcolm, and Cleve B. Moler (1977),
-Computer Methods for Mathematical Computations, Prentice-Hall.
+Forsythe, George E., Michael A. Malcolm, and Cleve B. Moler
+I<Computer Methods for Mathematical Computations>. Prentice-Hall, 1977.
 
 =head1 AUTHOR
 

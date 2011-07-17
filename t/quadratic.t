@@ -5,6 +5,8 @@ use Test::Simple tests => 16;
 
 use Math::Polynomial::Solve qw(quadratic_roots);
 use Math::Complex;
+use strict;
+use warnings;
 
 require "t/coef.pl";
 

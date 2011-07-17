@@ -2,10 +2,12 @@
 # Tests of the poly_roots() function, all of polynomials of degree
 # four or less.
 #
-use Test::Simple tests => 22;
+use Test::Simple tests => 24;
 
-use Math::Polynomial::Solve qw(poly_roots set_hessenberg);
+use Math::Polynomial::Solve qw(:numeric);
 use Math::Complex;
+use strict;
+use warnings;
 
 require "t/coef.pl";
 
@@ -13,6 +15,7 @@ my @case = (
 	[2, 1],
 	[1, 2, 1],
 	[1, 3, 3, 1],
+	[729, -1, 1, 9],
 	[1, 4, 6, 4, 1],
 	[3, 6, -1, -4, 2],
 	[-3, -6, 1, 4, -2],

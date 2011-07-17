@@ -1,5 +1,64 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.54
+     Sep 7 2010
+	- Documentation updates. Time to release the module.
+     Sep 2 2010
+	- Added an %option variable. Currently its fields are hessenberg,
+	  varsubs, and roots; hessenberg (which has replaced
+	  $use_hessenberg) is in use, the other two might not even keep
+	  their names the same.
+	- Let epsilon() function change the calculated machine epsilon
+	  value. This is probably something you want to do rarely, if at all.
+2.53_3
+     Aug 31 2010
+	- Added early return to poly_sturm_chain() when it's passed a
+	  constant or a linear equation (yeah, I know, but one still has to
+	  check).
+	- A couple more tests each for sturm0.t and sturm1.t.
+	- Finally used (and then fixed) sturm_sign_chain().
+	- Expose some more internal functions under the :sturm tag, and
+	  document them.
+2.53_2
+     Aug 26 2010
+	- Added another cubic test to cubic.t and poly0.t.
+     Aug 25 2010
+	- CPAN testers found a failing test in sturm0.t for some machines.
+	  Altered the test to make use of fltcmp(), which I hope will solve
+	  what I suspect is a precision problem.
+	- Made consistent the book references in the Acknowledgements section.
+2.53_1
+     Aug 23 2010
+	- poly_real_roots() becomes poly_real_root_count().
+	- Added test files sturm0.t and sturm1.t.
+	- Many documentation additions. Of note: the documentation
+	  notes the FUTURE DEPRECATION of set_hessenberg() and
+	  get_hessenberg().
+	- Set $VERSION to reflect beta condition, particularly
+	  the (lone) sturm function.
+     Aug 14 2010
+	- Added poly_real_roots().
+     Jul 22 2010
+	- Added the functions to create the sign rows, currently named
+	  sturm_sign_minus_infinity(), sturm_sign_plus_infinity(), and
+	  sturm_sign_chains().
+     Jul 21 2010
+	- Added function poly_sturm_chain(). Started a test file for it.
+	- Added a test file for the poly_division() function and of course
+	  made the function available under the :utility tag.
+     Jun 24 2010
+	- Stefan Petrea suggested adding Sturm's sequence to the module.  After
+	  looking it up, it seemed like a good idea, so I began by:
+	- Added poly_derivative() to the export list and to the :utility tag.
+	- Added poly_antiderivative() to the export list and to the :utility
+	  tag, mostly for completeness's sake, although I may find a legitimate
+	  use for it.
+     Jun 22 2010
+	- Added epsilon() to the export list and to the :utility tag. It
+	  existed in v2.52, I just forgot to add it.
+	- Formatting changes to the POD with respect to the functions'
+	  documentation.
+
 2.52
      Jun 16 2010
 	- Added export tags. You can export the analytic functions
@@ -21,7 +80,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  function that removes leading zero coefficients and divides the
 	  remaining coefficients by the coefficient of the highest power.
      Jun 14 2010
-	- Added an poly_evaluate() function to return y values of the
+	- Added a poly_evaluate() function to return y values of the
 	  polynomial at given x values. Partly done for my own testing but
 	  it's too useful not to provide generally.
 2.51

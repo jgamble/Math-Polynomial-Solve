@@ -1,21 +1,22 @@
 #!/bin/perl
 #
 #
-#
-#
-use Math::Polynomial::Solve qw(poly_roots set_hessenberg);
+use Carp;
+use Math::Polynomial::Solve qw(:numeric);
 use Math::Complex;
-use Getopt::Long;
+use strict;
+use warnings;
+#use IO::Prompt;
 
-my $hess = 0;
+my $line;
 
-GetOptions("hess" => \$hess,
-);
+while ($line = prompt("Polynomial: ", -num))
+{
+	my @coef = split(/,? /, $line);
 
-set_hessenberg($hess);
-
-my @x = poly_roots(@ARGV);
-print rootformat(@x), "\n";
+	my @x = poly_roots(@coef);
+	print rootprint(@x), "\n\n";
+}
 exit(0);
 
 sub cartesian_format($$@)
@@ -28,18 +29,15 @@ sub cartesian_format($$@)
 
 	foreach $n (@numbers)
 	{
-		#
-		# Is the number part of the Complex package?
-		#
-		if (ref($n) eq "Math::Complex")
+		$r = sprintf($fmt_re, Re($n));
+		if (Im($n) != 0)
 		{
-			$r = sprintf($fmt_re, Re($n));
 			$i = sprintf($fmt_im, Im($n));
 		}
 		else
 		{
 			$r = sprintf($fmt_re, $n);
-			$i = sprintf($fmt_im, 0);
+			$i = "";
 		}
 
 		push @cfn, $r . $i;
@@ -48,7 +46,7 @@ sub cartesian_format($$@)
 	return wantarray? @cfn: $cfn[0];
 }
 
-sub rootformat
+sub rootprint
 {
 	my @fmtlist;
 	foreach (@_)
@@ -56,5 +54,14 @@ sub rootformat
 		push @fmtlist, cartesian_format(undef, undef, $_);
 	}
 	return "[ " . join(", ", @fmtlist) . " ]";
+}
+
+sub prompt
+{
+	my $pr = shift;
+	print $pr;
+	my $inp = <>;
+	chomp $inp;
+	return $inp;
 }
 

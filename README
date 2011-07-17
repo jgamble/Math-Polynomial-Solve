@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 2.52, 16 Jun 2010.
+	Math::Polynomial::Solve, version 2.54, 7 Sep 2010.
 ----------------------------------------------------------------
 
 Copyright (c) 2010 John M. Gamble. All rights reserved. This program is
@@ -6,9 +6,16 @@ free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
 This package provides a set of functions that find the roots of
-polynomials up to degree 4 using the classical methods, and a function
+polynomials up to degree 4 using the classical methods; a function
 for solving polynomials of any degree with an implementation by an
-implementation of the QR Hessenberg algorithm.
+implementation of the QR Hessenberg algorithm; and functions that
+implement Sturm's sequence for counting the number of real, unique
+roots in a range.
+
+These functions can be exported by name or by tag (:classical, :numeric,
+:sturm, and :utility). The utility tag exports the functions that 
+are used internally and which previously were private to the module.
+See the documentation for more information.
 
 The cubic is solved by the method described by R. W. D. Nickalls, "A New
 Approach to solving the cubic: Cardan's solution revealed," The
@@ -22,8 +29,8 @@ in the web page Karl's Calculus Tutor,
 Installation:
 ----------------------------------------------------------------
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.50.tar.gz
-	tar xvf Math-Polynomial-Solve-2.50.tar
+	gzip -d Math-Polynomial-Solve-2.54.tar.gz
+	tar xvf Math-Polynomial-Solve-2.54.tar
 
 This package now makes use of Module::Build, and the Build.PL script,
 but you can still use Makefile.PL, which is provided:

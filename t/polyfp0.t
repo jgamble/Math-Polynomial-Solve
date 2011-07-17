@@ -5,8 +5,10 @@
 #
 use Test::Simple tests => 22;
 
-use Math::Polynomial::Solve qw(poly_roots set_hessenberg);
+use Math::Polynomial::Solve qw(:numeric);
 use Math::Complex;
+use warnings;
+use strict;
 
 require "t/coef.pl";
 

@@ -24,6 +24,27 @@ sub fltcmp
 	return 0;
 }
 
+#
+# returns 0 (equal) or 1 (not equal). There's no -1 value, unlike other cmp functions.
+#
+sub polycmp
+{
+	my($p_ref1, $p_ref2) = @_;
+
+	my @polynomial1 = @$p_ref1;
+	my @polynomial2 = @$p_ref2;
+
+	return 1 if (scalar @polynomial1 != scalar @polynomial2);
+
+	foreach my $c1 (@polynomial1)
+	{
+		my $c2 = shift @polynomial2;
+		return 1 if (fltcmp($c1, $c2) != 0);
+	}
+
+	return 0;
+}
+
 sub cartesian_format_signed($$@)
 {
 	my($fmt_re, $fmt_im, @numbers) = @_;

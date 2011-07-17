@@ -5,6 +5,8 @@ use Test::Simple tests => 9;
 
 use Math::Polynomial::Solve qw(poly_roots);
 use Math::Complex;
+use strict;
+use warnings;
 
 require "t/coef.pl";
 
@@ -38,7 +40,7 @@ foreach (@case)
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
 	#print "\nmy \$c0 = $c0; \$coef[$n] = ", $coef[$n], "\n";
-	#print rootformat(@x), "\n\n";
+	print rootformat(@x), "\n\n";
 }
 
 1;
