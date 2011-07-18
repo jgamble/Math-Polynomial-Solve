@@ -3,7 +3,7 @@
 
 use Test::Simple tests => 16;
 
-use Math::Polynomial::Solve qw(:sturm);
+use Math::Polynomial::Solve qw(:sturm fltcmp);
 use strict;
 use warnings;
 require "t/coef.pl";

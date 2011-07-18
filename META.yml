@@ -1,22 +1,30 @@
 ---
 name: Math-Polynomial-Solve
-version: 2.54
+version: 2.60
 author:
   - 'John M. Gamble <jgamble@cpan.org>'
 abstract: Find the roots of polynomial equations.
 license: perl
 resources:
-  license: ~
-requires:
-  Math::Complex: 1.36
-  perl: 5.6.0
+  license: http://dev.perl.org/licenses/
 build_requires:
   Test::Simple: 0
+requires:
+  Math::Complex: 1.36
+  perl: v5.6.0
+configure_requires:
+  Module::Build: 0.340201
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.54
-generated_by: Module::Build version 0.31012
+    version: 2.60
+generated_by: Module::Build version 0.340201
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+keyword:
+  - math
+  - polynomial
+  - Sturm
+  - Nickalls
+  - Laguerre

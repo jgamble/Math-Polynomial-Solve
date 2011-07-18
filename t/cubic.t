@@ -3,7 +3,7 @@
 
 use Test::Simple tests => 20;
 
-use Math::Polynomial::Solve qw(cubic_roots);
+use Math::Polynomial::Solve qw(cubic_roots fltcmp);
 use Math::Complex;
 use strict;
 use warnings;

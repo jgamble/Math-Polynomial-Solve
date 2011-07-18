@@ -1,5 +1,8 @@
-	Math::Polynomial::Solve, version 2.54, 7 Sep 2010.
+	Math::Polynomial::Solve, version 2.55_4, 3 Nov 2010.
 ----------------------------------------------------------------
+>>>NOTE: FUNCTIONS set_hessenberg() AND get_hessenberg() ARE DEPRECATED.<<<
+See poly_option() instead if you want to change the default operation
+of poly_root().
 
 Copyright (c) 2010 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
@@ -29,8 +32,8 @@ in the web page Karl's Calculus Tutor,
 Installation:
 ----------------------------------------------------------------
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.54.tar.gz
-	tar xvf Math-Polynomial-Solve-2.54.tar
+	gzip -d Math-Polynomial-Solve-2.55_4.tar.gz
+	tar xvf Math-Polynomial-Solve-2.55_4.tar
 
 This package now makes use of Module::Build, and the Build.PL script,
 but you can still use Makefile.PL, which is provided:

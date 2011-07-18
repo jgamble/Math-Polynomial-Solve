@@ -1,5 +1,96 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.60
+     Dec 15 2010
+	- Moved fltcmp() from the test directory to the module, and
+	  added it to the :utility list. Added a "fltcmp" key to the
+	  %tolerance list.
+	- Changed all of the test files to use the module's fltcmp();
+	- More documentation clean-up!
+	- Released!
+     Dec 14 2010
+	- Created and documented poly_tolerance(), letting the user
+	  set the tolerance value for laguerre().
+	- Documentation clean-up.
+2.55_4
+     Dec 3 2010
+	- Function laguerre() now works with a better tolerance value.
+	- Added a %tolerance hash for the iterative functions. Currently
+	  only laguerre() makes use of it, and I may change the way of
+	  handling later.
+	- Fixed poly_iteration() - iteration limits weren't getting
+	  changed.
+	- Checking the t directory, I found four or so test files that
+	  weren't in the MANIFEST file. Fixed that.
+     Nov 30 2010
+	- New version of laguerre() now takes multiple x-values.
+	- Documented the changes in poly_evaluate().
+     Nov 18 2010
+	- Function poly_evaluate() can now detect whether it is being passed
+	  an array of x-values, or a single x-value. Return checks to see if
+	  an array of y-values is wanted, or a single value.
+     Nov 17 2010
+	- Add function poly_iteration() to make iteration limits adjustable.
+	- Add function laguerre() for use by sturm_bisection_roots().
+     Nov 7 2010
+	- Add function sturm_bisection_roots(). Not complete yet.
+	- De-Fortran'd some loops in hqr_eigen_hessenberg(). Now uses
+	  the range operator, '..'.
+2.55_3
+     Oct 22 2010
+	- The Sturm functions sturm_sign_minus_inf() and sturm_sign_minus_inf()
+	  had been documented as exported, but they weren't. They are now.
+	- Documentation for the Sturm functions was cut short - either I had
+	  accidentally chopped it, or I left off writing it and forgot to get
+	  back to it. Took a stab at completing it.
+	- Added function sturm_real_root_range_count().
+	- Added test file sturm2.t to the t directory, and to the MANIFEST.
+     Oct 19 2010
+	- The keyword metadata key isn't an argument to the Module::Build
+	  constructor, it's part of the meta_merge hash which *is* an
+	  argument to the constructor. Fixed that.
+	- Document the varsubst option in poly_option().
+	- Made the variable substitution method more efficient by
+	  actually removing primes from the list as they're checked.
+	  Extended the prime list that gets checked.
+     Oct 18 2010
+	- Aaaaaaand of course I forgot to put varsubst.t in the MANIFEST.
+	- Updated Module::Build on my system. Maybe get keywords in
+	  META.yml now?
+2.55_2
+     Oct 18 2010
+	- Got the variable substitution code in, and created test file
+	  varsubst.t. Undocumented for now.
+     Oct 15 2010
+	- More documentation improvments, as I clear away old
+	  numeric vs. classical confusion, and add documentation
+	  for poly_option().
+	- Read the latest Module::Build documentation, and decided
+	  to try the keyword item in Build.PL.
+     Oct 12 2010
+	- Added division.pl to the eg directory and to the MANIFEST.
+	- Was removing leading zeros in poly_nonzero_term_count(),
+	  which is pretty pointless. Removed those lines of code.
+2.55_1
+     Oct 12 2010
+	- And one more document change: I found a call to set_hessenberg(0)
+	  where we now want poly_option(hessenberg => 0);
+     Oct 8 2010
+	- Added rootf.t to test directory and MANIFEST; it tests poly_roots()
+	  with the option "root_function" set.
+	- Changes to the poly_option() function for better
+	  option handling.
+	- Change test files poly0.t and polyfp0.t (which used
+	  set_hessenberg($value)) to now use
+	  poly_option(hessenberg => $value) instead.
+     Oct 5 2010
+	- Documentation change to EXPORT section. Instead of listing
+	  exported functions, link to the head3 Functions sections,
+	  which are now organized by tag (see Sep 28 2010).
+	- Added the poly_option() function.
+     Sep 28 2010
+	- Documentation improvement by categorizing the functions by
+	  tag and improving the Sturm sequence explanation.
 2.54
      Sep 7 2010
 	- Documentation updates. Time to release the module.

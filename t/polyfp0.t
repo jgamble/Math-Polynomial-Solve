@@ -5,7 +5,7 @@
 #
 use Test::Simple tests => 22;
 
-use Math::Polynomial::Solve qw(:numeric);
+use Math::Polynomial::Solve qw(:numeric fltcmp);
 use Math::Complex;
 use warnings;
 use strict;
@@ -30,7 +30,7 @@ my @case = (
 # All of these tests will be dispatched to the
 # quadratic_roots, cubic_roots, and quartic_roots functions.
 #
-set_hessenberg(0);
+poly_option(hessenberg => 0);
 
 foreach (@case)
 {
@@ -53,7 +53,7 @@ foreach (@case)
 # Repeate, except that the next line sets the
 # 'always use the iterative matrix' flag.
 #
-set_hessenberg(1);
+poly_option(hessenberg => 1);
 
 foreach (@case)
 {

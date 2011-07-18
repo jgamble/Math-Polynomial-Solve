@@ -14,16 +14,6 @@ sub prodof
 	return $x;
 }
 
-sub fltcmp
-{
-	my($a, $b) = @_;
-	my($flt) = 0.25/16777216;	# a good enough value for testing.
-
-	return -1 if ($a + $flt < $b);
-	return 1 if ($a - $flt > $b);
-	return 0;
-}
-
 #
 # returns 0 (equal) or 1 (not equal). There's no -1 value, unlike other cmp functions.
 #
