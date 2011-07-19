@@ -12,13 +12,15 @@ my $build = Module::Build->new(
 		perl=> '5.6.0',
 		'Math::Complex'=> '1.36',  # Bugfix of Im().
 	},
+
 	build_requires => { 'Test::Simple' => 0 },
 
 	license => 'perl',
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
 	meta_merge => {
-		keyword => [ qw(math polynomial Sturm Nickalls Laguerre) ],
+		keyword => [ qw(math polynomial quadratic cubic quartic matrix
+			        Sturm Nickalls Ferrari Laguerre Hessenberg) ],
 	},
 );
 

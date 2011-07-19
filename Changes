@@ -1,5 +1,13 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.61
+     Feb 21 2011
+	- %iteration hash was checked in poly_tolerance(). Changed
+	  to checking %tolerance, which makes much more sense.
+     Jan 27 2011
+	- README wasn't up to date.
+	- Added some more keywords in Build.PL.
+	- Documentation changes to grammar, spelling, and L<>s.
 2.60
      Dec 15 2010
 	- Moved fltcmp() from the test directory to the module, and

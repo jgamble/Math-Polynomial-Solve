@@ -1,6 +1,6 @@
 ---
 name: Math-Polynomial-Solve
-version: 2.60
+version: 2.61
 author:
   - 'John M. Gamble <jgamble@cpan.org>'
 abstract: Find the roots of polynomial equations.
@@ -17,7 +17,7 @@ configure_requires:
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.60
+    version: 2.61
 generated_by: Module::Build version 0.340201
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,6 +25,12 @@ meta-spec:
 keyword:
   - math
   - polynomial
+  - quadratic
+  - cubic
+  - quartic
+  - matrix
   - Sturm
   - Nickalls
+  - Ferrari
   - Laguerre
+  - Hessenberg
