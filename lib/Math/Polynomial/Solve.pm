@@ -8,7 +8,7 @@ use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use strict;
 use warnings;
-#use Smart::Comments;
+#use Smart::Comments q(#####);	# Three # for "I am here" messages, four # for dumps.
 
 @ISA = qw(Exporter);
 
@@ -42,12 +42,15 @@ use warnings;
 		epsilon
 		fltcmp
 		poly_iteration
+		poly_tolerance
+		newtonraphson
 		laguerre
 		poly_antiderivative
 		poly_derivative
 		poly_constmult
 		poly_divide
 		poly_evaluate
+		poly_derivaluate
 		poly_nonzero_term_count
 		simplified_form
 	) ],
@@ -56,7 +59,7 @@ use warnings;
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.61';
+our $VERSION = '2.62_1';
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -87,6 +90,7 @@ my %option = (
 #
 my %iteration = (
 	hessenberg => 60,
+	newtonraphson => 60,
 	laguerre => 60,
 	sturm_bisection => 100,
 );
@@ -96,6 +100,7 @@ my %iteration = (
 # replaced in the BEGIN block.
 #
 my %tolerance = (
+	newtonraphson => 1e-14,
 	laguerre => 1e-14,
 	fltcmp => 1.5e-8,
 );
@@ -119,6 +124,7 @@ BEGIN
 	}
 
 	$tolerance{laguerre} = 2 * $epsilon;
+	$tolerance{newtonraphson} = 2 * $epsilon;
 }
 
 #
@@ -127,9 +133,8 @@ BEGIN
 #
 sub sign
 {
-	my($x) = @_;
-	return 1 if ($x > 0);
-	return -1 if ($x < 0);
+	return 1 if ($_[0] > 0);
+	return -1 if ($_[0] < 0);
 	return 0;
 }
 
@@ -144,7 +149,6 @@ sub sign
 sub fltcmp
 {
 	my($a, $b) = @_;
-	#my($flt) = 0.25/16777216;	# a good enough value for testing.
 
 	return -1 if ($a + $tolerance{fltcmp} < $b);
 	return 1 if ($a - $tolerance{fltcmp} > $b);
@@ -172,11 +176,13 @@ sub epsilon
 #
 sub get_hessenberg
 {
+	carp "get_hessenberg() is DEPRECATED. Please use \"\%opts = poly_option(); \$opts{hessenberg};\" instead.";
 	return $option{hessenberg};
 }
 
 sub set_hessenberg
 {
+	carp "set_hessenberg() is DEPRECATED. Please use \"poly_option(hessenberg => $_[0]);\" instead.";
 	$option{hessenberg} = ($_[0])? 1: 0;
 }
 
@@ -1083,7 +1089,7 @@ sub poly_analysis
 		#
 		map(($m *= $_), @czp);
 
-		### Substitution degree: $m
+		#### Substitution degree: $m
 	}
 
 	#
@@ -1230,6 +1236,65 @@ sub poly_evaluate
 }
 
 #
+# ($y, $dy, $ddy) = poly_derivaluate(\@coefficients, $x);
+#
+# Returns p(x), p'(x), and p"(x) of the polynomial for an
+# x-value, using Horner's method.
+#
+sub poly_derivaluate
+{
+	my($coef_ref, $x) = @_;
+	my(@coefficients) = @$coef_ref;
+	my $n = $#coefficients;
+	my $val = shift @coefficients;
+	my $d1val = $val * $n;
+	my $d2val = 0;
+
+	#
+	# Be nice and check if the user accidentally passed in
+	# a reference for the $x value.
+	##### poly_derivaluate
+	##### $coef_ref
+	##### $x
+	#
+	croak "Used a reference instead of an X value in poly_derivaluate()" if (ref $x eq "ARRAY" or ref $x eq "SCALAR");
+
+	#
+	# Special case for the linear eq'n (the y = constant eq'n
+	# takes care of itself).
+	#
+	if ($n == 1)
+	{
+		$d1val = $val;
+		$val = $val * $x + $coefficients[0];
+	}
+	elsif ($n >= 2)
+	{
+		my $lastn = --$n;
+		$d2val = $d1val * $n;
+
+		#
+		# Loop through the coefficients, except for
+		# the linear and constant terms.
+		#
+		foreach my $c (@coefficients[0..$lastn-2])
+		{
+			$val = $val * $x + $c;
+			$d1val = $d1val * $x + ($c *= $n--);
+			$d2val = $d2val * $x + $c;
+		}
+
+		#
+		# Handle the last two coefficients.
+		#
+		$d1val = $d1val * $x + $coefficients[$lastn-1];
+		$val = ($val * $x + $coefficients[$lastn-1]) * $x + $coefficients[$lastn];
+	}
+
+	return ($val, $d1val, $d2val);
+}
+
+#
 # ($q_ref, $r_ref) = poly_divide(\@coefficients1, \@coefficients2);
 #
 # Synthetic division for polynomials. Returns references to the quotient
@@ -1258,10 +1323,10 @@ sub poly_divide
 	return (undef, undef) if ($d_degree < 0);
 
 	#
-	###Dividing:
-	### @numerator
-	### by
-	### @divisor
+	### poly_divide():
+	#### @numerator
+	#### by
+	#### @divisor
 	#
 	my $lead_coefficient = $divisor[0];
 
@@ -1337,7 +1402,7 @@ sub poly_sturm_chain
 	while ($#$r > 0);
 
 	#
-	#### poly_sturm_chain:
+	### poly_sturm_chain:
 	#### @chain
 	#
 	return @chain;
@@ -1364,8 +1429,8 @@ sub poly_real_root_count
 # $root_count = sturm_real_root_range_count(\@chain, $x0, $x1);
 #
 # An all-in-one function for finding the number of real roots in
-# a polynomial. Use this if you don't intend to do anything else
-# requiring the Sturm chain.
+# a polynomial over a range in X. Use this if you don't intend to do
+# anything else requiring the Sturm chain.
 #
 sub sturm_real_root_range_count
 {
@@ -1428,12 +1493,12 @@ sub sturm_bisection_roots
 			my $midto_count = sturm_real_root_range_count($chain_ref, $mid, $to);
 
 			#
-			### $its
-			### $from
-			### $to
-			### $mid
-			### $frommid_count
-			### $midto_count
+			#### $its
+			#### $from
+			#### $to
+			#### $mid
+			#### $frommid_count
+			#### $midto_count
 			#
 
 			#
@@ -1571,14 +1636,16 @@ sub sturm_sign_count
 	return $scnt;
 }
 
+#
+# @roots = laguerre(\@coefficients, \@xvals);
+#
+# Find the roots nearby the given X values.
+#
 sub laguerre
 {
 	my($p_ref, $xval_ref) = @_;
-	my(@p0) = @$p_ref;
-	my(@p1) = poly_derivative(@p0);
-	my(@p2) = poly_derivative(@p1);
-	my $n = $#p0;
-	my @values;
+	my $n = $#$p_ref;
+	my @xvalues;
 	my @roots;
 
 	#
@@ -1586,49 +1653,56 @@ sub laguerre
 	#
 	if (ref $xval_ref eq "ARRAY")
 	{
-		@values = @$xval_ref;
+		@xvalues = @$xval_ref;
 	}
 	else
 	{
 		#
 		# It could happen. Someone might type \$x instead of $x.
 		#
-		@values = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
+		@xvalues = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
 	}
 
-	foreach my $x (@values)
+	foreach my $x (@xvalues)
 	{
+		#
+		### laguerre: looking near $x
+		### Coefficient: @$p_ref
+		### Degree: $n
+		#
 		my $its = 0;
 
 		ROOT:
 		for (;;)
 		{
 			#
-			# There's a better way to do this, but
-			# I'm going for "simple to code" for
-			# this developer release.
+			# Get the values of the function and its first and
+			# second derivatives at X.
 			#
-			my $valp0 = poly_evaluate($p_ref, $x);
-			my $valp1 = poly_evaluate(\@p1, $x);
-			my $valp2 = poly_evaluate(\@p2, $x);
+			my($y, $dy, $d2y) = poly_derivaluate($p_ref, $x);
 
-			if (abs($valp0) <= $tolerance{laguerre})
+			if (abs($y) <= $tolerance{laguerre})
 			{
 				push @roots, $x;
 				last ROOT;
 			}
 
 			#
-			### At Iteration: $its
-			### X: $x
-			### f(x): $valp0
-			### f'(x): $valp1
-			### f''(x): $valp2
+			#### At Iteration: $its
+			#### X: $x
+			#### f(x): $y
+			#### f'(x): $dy
+			#### f''(x): $d2y
 			#
-			my $g = $valp1/$valp0;
-			my $h = $g * $g - $valp2/$valp0;
+			my $g = $dy/$y;
+			my $h = $g * $g - $d2y/$y;
 			my $f = sqrt(($n - 1) * ($n * $h - $g*$g));
+			$f = - $f if (abs($g - $f) > abs($g + $f));
 
+			#
+			#### g = $g
+			#### h = $h
+			#### f = $f
 			#
 			# Divide by the largest value of $g plus
 			# $f, bearing in mind that $f is the result
@@ -1638,7 +1712,6 @@ sub laguerre
 			# Use the abs() function to determine size
 			# since $g or $f may be complex numbers.
 			#
-			$f = - $f if (abs($g - $f) > abs($g + $f));
 			my $dx = $n/($g + $f);
 
 			$x -= $dx;
@@ -1651,6 +1724,78 @@ sub laguerre
 			croak "Too many iterations ($its) at dx=$dx\n" if ($its >= $iteration{laguerre});
 			$its++;
 		}
+
+		### root found at iteration $its
+		#### $x
+	}
+	return @roots;
+}
+
+#
+# @xvals = newtonraphson(\@coefficients, \@xvals);
+#
+# Find the roots nearby the given X values.
+#
+sub newtonraphson
+{
+	my($p_ref, $xval_ref) = @_;
+	my $n = $#$p_ref;
+	my @xvalues;
+	my @roots;
+
+	#
+	# Allow some flexibility in sending the x-values.
+	#
+	if (ref $xval_ref eq "ARRAY")
+	{
+		@xvalues = @$xval_ref;
+	}
+	else
+	{
+		#
+		# It could happen. Someone might type \$x instead of $x.
+		#
+		@xvalues = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
+	}
+
+	#
+	### newtonraphson()
+	#### @xvalues
+	#
+	foreach my $x (@xvalues)
+	{
+		my $its = 0;
+
+		ROOT:
+		for (;;)
+		{
+			#
+			# Get the values of the function and its first and
+			# second derivatives at X.
+			#
+			my($y, $dy, $d2y) = poly_derivaluate($p_ref, $x);
+			my $dx = $y/$dy;
+			$x -= $dx;
+
+			if (abs($dx) <= $tolerance{newtonraphson})
+			{
+				push @roots, $x;
+				last ROOT;
+			}
+
+			#
+			#### At Iteration: $its
+			#### X: $x
+			#### f(x): $y
+			#### f'(x): $dy
+			#### f''(x): $d2y
+			#
+			croak "Too many iterations ($its) at dx=$dx\n" if ($its >= $iteration{newtonraphson});
+			$its++;
+		}
+
+		### root found at iteration $its
+		#### $x
 	}
 	return @roots;
 }
@@ -1739,6 +1884,8 @@ or
 This package supplies a set of functions that find the roots of
 polynomials, along with some utility functions.
 
+Roots will be either real or of type L<Math::Complex>.
+
 Functions making use of the Sturm sequence are also available, letting you
 find the number of real roots present in a range of X values.
 
@@ -1784,7 +1931,7 @@ B<NOTE>: this function is replaced by the option function C<poly_option()>.
 
 Set options that affect the behavior of the C<poly_roots()> function. All options
 are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
-and L/<poly_tolerance()>.
+and L</poly_tolerance()>.
 
 This is the option function that deprecates C<set_hessenberg()> and
 C<get_hessenberg()>.
@@ -1935,17 +2082,20 @@ See L</poly_real_root_count()> above for an example of its use.
 
 =head3 sturm_real_root_range_count()
 
-Return the number of I<unique>, I<real> roots of the polynomial.
+Return the number of I<unique>, I<real> roots of the polynomial between two X values.
 
   my($x0, $x1) = (0, 1000);
 
   my @chain = poly_sturm_chain(@coefficients);
   $unique_roots = sturm_real_root_range_count(\@chain, $x0, $x1);
 
-Internally, this is equivalent to:
+This is equivalent to:
 
+  my($x0, $x1) = (0, 1000);
+
+  my @chain = poly_sturm_chain(@coefficients);
   my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
-  return sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+  $unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
 
 =head3 Sturm Sign Sequence Functions
 
@@ -2024,6 +2174,8 @@ to a single root, then uses L</laguerre()> to find the value.
 
 As it is using the Sturm functions, it will find only the real roots.
 
+Internally, laguerre() is used by sturm_bisection_roots().
+
 =head2 Utility Functions
 
 These are internal functions used by the other functions listed above,
@@ -2079,13 +2231,25 @@ for polynomials.
 
 For each x value the function will attempt to find a root closest to it.
 
+=head3 newtonraphson()
+
+Like laguerre, a numerical method for finding a root of an equation.
+
+  @roots = laguerre(\@coefficients, \@xvalues);
+  push @roots, laguerre(\@coefficients, $another_xvalue);
+
+For each x value the function will attempt to find a root closest to it.
+
+This function is provided for comparisons purposes for the user; internally
+laguerre() is used.
+
 =head3 poly_iteration()
 
 Sets the limit to the number of iterations that a solving method may go
 through before giving up trying to find a root. Each method of root-finding
 used by L</poly_roots()>, L</sturm_bisection_roots()>, and L</laguerre()>
-has its own iteration limit, which may be found, like L</poly_option()>, by
-simply looking at the return value of poly_iteration().
+has its own iteration limit, which may be found, like L</poly_option()>,
+simply by looking at the return value of poly_iteration().
 
   #
   # Get all of the current iteration limits.
@@ -2113,11 +2277,16 @@ There are iteration limit values for:
 The numeric method used by poly_roots(), if the hessenberg option is set.
 Its default value is 60.
 
+=item newtonraphson
+
+The numeric method used by newtonraphson(). The Newton-Raphson method is offered
+as an alternative to Laguerre's method.  Its default value is 60.
+
 =item laguerre
 
 The numeric method used by laguerre(). Laguerre's method is used within
-sturm_bisection_roots() once an individual root has been found within a
-range, and of course it may be called independently. Its default value is
+sturm_bisection_roots() once it has narrowed its search in on an individual root,
+and of course laguerre() may be called independently. Its default value is
 60.
 
 =item sturm_bisection
@@ -2131,8 +2300,8 @@ is 100.
 
 Set the degree of accuracy needed for comparisons to be equal or roots to
 be found.  Amongst the root finding functions this currently only
-affects laguerre(), as the Hessenberg matrix method determines how close
-it needs to get using a complicated formula based on L</epsilon()>.
+affects laguerre() and newtonraphson(), as the Hessenberg matrix method determines
+how close it needs to get using a complicated formula based on L</epsilon()>.
 
   #
   # Print the tolerances.
@@ -2205,7 +2374,8 @@ The function may return a list...
 
   print "Polynomial: [", join(", ", @coefficients), "]\n";
 
-  for my $j (0..$#yvals) {
+  for my $j (0..$#yvals)
+  {
     print "Evaluates at ", $xvals[$j], " to ", $yvals[$j], "\n";
   }
 
@@ -2214,6 +2384,20 @@ or return a scalar.
   my $x_median = ($xvals[0] + $xvals[$#xvals])/2.0;
   my $y_median = poly_evaluate(\@coefficients, $x_median);
 
+
+=head3 poly_derivaluate();
+
+Given an X value, returns the y-values of the polynomial, its first derivative,
+and its second derivative.
+
+  my($y, $dy, $ddy) = poly_derivaluate(\@coefficients, $x);
+
+Note that unlike L</poly_evaluate()>, this takes a single
+x-value.
+
+If the polynomial is a linear equation, the second derivative value will be
+zero.  Similarly, if the "equation" is a constant, the first derivative value
+will be zero.
 
 =head3 poly_nonzero_term_count()
 

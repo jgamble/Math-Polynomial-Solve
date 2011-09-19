@@ -7,8 +7,10 @@ lib/Math/Polynomial/Solve.pm
 README
 eg/cubic.m
 eg/division.pl
+eg/derivtest.pl
 eg/poly.pl
 eg/sturm.pl
+eg/sturmbisect.pl
 eg/sturmrange.pl
 reference/cubic1993.pdf
 reference/quartic2009.pdf
@@ -18,6 +20,7 @@ t/derivative.t
 t/division.t
 t/laguerre.t
 t/limit.t
+t/nr.t
 t/option.t
 t/peval.t
 t/pod.t

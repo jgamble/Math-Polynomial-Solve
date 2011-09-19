@@ -1,49 +1,78 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl limit.t'
 
-use Test::Simple tests => 7;
+use Test::Simple tests => 11;
 
 use Math::Polynomial::Solve qw(:utility);
 use strict;
 use warnings;
 require "t/coef.pl";
 
-my @options = qw( hessenberg laguerre sturm_bisection);
-my %okeys = poly_iteration();
-my $keystr = join(" ", sort keys %okeys);
+#
+# Cue the poly_iteration choices...
+#
+my @expected_names = qw( hessenberg laguerre newtonraphson sturm_bisection);
+my $expectedstr = join(" ", sort @expected_names);
+my %ikeys = poly_iteration();
+my $ikeystr = join(" ", sort keys %ikeys);
 
-ok( $keystr eq join(" ", sort @options),
-	"Mis-matched keys, expected '$keystr'");
+ok( $ikeystr eq $expectedstr,
+	"Mis-matched keys, expected '$expectedstr', got '$ikeystr'");
 
 poly_iteration(hessenberg => 200);
-%okeys = poly_iteration();
-my $val = $okeys{hessenberg};
+%ikeys = poly_iteration();
+my $val = $ikeys{hessenberg};
 ok($val == 200, "hessenberg option is '$val' didn't get set");
 
 poly_iteration(laguerre => 25);
-%okeys = poly_iteration();
-$val = $okeys{laguerre};
-ok($okeys{laguerre} == 25, "laguerre option is '$val' didn't get set");
+%ikeys = poly_iteration();
+$val = $ikeys{laguerre};
+ok($ikeys{laguerre} == 25, "laguerre option is '$val' didn't get set");
 
 poly_iteration(sturm_bisection => 30);
-%okeys = poly_iteration();
-$val = $okeys{sturm_bisection};
-ok($okeys{sturm_bisection} == 30, "sturm_bisection option is '$val' didn't get set");
+%ikeys = poly_iteration();
+$val = $ikeys{sturm_bisection};
+ok($ikeys{sturm_bisection} == 30, "sturm_bisection option is '$val' didn't get set");
 
 poly_iteration(hessenberg => 60);
-%okeys = poly_iteration();
-$val = $okeys{hessenberg};
-ok($okeys{hessenberg} == 60, "hessenberg option is '$val' didn't get set");
+%ikeys = poly_iteration();
+$val = $ikeys{hessenberg};
+ok($ikeys{hessenberg} == 60, "hessenberg option is '$val' didn't get set");
 
 poly_iteration(laguerre => 65);
-%okeys = poly_iteration();
-$val = $okeys{laguerre};
-ok($okeys{laguerre} == 65, "laguerre option is '$val' didn't get set");
+%ikeys = poly_iteration();
+$val = $ikeys{laguerre};
+ok($ikeys{laguerre} == 65, "laguerre option is '$val' didn't get set");
 
 poly_iteration(sturm_bisection => 70);
-%okeys = poly_iteration();
-$val = $okeys{sturm_bisection};
-ok($okeys{sturm_bisection} == 70, "sturm_bisection option is '$val' didn't get set");
+%ikeys = poly_iteration();
+$val = $ikeys{sturm_bisection};
+ok($ikeys{sturm_bisection} == 70, "sturm_bisection option is '$val' didn't get set");
 
+#
+# Now the poly_tolerance choices.
+#
+@expected_names = qw( fltcmp laguerre newtonraphson);
+$expectedstr = join(" ", sort @expected_names);
+my %tkeys = poly_tolerance();
+my $tkeystr = join(" ", sort keys %tkeys);
+
+ok( $tkeystr eq $expectedstr,
+	"Mis-matched keys, expected '$expectedstr', got '$tkeystr'");
+
+poly_tolerance(fltcmp => 2.9e-10);
+%tkeys = poly_tolerance();
+$val = $tkeys{fltcmp};
+ok($val == 2.9e-10, "fltcmp option is '$val' didn't get set");
+
+poly_tolerance(laguerre => 2.9e-10);
+%tkeys = poly_tolerance();
+$val = $tkeys{laguerre};
+ok($tkeys{laguerre} == 2.9e-10, "laguerre option is '$val' didn't get set");
+
+poly_tolerance(newtonraphson => 2.9e-10);
+%tkeys = poly_tolerance();
+$val = $tkeys{newtonraphson};
+ok($tkeys{newtonraphson} == 2.9e-10, "newtonraphson option is '$val' didn't get set");
 
 exit(0);

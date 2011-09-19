@@ -19,8 +19,11 @@ my $build = Module::Build->new(
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
 	meta_merge => {
-		keyword => [ qw(math polynomial quadratic cubic quartic matrix
-			        Sturm Nickalls Ferrari Laguerre Hessenberg) ],
+		keyword => [ qw(math polynomial solve roots
+				quadratic cubic quartic matrix
+				derivative antiderivative Nickalls Ferrari
+				Laguerre Newton-Raphson Sturm Hessenberg
+			) ],
 	},
 );
 

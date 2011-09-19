@@ -1,5 +1,40 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.61_1
+     Sep 19 2011
+     	- The pre-September items for this version were done separate
+     	  from the git and github installation. Merged it all in.
+     Sep 9 2011
+	- Added carp messages to get_hessenberg() and set_hessenberg().
+	  Now anyone still using these functions gets nagged about it.
+     July 20 2011
+	- Emphasize in the documentation the fact that roots are mixed
+	  real and Math::Complex - there was some confusion.
+     Mar 24 2011
+	- Gah. EXPORT list didn't have poly_tolerance!
+	- Put in a check for accidental refs in poly_derivaluate().
+     Mar 23 2011
+	- Test file nr.t created, and added to MANIFEST.
+	- A couple more keywords added to Build.PL.
+     Mar 12 2011
+	- Added Newton-Raphson function newtonraphson() to the module, just
+	  to provide a comparison with laguerre().
+	- Added Newton-Raphson to the keyword list.
+     Mar 9 2011
+	- New function poly_derivaluate(), to be used internally by
+	  laguerre(). Added it to the :utility EXPORT list.
+	- laguerre() now uses poly_derivaluate().
+	- Documented poly_derivaluate().
+	- Fixed an L<> typo.
+	- Improved the Sturm function documentation.
+     Mar 2 2011
+	- Three more tests to cubic.t (polynomial representations
+	  of trisecting a 60 deg. angle; duplicating the cube; and
+	  construction a septagon; all with straightedge and compass).
+	- Instead of a copy of the @cases in cubic.t with negative
+	  coefficients, just use poly_constmult() in the loop.
+	- Did the same to quartic.t.
+	- And quadratic.t.
 2.61
      Feb 21 2011
 	- %iteration hash was checked in poly_tolerance(). Changed

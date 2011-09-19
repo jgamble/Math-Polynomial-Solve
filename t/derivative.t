@@ -1,5 +1,5 @@
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl cubic.t'
+# `make test'. After `make install' it should work as `perl derivative.t'
 
 use Test::Simple tests => 12;
 
@@ -10,7 +10,7 @@ use warnings;
 require "t/coef.pl";
 
 #
-# Groups of four repeated: numerator, divisor, quotient, remainder.
+# Pairs of polynomnials and their derivatives.
 #
 my @case = (
 	[32, 24, 1], [64, 24],
@@ -28,11 +28,10 @@ while (@case)
 {
 	my $p_ref = shift @case;
 	my $d_ref = shift @case;
-
-	my(@derivative) = poly_derivative(@$p_ref);
-
 	my @polynomial = @$p_ref;
 	my $constant = $polynomial[$#polynomial];
+
+	my(@derivative) = poly_derivative(@polynomial);
 
 	ok((polycmp($d_ref, \@derivative) == 0),
 		" f() = [ " . join(", ", @polynomial) . " ]\n" .
@@ -46,7 +45,6 @@ while (@case)
 		" f() = [ " . join(", ", @derivative) . " ]\n" .
 		" integral f() = [ " . join(", ", @antiderivative) . " ].\n"
 	);
-
 }
 
 1;

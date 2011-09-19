@@ -14,13 +14,11 @@ while ($line = prompt("Polynomial: ", -num))
 
 	my @chain = poly_sturm_chain( @coef );
 
-	my($fn) = @{$chain[$#chain]};	# get the last (constant) polynomial.
-
 	print "\nPolynomial: [", join(", ", @coef), "]\n";
 	foreach my $j (0..$#chain)
 	{
 		my @c = @{$chain[$j]};
-		print sprintf("    f%2d: [", $j) . join(", ", @c), "]\n";
+		print sprintf("    Fn%02d: [", $j) . join(", ", @c), "]\n";
 	}
 	print "Number of unique, real, roots: ", poly_real_root_count(@coef), "\n\n";
 }
