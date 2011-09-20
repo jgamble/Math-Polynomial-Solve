@@ -42,7 +42,7 @@ my $build = Module::Build->new(
 			) ],
 
 	meta_spec => {
-		version => x.xx,
+		version => '2.112621',
 	},
 );
 
