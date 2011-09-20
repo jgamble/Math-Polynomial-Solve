@@ -8,7 +8,7 @@ my $build = Module::Build->new(
 	name => 'Math::Polynomial::Solve',
 	module_name => 'Math::Polynomial::Solve',
 	version => 'lib/Math/Polynomial/Solve.pm',
-	release_status => 'testing',
+	release_status => 'alpha',
 	license => ['perl_5'],
 
 	prereqs => {
