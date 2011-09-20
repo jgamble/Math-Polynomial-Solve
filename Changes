@@ -1,9 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.61_1
+     Sep 20 2011
+	- CPAN::Meta::Spec had a lot to say about the changes to Build.PL
+	  scripts. Made those changes.
      Sep 19 2011
-     	- The pre-September items for this version were done separate
-     	  from the git and github installation. Merged it all in.
+	- The pre-September items for this version were done separate
+	  from the git and github installation. Merged it all in.
      Sep 9 2011
 	- Added carp messages to get_hessenberg() and set_hessenberg().
 	  Now anyone still using these functions gets nagged about it.
