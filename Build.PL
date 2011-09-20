@@ -6,6 +6,7 @@ my $build = Module::Build->new(
 	abstract => 'Find the Roots of Polynomial Equations',
 	author => 'John M. Gamble <jgamble@cpan.org>',
 	name => 'Math::Polynomial::Solve',
+	module_name => 'Math::Polynomial::Solve',
 	version => 'lib/Math/Polynomial/Solve.pm',
 	release_status => 'testing',
 	license => ['perl_5'],
