@@ -22,6 +22,7 @@ my $build = Module::Build->new(
 			requires => {
 				'Test::Simple' => 0
 			},
+		},
 	},
 	resources => {
 		repository => {
