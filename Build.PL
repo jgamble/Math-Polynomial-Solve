@@ -3,49 +3,41 @@ use strict;
 use warnings;
 
 my $build = Module::Build->new(
-	abstract => 'Find the Roots of Polynomial Equations',
-	author => 'John M. Gamble <jgamble@cpan.org>',
-	name => 'Math::Polynomial::Solve',
 	module_name => 'Math::Polynomial::Solve',
-	version => 'lib/Math/Polynomial/Solve.pm',
-	release_status => 'alpha',
-	license => ['perl_5'],
 
-	prereqs => {
-		runtime => {
-			requires => {
-				perl=> '5.008',
-				'Math::Complex'=> '1.36',  # Bugfix of Im().
-			},
-		},
+	dist_abstract => 'Find the Roots of Polynomial Equations',
+	dist_author => ['John M. Gamble <jgamble@cpan.org>'],
+	dist_version => '2.61',  
+	dist_name => 'Math-Polynomial-Solve',
 
-		test => {
-			requires => {
-				'Test::Simple' => 0
-			},
-		},
-	},
-	resources => {
-		repository => {
-			url => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
-			web => 'https://github.com/jgamble/Math-Polynomial-Solve',
-			type => 'git',
-		}
+	requires => {
+		perl=> '5.6.0',
+		'Math::Complex'=> '1.36',  # Bugfix of Im().
 	},
 
-	dynamic_config => 0,
+	configure_requires => {
+		'Module::Build' => '0.3624',
+	},
+
+	build_requires => {
+		'Test::Simple' => 0
+	},
+
+	license => 'perl',
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
-
-	keywords => [ qw(math polynomial solve roots
-				quadratic cubic quartic matrix
-				derivative antiderivative Nickalls Ferrari
-				Laguerre Newton-Raphson Sturm Hessenberg
-			) ],
-
-	meta_spec => {
-		version => '2.112621',
+	meta_merge => {
+		keyword => [ qw(math polynomial quadratic cubic quartic matrix
+			        Sturm Nickalls Ferrari Laguerre Hessenberg) ],
+		resources => {
+			repository => {
+				url => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
+				web => 'https://github.com/jgamble/Math-Polynomial-Solve',
+				type => 'git',
+			},
+		},
 	},
+
 );
 
 $build->create_build_script;
