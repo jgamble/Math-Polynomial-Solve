@@ -7,11 +7,11 @@ my $build = Module::Build->new(
 
 	dist_abstract => 'Find the Roots of Polynomial Equations',
 	dist_author => ['John M. Gamble <jgamble@cpan.org>'],
-	dist_version => '2.62_1',  
+	dist_version => '2.62_2',  
 	dist_name => 'Math-Polynomial-Solve',
 
 	requires => {
-		perl=> '5.6.0',
+		perl=> '5.8.3',
 		'Math::Complex'=> '1.36',  # Bugfix of Im().
 	},
 
@@ -30,11 +30,12 @@ my $build = Module::Build->new(
 		keyword => [ qw(math polynomial quadratic cubic quartic matrix
 			        Sturm Nickalls Ferrari Laguerre Hessenberg) ],
 		resources => {
-			repository => {
-				url => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
-				web => 'https://github.com/jgamble/Math-Polynomial-Solve',
-				type => 'git',
-			},
+			repository => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
+#			repository => {
+#				url => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
+#				web => 'https://github.com/jgamble/Math-Polynomial-Solve',
+#				type => 'git',
+#			},
 		},
 	},
 

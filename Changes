@@ -1,5 +1,15 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.62_2
+     Nov 17 2011
+	- Perl version requirement changed to 5.8.3 (from 5.6.0). Support
+	  for 5.6.0 in various perl development tools is being dropped,
+	  and 5.8.3 seems to be a safe minimum, at least for the next
+	  year or so. Change made in Build.PL and Solve.pm.
+	- Changed "repository" key in Build.PL from a hash to a string,
+	  as seems to be currently required under the version of
+	  Module::Build that I'm developing with (the hash form looks
+	  to be for a later version that I cannot install yet).
 2.61_1
      Oct 30 2011
 	- A couple more changes to Build.PL (dist_author and resources).

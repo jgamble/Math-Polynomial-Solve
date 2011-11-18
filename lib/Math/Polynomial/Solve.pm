@@ -1,6 +1,6 @@
 package Math::Polynomial::Solve;
 
-require 5.006;
+require 5.008003;
 
 use Math::Complex;
 use Carp;
@@ -59,7 +59,7 @@ use warnings;
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.62_1';
+our $VERSION = '2.62_2';
 
 #
 # Options to set or unset to force poly_roots() to use different
