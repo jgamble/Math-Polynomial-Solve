@@ -14,9 +14,10 @@ while ($line = prompt("Polynomial: ", -num))
 	my @coef = split(/,? /, $line);
 	my @chain = poly_sturm_chain( @coef );
 
-	$line = prompt("X values: ");
+	$line = prompt("Two X values: ");
 	my @xvals = split(/,? /, $line);
 
+	croak "Only two x values please" if (scalar @xvals != 2);
 
 	print "\nPolynomial: [", join(", ", @coef), "]\n";
 
