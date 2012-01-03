@@ -16,13 +16,34 @@ while ($line = prompt("Polynomial: ", -num))
 	last unless ($line);
 
 	my $x = prompt("x-value: ", -num);
-	last unless ($x);
 
-	my($r, $d1, $d2) = poly_derivaluate(\@polynomial, $x);
-
-	print "Root: $r, First derivative: $d1, Second derivative $d2\n";
+	d1(\@polynomial, $x);
+	d2(\@polynomial, $x);
 }
 exit(0);
+
+sub d1
+{
+	my($p_ref, $x) = @_;
+
+	my($r, $d1, $d2) = poly_derivaluate($p_ref, $x);
+
+	print "Polynomial: $r, First derivative: $d1, Second derivative $d2\n\n";
+}
+
+sub d2
+{
+	my($p_ref, $x) = @_;
+
+	my @d1p = poly_derivative(@$p_ref);
+	my @d2p = poly_derivative(@d1p);
+
+	my $r = poly_evaluate($p_ref, $x);
+	my $d1 = poly_evaluate(\@d1p, $x);
+	my $d2 = poly_evaluate(\@d2p, $x);
+
+	print "Polynomial: $r, First derivative: $d1, Second derivative $d2\n\n";
+}
 
 sub cartesian_format($$@)
 {

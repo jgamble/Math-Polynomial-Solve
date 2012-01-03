@@ -2,6 +2,7 @@ Build.PL
 Changes
 MANIFEST
 Makefile.PL
+META.json
 META.yml
 lib/Math/Polynomial/Solve.pm
 README
@@ -22,6 +23,7 @@ t/laguerre.t
 t/limit.t
 t/nr.t
 t/option.t
+t/pderival.t
 t/peval.t
 t/pod.t
 t/poly0.t

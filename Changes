@@ -1,6 +1,15 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.62_2
+     Jan 2  2012
+	- And more tests added to derivaluate.t. Up to CPAN we go.
+     Dec 23 2011
+	- Bug in poly_derivaluat(). For polynomials degree 5 or higher,
+	  was returning the wrong second derivative value.
+	  Unfortunately, the testing of the function was only done
+	  indirectly in laguerre.t, and it, only had third degree
+	  polynomials. Extended laguerre.t, and added derivaluate.t
+	  to test files.
      Nov 17 2011
 	- Perl version requirement changed to 5.8.3 (from 5.6.0). Support
 	  for 5.6.0 in various perl development tools is being dropped,
