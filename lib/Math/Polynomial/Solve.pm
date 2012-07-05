@@ -824,7 +824,10 @@ sub hqr_eigen_hessenberg
 			$its++;
 
 			#
-			# Look for two consecutive small sub-diagonal elements.
+			### Look for two consecutive small sub-diagonal elements.
+			#
+			#### $n
+			#### $l
 			#
 			my $m;
 			for ($m = $n - 2 ; $m >= $l ; $m--)
