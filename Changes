@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.62_3
+     Jul 5  2012
+	- Changed the first Fortran-style down-count loop in
+	  hqr_eigen_hessenberg() to a Perl-style loop using reverse.
+
 2.62_2
      Jan 2  2012
 	- And more tests added to derivaluate.t. Up to CPAN we go.
