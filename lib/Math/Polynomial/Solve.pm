@@ -742,11 +742,16 @@ sub hqr_eigen_hessenberg
 			#
 			# Look for single small sub-diagonal element;
 			#
-			my $l;
-			for ($l = $n; $l >= 2; $l--)
+			my $l = 1;
+			for my $d (reverse 2 .. $n)
 			{
-				last if ( abs( $h[$l][ $l - 1 ] ) <= $epsilon *
-					( abs( $h[ $l - 1 ][ $l - 1 ] ) + abs( $h[$l][$l] ) ) );
+				if (abs( $h[$d][ $d - 1 ] ) <= $epsilon *
+				    (abs( $h[ $d - 1 ][ $d - 1 ] ) +
+				     abs( $h[$d][$d] ) ) )
+				{
+					$l = $d;
+					last;
+				}
 			}
 
 			$x = $h[$n][$n];
