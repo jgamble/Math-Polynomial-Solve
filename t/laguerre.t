@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl laguerre.t'
 
-use Test::Simple tests => 6;
+use Test::Simple tests => 8;
 
 use Math::Polynomial::Solve qw(laguerre poly_evaluate fltcmp);
 use Math::Complex;
@@ -12,7 +12,7 @@ require "t/coef.pl";
 
 ok_laguerre([1, 2, -11, -12], [-4.5, 0.5, 2.5]);
 ok_laguerre([12, 11, -2, -1], [-0.5, 0.3, -5]);
-#ok_laguerre([1, 2, -11, -12], [-4.5, 0.5, 2.5]);
+ok_laguerre([1, 5, 8, 10, 11], [-8, 8]);
 exit(0);
 
 sub ok_laguerre

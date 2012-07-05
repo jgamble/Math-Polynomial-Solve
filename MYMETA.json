@@ -1,0 +1,60 @@
+{
+   "abstract" : "Find the roots of polynomial equations.",
+   "author" : [
+      "John M. Gamble <jgamble@cpan.org>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112621",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "Math-Polynomial-Solve",
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "Test::Simple" : 0
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build" : "0.340201"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Math::Complex" : "1.36",
+            "perl" : "v5.8.3"
+         }
+      }
+   },
+   "provides" : {
+      "Math::Polynomial::Solve" : {
+         "file" : "lib/Math/Polynomial/Solve.pm",
+         "version" : "2.61"
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "2.61",
+   "x_keyword" : [
+      "math",
+      "polynomial",
+      "quadratic",
+      "cubic",
+      "quartic",
+      "matrix",
+      "Sturm",
+      "Nickalls",
+      "Ferrari",
+      "Laguerre",
+      "Hessenberg"
+   ]
+}
