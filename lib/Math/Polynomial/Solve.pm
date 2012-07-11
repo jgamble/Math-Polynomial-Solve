@@ -8,7 +8,12 @@ use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use strict;
 use warnings;
-#use Smart::Comments q(#####);	# Three # for "I am here" messages, four # for dumps.
+
+#
+# Three # for "I am here" messages, four # for variable dumps.
+# Five # for a dump of the companion matrix.
+#
+#use Smart::Comments q(####);
 
 @ISA = qw(Exporter);
 
@@ -592,12 +597,12 @@ sub build_companion
 	}
 
 	#
-	### Now we balance the matrix.
-	#### @h
+	##### @h
 	#
-	# Balancing the unsymmetric matrix A.
-	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
-	# from FORTRAN code by Hiroshi Murakami.
+	### Balancing the unsymmetric matrix A.
+	#
+	# Perl code translated by Nick Ing-Simmons from FORTRAN code
+	# by Hiroshi Murakami.
 	#
 	#  The Fortran code is based on the Algol code "balance" from paper:
 	#  "Balancing a Matrix for Calculation of Eigenvalues and Eigenvectors"
@@ -714,15 +719,16 @@ sub hqr_eigen_hessenberg
 	my $n   = $#h;
 
 	#
+	# Eigenvalue Computation by the Householder QR method for the
+	# Real Hessenberg matrix.
 	#
-	# Eigenvalue Computation by the Householder QR method for the Real Hessenberg matrix.
-	# Perl code translated by Nick Ing-Simmons <Nick@Ing-Simmons.net>
-	# from FORTRAN code by Hiroshi Murakami.
+	# Perl code translated by Nick Ing-Simmons from FORTRAN code
+	# by Hiroshi Murakami.
+	#
 	# The Fortran code is based on the Algol code "hqr" from the paper:
 	#   "The QR Algorithm for Real Hessenberg Matrices"
 	#   by R. S. Martin, G. Peters and J. H. Wilkinson,
 	#   Numer. Math. 14, 219-231(1970).
-	#
 	#
 	my($p, $q, $r);
 	my($w, $x, $y);
@@ -826,9 +832,6 @@ sub hqr_eigen_hessenberg
 			#
 			### Look for two consecutive small sub-diagonal elements.
 			#
-			#### $n
-			#### $l
-			#
 			my $m;
 			for ($m = $n - 2 ; $m >= $l ; $m--)
 			{
@@ -855,6 +858,11 @@ sub hqr_eigen_hessenberg
 				  );
 			}
 
+			#
+			#### $n
+			#### $l
+			#### $m
+			#
 			for my $i (($m + 2) .. $n)
 			{
 				$h[$i][$i - 2] = 0.0;
@@ -1016,9 +1024,10 @@ sub poly_roots
 	{
 		my $matrix_ref = build_companion(@coefficients);
 
-		#### Balanced Companion Matrix (row and column 0 will be undefs)...
-		#### $matrix_ref
-
+		#
+		### Balanced Companion Matrix
+		##### (row and column 0 will be undefs)...
+		##### $matrix_ref
 		#
 		# QR iterations from the matrix.
 		#
@@ -1261,9 +1270,9 @@ sub poly_derivaluate
 	#
 	# Be nice and check if the user accidentally passed in
 	# a reference for the $x value.
-	##### poly_derivaluate
-	##### $coef_ref
-	##### $x
+	### poly_derivaluate
+	#### $coef_ref
+	#### $x
 	#
 	croak "Used a reference instead of an X value in poly_derivaluate()" if (ref $x eq "ARRAY" or ref $x eq "SCALAR");
 
