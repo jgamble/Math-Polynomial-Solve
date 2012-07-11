@@ -4,8 +4,15 @@ Revision history for Perl extension Math::Polynomial::Solve.
      Jul 10 2012
 	- Comment and Smart-Comment changes. Also removed the late
 	  Nick Ing-Simmons's e-mail address from comments.
+	- Changed the remaining C/Fortran-style down-count loop in
+	  hqr_eigen_hessenberg() to a Perl-style loop using reverse.
+	  Made sure edge cases were handled, and commented *why*
+	  early checks are made in that loop.
+	- Made variables $s and $z in hqr_eigen_hessenberg() local
+	  to their loops in an attempt to make the algorithm more
+	  easily read.
      Jul 5  2012
-	- Changed the first Fortran-style down-count loop in
+	- Changed the first C/Fortran-style down-count loop in
 	  hqr_eigen_hessenberg() to a Perl-style loop using reverse.
 
 2.62_2

@@ -64,7 +64,7 @@ use warnings;
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.62_2';
+our $VERSION = '2.62_3';
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -524,9 +524,10 @@ sub quartic_roots
 	return ($x[0] - $b4, $x[1] - $b4, $x[2] - $b4, $x[3] - $b4);
 }
 
-
+#
 # Perl code to find roots of a polynomial translated by Nick Ing-Simmons
-# <Nick@Ing-Simmons.net> from FORTRAN code by Hiroshi Murakami.
+# from FORTRAN code by Hiroshi Murakami.
+#
 # From the netlib archive: http://netlib.bell-labs.com/netlib/search.html
 # In particular http://netlib.bell-labs.com/netlib/opt/companion.tgz
 
@@ -732,7 +733,6 @@ sub hqr_eigen_hessenberg
 	#
 	my($p, $q, $r);
 	my($w, $x, $y);
-	my($s, $z );
 	my $t = 0.0;
 
 	my @w;
@@ -821,7 +821,7 @@ sub hqr_eigen_hessenberg
 					$h[$i][$i] -= $x;
 				}
 
-				$s = abs($h[$n][$na]) + abs($h[$na][$n - 2]);
+				my $s = abs($h[$n][$na]) + abs($h[$na][$n - 2]);
 				$y = 0.75 * $s;
 				$x = $y;
 				$w = -0.4375 * $s * $s;
@@ -830,32 +830,42 @@ sub hqr_eigen_hessenberg
 			$its++;
 
 			#
-			### Look for two consecutive small sub-diagonal elements.
+			### Look for two consecutive small
+			### sub-diagonal elements.
 			#
-			my $m;
-			for ($m = $n - 2 ; $m >= $l ; $m--)
+			my $m = $l;	# Set in case we fall through the loop.
+			for my $d (reverse $l .. $n - 2)
 			{
-				$z = $h[$m][$m];
+				my $z = $h[$d][$d];
+				my $s = $y - $z;
 				$r = $x - $z;
-				$s = $y - $z;
-				$p = ($r * $s - $w) / $h[$m + 1][$m] + $h[$m][$m + 1];
-				$q = $h[$m + 1][$m + 1] - $z - $r - $s;
-				$r = $h[$m + 2][$m + 1];
+				$p = ($r * $s - $w) / $h[$d + 1][$d] + $h[$d][$d + 1];
+				$q = $h[$d + 1][$d + 1] - $z - $r - $s;
+				$r = $h[$d + 2][$d + 1];
 
 				$s = abs($p) + abs($q) + abs($r);
 				$p /= $s;
 				$q /= $s;
 				$r /= $s;
 
-				last if ($m == $l);
-				last if (
-					abs($h[$m][$m - 1]) * (abs($q) + abs($r)) <=
+				#
+				# The sub-diagonal check doesn't get made for
+				# the last iteration of the loop, and the only
+				# reason we have the loop continue up to this
+				# point is to set $p, $q, and $r.
+				#
+				last if ($d == $l);
+
+				if (abs($h[$d][$d - 1]) * (abs($q) + abs($r)) <=
 					$epsilon * abs($p) * (
-						  abs($h[$m - 1][$m - 1]) +
+						  abs($h[$d - 1][$d - 1]) +
 						  abs($z) +
-						  abs($h[$m + 1][$m + 1])
-					)
-				  );
+						  abs($h[$d + 1][$d + 1])
+					))
+				{
+					$m = $d;
+					last;
+				}
 			}
 
 			#
@@ -878,6 +888,7 @@ sub hqr_eigen_hessenberg
 			#
 			for my $k ($m .. $na)
 			{
+				my $z;
 				my $notlast = ($k != $na);
 				if ($k != $m)
 				{
@@ -893,7 +904,7 @@ sub hqr_eigen_hessenberg
 					$r /= $x;
 				}
 
-				$s = sqrt($p * $p + $q * $q + $r * $r);
+				my $s = sqrt($p * $p + $q * $q + $r * $r);
 				$s = -$s if ($p < 0.0);
 
 				if ($k != $m)
