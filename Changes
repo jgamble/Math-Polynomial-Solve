@@ -22,7 +22,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	- Bug in poly_derivaluat(). For polynomials degree 5 or higher,
 	  was returning the wrong second derivative value.
 	  Unfortunately, the testing of the function was only done
-	  indirectly in laguerre.t, and it, only had third degree
+	  indirectly in laguerre.t, and it only had third degree
 	  polynomials. Extended laguerre.t, and added derivaluate.t
 	  to test files.
      Nov 17 2011
