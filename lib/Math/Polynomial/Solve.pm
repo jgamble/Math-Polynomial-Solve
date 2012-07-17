@@ -948,7 +948,8 @@ sub hqr_eigen_hessenberg
 				#
 				for my $i ($l .. $j)
 				{
-					$p = $x * $h[$i][$k] + $y * $h[$i][$k + 1];
+					$p = $x * $h[$i][$k] +
+					     $y * $h[$i][$k + 1];
 
 					if ($notlast)
 					{
@@ -2312,17 +2313,17 @@ There are iteration limit values for:
 The numeric method used by poly_roots(), if the hessenberg option is set.
 Its default value is 60.
 
+=item laguerre
+
+The numeric method used by laguerre(). Laguerre's method is used within
+sturm_bisection_roots() once it has narrowed its search in on an individual
+root, and of course laguerre() may be called independently. Its default value is
+60.
+
 =item newtonraphson
 
 The numeric method used by newtonraphson(). The Newton-Raphson method is offered
 as an alternative to Laguerre's method.  Its default value is 60.
-
-=item laguerre
-
-The numeric method used by laguerre(). Laguerre's method is used within
-sturm_bisection_roots() once it has narrowed its search in on an individual root,
-and of course laguerre() may be called independently. Its default value is
-60.
 
 =item sturm_bisection
 
@@ -2534,7 +2535,8 @@ Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
 
 For starting out, you may want to read
 
-William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling I<Numerical Recipes in C>.
+William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling
+I<Numerical Recipes in C>.
 Cambridge University Press, 1988.
 They have a web site for their book, L<http://www.nr.com/>.
 
@@ -2565,7 +2567,8 @@ Acton, Forman S. I<Numerical Methods That Work>. New York: Harper & Row, Publish
 =over 5
 
 Lively, opinionated book on numerical equation solving. I looked it up when it
-became obvious that everyone was quoting Acton when discussing Laguerre's method.
+became obvious that everyone was quoting Acton when discussing Laguerre's
+method.
 
 =back
 
