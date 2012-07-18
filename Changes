@@ -1,6 +1,17 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.62_3
+     Jul 18 2012
+	- Changed the Test::Pod requirement in pod.t from
+	  version 1.00 to 1.41. Didn't put the version
+	  requirement in Build.PL because it's silly to
+	  block installation because of POD testing.
+	- Put "=encoding utf8" command in the first line of my
+	  POD. One of my references has a non-ASCII character in
+	  his name, and Pod-Simple now warns about that as of May.
+	  Some searching seems to indicate that =encoding was
+	  introduced in perl version 5.10; we'll see how older perls
+	  handle this.
      Jul 10 2012
 	- Comment and Smart-Comment changes. Also removed the late
 	  Nick Ing-Simmons's e-mail address from comments.
@@ -34,7 +45,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  as seems to be currently required under the version of
 	  Module::Build that I'm developing with (the hash form looks
 	  to be for a later version that I cannot install yet).
-2.61_1
+2.62_1
      Oct 30 2011
 	- A couple more changes to Build.PL (dist_author and resources).
 	  Time to push this up to git and add it to CPAN.
