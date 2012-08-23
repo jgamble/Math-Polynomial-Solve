@@ -1672,6 +1672,7 @@ sub sturm_sign_count
 #
 sub laguerre
 {
+	no Math::Complex;
 	my($p_ref, $xval_ref) = @_;
 	my $n = $#$p_ref;
 	my @xvalues;
@@ -1774,6 +1775,7 @@ print "n * h - g*g = ", $n*$h - $g*$g, "\n\n";
 #
 sub newtonraphson
 {
+	no Math::Complex;
 	my($p_ref, $xval_ref) = @_;
 	my $n = $#$p_ref;
 	my @xvalues;
@@ -2268,6 +2270,7 @@ for polynomials.
   push @roots, laguerre(\@coefficients, $another_xvalue);
 
 For each x value the function will attempt to find a root closest to it.
+The function will return real roots only.
 
 =head3 newtonraphson()
 
@@ -2277,6 +2280,7 @@ Like laguerre, a numerical method for finding a root of an equation.
   push @roots, laguerre(\@coefficients, $another_xvalue);
 
 For each x value the function will attempt to find a root closest to it.
+The function will return real roots only.
 
 This function is provided for comparisons purposes for the user; internally
 laguerre() is used.
