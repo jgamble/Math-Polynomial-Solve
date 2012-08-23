@@ -1,13 +1,13 @@
 ---
-abstract: 'Find the roots of polynomial equations.'
+abstract: 'Find the Roots of Polynomial Equations'
 author:
   - 'John M. Gamble <jgamble@cpan.org>'
 build_requires:
   Test::Simple: 0
 configure_requires:
-  Module::Build: 0.340201
+  Module::Build: 0.3624
 dynamic_config: 0
-generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.112621'
+generated_by: 'Module::Build version 0.4, CPAN::Meta::Converter version 2.112621'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -16,13 +16,14 @@ name: Math-Polynomial-Solve
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.61
+    version: 2.62_2
 requires:
   Math::Complex: 1.36
   perl: v5.8.3
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.61
+  repository: git://github.com/jgamble/Math-Polynomial-Solve.git
+version: 2.62_2
 x_keyword:
   - math
   - polynomial
