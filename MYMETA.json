@@ -34,7 +34,7 @@
    "provides" : {
       "Math::Polynomial::Solve" : {
          "file" : "lib/Math/Polynomial/Solve.pm",
-         "version" : "2.62_2"
+         "version" : "2.62_3"
       }
    },
    "release_status" : "testing",
