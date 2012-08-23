@@ -1845,6 +1845,8 @@ sub poly_gcd
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
 Math::Polynomial::Solve - Find the roots of polynomial equations.
