@@ -1244,7 +1244,7 @@ sub poly_evaluate
 		#
 		# It could happen. Someone might type \$x instead of $x.
 		#
-		@values = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
+		@values = ((ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
 	}
 
 	#
@@ -1690,7 +1690,7 @@ sub laguerre
 		#
 		# It could happen. Someone might type \$x instead of $x.
 		#
-		@xvalues = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
+		@xvalues = ((ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
 	}
 
 	foreach my $x (@xvalues)
@@ -1728,13 +1728,6 @@ sub laguerre
 			my $h = $g * $g - $d2y/$y;
 			my $f = sqrt(($n - 1) * ($n * $h - $g*$g));
 			$f = - $f if (abs($g - $f) > abs($g + $f));
-if (ref($f) eq "Math::Complex") {
-print "Iteration $its, x = $x, y = $y, dy = $dy, d2y = $d2y\n";
-print "g = $g\nh = $h\nf = $f\n";
-print "g * g = ", $g*$g, "\n";
-print "n * h = ", $n*$h, "\n";
-print "n * h - g*g = ", $n*$h - $g*$g, "\n\n";
-}
 
 			#
 			#### g = $g
@@ -1793,7 +1786,7 @@ sub newtonraphson
 		#
 		# It could happen. Someone might type \$x instead of $x.
 		#
-		@xvalues = ( (ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
+		@xvalues = ((ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
 	}
 
 	#
@@ -1969,8 +1962,8 @@ B<NOTE>: this function is replaced by the option function C<poly_option()>.
 
 =head3 poly_option()
 
-Set options that affect the behavior of the C<poly_roots()> function. All options
-are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
+Set options that affect the behavior of the C<poly_roots()> function. All
+options are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
 and L</poly_tolerance()>.
 
 This is the option function that deprecates C<set_hessenberg()> and
@@ -2218,12 +2211,14 @@ Internally, laguerre() is used by sturm_bisection_roots().
 
 =head2 Utility Functions
 
-These are internal functions used by the other functions listed above,
-but which may also be useful to the user. They are all exported under the tag "utility".
+These are internal functions used by the other functions listed above
+that may also be useful to the user, or which affect the behavior of
+other functions. They are all exported under the tag "utility".
 
 =head3 epsilon()
 
-Returns the machine epsilon value that was calculated when this module was loaded.
+Returns the machine epsilon value that was calculated when this module was
+loaded.
 
 The value may be changed, although this in general is not recommended.
 
@@ -2272,18 +2267,21 @@ for polynomials.
 For each x value the function will attempt to find a root closest to it.
 The function will return real roots only.
 
+This is the function used by L</sturm_bisection_roots()> after narrowing its
+search to a range containing a single root.
+
 =head3 newtonraphson()
 
 Like laguerre, a numerical method for finding a root of an equation.
 
-  @roots = laguerre(\@coefficients, \@xvalues);
-  push @roots, laguerre(\@coefficients, $another_xvalue);
+  @roots = newtonraphson(\@coefficients, \@xvalues);
+  push @roots, newtonraphson(\@coefficients, $another_xvalue);
 
 For each x value the function will attempt to find a root closest to it.
 The function will return real roots only.
 
-This function is provided for comparisons purposes for the user; internally
-laguerre() is used.
+This function is provided as an alternative to laguerre(). It is not
+used internally by any other functions.
 
 =head3 poly_iteration()
 
@@ -2369,6 +2367,11 @@ Tolerances may be set for:
 The numeric method used by laguerre(). Laguerre's method is used within
 sturm_bisection_roots() once an individual root has been found within a range,
 and of course it may be called independently.
+
+=item newtonraphson
+
+The numeric method used by newtonraphson(). Newton-Raphson is, like Laguerre's
+method, a method for finding a root near the starting X value.
 
 =item fltcmp
 
@@ -2577,6 +2580,12 @@ became obvious that everyone was quoting Acton when discussing Laguerre's
 method.
 
 =back
+
+=head2 Newton-Raphson
+
+Commonly known as Newton's method. Almost every introduction to calculus
+text book will have a section on it; a Wikipedia article is at
+L<http://en.wikipedia.org/wiki/Newton%27s_method>.
 
 =head1 SEE ALSO
 

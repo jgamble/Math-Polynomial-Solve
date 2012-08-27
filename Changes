@@ -1,5 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.63
+     Aug 27 2012
+	- Documentation of 'newtonraphson' option for poly_tolerance()
+	  accidentally left off.
+	- Better documentation for newtonraphson().
+	- Removed some debugging code from laguerre() that I forgot to
+	  remove earlier.
 2.62_3
      Aug 23 2012
 	- sturm_bisection_roots(), which was supposed to only
@@ -10,7 +17,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  line at the start of the function to prevent this.
 	- Did the same for newtonraphson(), as its primary use
 	  is to find real roots.
-	- Made sure the documentation makes the real roots only
+	- Made sure the documentation makes the real-roots-only
 	  condition of laguerre() and newtonraphson() clear.
      Jul 18 2012
 	- Changed the Test::Pod requirement in pod.t from
