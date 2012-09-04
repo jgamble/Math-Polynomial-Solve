@@ -27,6 +27,8 @@ my $build = Module::Build->new(
 	create_license => 1,
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
+	dynamic_config =>0,
+
 	meta_merge => {
 		keyword => [ qw(math polynomial quadratic cubic quartic matrix
 			        Sturm Nickalls Ferrari Laguerre Hessenberg) ],
