@@ -1,6 +1,15 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.63
+     Sep  4 2012
+	- Yet more documentation improvement involving some minor
+	  re-organization of the Sturm functions and a correction
+	  in the poly_iteration() example.
+	- Get all the files's VERSION number up to 2.63.
+	- Added 'create_license => 1' to the Build.PL list of attributes.
+	- Added 'dynamic_config => 0' to the Build.PL list of attributes.
+	- Added LICENSE to the MANIFEST file.
+	- Up to CPAN we go.
      Aug 27 2012
 	- Documentation of 'newtonraphson' option for poly_tolerance()
 	  accidentally left off.
