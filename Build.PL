@@ -24,6 +24,7 @@ my $build = Module::Build->new(
 	},
 
 	license => 'perl',
+	create_license => 1,
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
 	meta_merge => {
