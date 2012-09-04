@@ -64,7 +64,7 @@ use warnings;
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.62_3';
+our $VERSION = '2.63';
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -2008,16 +2008,18 @@ solving methods.
 
 Reduce polynomials to a lower degree through variable substitution, if possible.
 
-For example, with varsubst set to one and the polynomial to solve is C<9x**6 + 128x**3 + 21>,
-then C<poly_roots()> will reduce the polynomial to C<9y**2 + 128y + 21>, where y = x**3,
+For example, with C<varsubst> set to one and the polynomial to solve being
+C<9x**6 + 128x**3 + 21>, C<poly_roots()> will reduce the polynomial to
+C<9y**2 + 128y + 21> (where C<y = x**3>),
 and solve the quadratic (either classically or numerically, depending
 on the hessenberg option). Taking the cube root of each quadratic root
 completes the operation.
 
-This has the benefit of having a simpler matrix to solve, or if the hessenberg option
-is set to zero, has the effect of being able to use one of the classical methods on a
-polynomial of high degree. In the above example, the order-six polynomial gets solved
-with the quadratic_roots() function if the hessenberg option is zero.
+This has the benefit of having a simpler matrix to solve, or if the
+C<hessenberg> option is set to zero, has the effect of being able to use one of
+the classical methods on a polynomial of high degree. In the above example, the
+order-six polynomial gets solved with the quadratic_roots() function if the
+hessenberg option is zero.
 
 Currently the variable substitution is fairly simple and will only look
 for gaps of zeros in the coefficients that are multiples of the prime numbers
@@ -2087,8 +2089,9 @@ Return the number of I<unique>, I<real> roots of the polynomial.
 
   $unique_roots = poly_real_root_count(@coefficients);
 
-For example, the equation C<(x + 3)**3> forms the polynomial C<x**3 + 9x**2 + 27x + 27>,
-but since all three of its roots are identical, C<poly_real_root_count(1, 9, 27, 27)> will return 1.
+For example, the equation C<(x + 3)**3> forms the polynomial
+C<x**3 + 9x**2 + 27x + 27>, but since all three of its roots are identical,
+C<poly_real_root_count(1, 9, 27, 27)> will return 1.
 
 Likewise, C<poly_real_root_count(1, -8, 25)> will return 0 because the two roots
 of C<x**2 -8x + 25> are both complex.
@@ -2101,17 +2104,6 @@ This function is the all-in-one function to use instead of
           sturm_sign_count(sturm_sign_plus_inf(\@chain));
 
 if you don't intend to use the Sturm chain for anything else.
-
-=head3 poly_sturm_chain()
-
-Returns the chain of Sturm functions used to evaluate the number of roots of a
-polynomial in a range of X values.
-
-If you feed in a sequence of X values to the Sturm functions, you can tell where
-the (real, not complex) roots of the polynomial are by counting the number of
-times the Y values change sign.
-
-See L</poly_real_root_count()> above for an example of its use.
 
 =head3 sturm_real_root_range_count()
 
@@ -2129,6 +2121,31 @@ This is equivalent to:
   my @chain = poly_sturm_chain(@coefficients);
   my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
   $unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+
+=head3 sturm_bisection_roots()
+
+Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses the
+bisection method combined with C<sturm_real_range_count()> to narrow the range
+to a single root, then uses L</laguerre()> to find the value.
+
+  my($from, $to) = (-1000, 0);
+  my @chain = poly_sturm_chain(@coefficients);
+  my @roots = sturm_bisection_roots(\@chain, $from, $to);
+
+As it is using the Sturm functions, it will find only the real roots.
+
+Internally, laguerre() is used by sturm_bisection_roots().
+
+=head3 poly_sturm_chain()
+
+Returns the chain of Sturm functions used to evaluate the number of roots of a
+polynomial in a range of X values.
+
+If you feed in a sequence of X values to the Sturm functions, you can tell where
+the (real, not complex) roots of the polynomial are by counting the number of
+times the Y values change sign.
+
+See L</poly_real_root_count()> above for an example of its use.
 
 =head3 Sturm Sign Sequence Functions
 
@@ -2195,20 +2212,6 @@ such as those returned by the L</Sturm Sign Sequence Functions>
 See L</poly_real_root_count()> and L</sturm_real_root_range_count()> for
 examples of its use.
 
-=head3 sturm_bisection_roots()
-
-Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses the
-bisection method combined with C<sturm_real_range_count()> to narrow the range
-to a single root, then uses L</laguerre()> to find the value.
-
-  my($from, $to) = (-1000, 0);
-  my @chain = poly_sturm_chain(@coefficients);
-  my @roots = sturm_bisection_roots(\@chain, $from, $to);
-
-As it is using the Sturm functions, it will find only the real roots.
-
-Internally, laguerre() is used by sturm_bisection_roots().
-
 =head2 Utility Functions
 
 These are internal functions used by the other functions listed above
@@ -2272,7 +2275,7 @@ search to a range containing a single root.
 
 =head3 newtonraphson()
 
-Like laguerre, a numerical method for finding a root of an equation.
+Like L</laguerre()>, a numerical method for finding a root of an equation.
 
   @roots = newtonraphson(\@coefficients, \@xvalues);
   push @roots, newtonraphson(\@coefficients, $another_xvalue);
@@ -2300,13 +2303,14 @@ simply by looking at the return value of poly_iteration().
   # Double the limit for the hessenberg method, but set the limit
   # for Laguerre's method to 20.
   #
-  poly_iteration(hessenberg => $its_limits{hessenberg} * 2, laguerre => 12);
+  my %old_limits = poly_iteration(hessenberg => $its_limits{hessenberg} * 2,
+                      laguerre => 20);
 
   #
   # Reset the limits with the former values, but save the values we had
   # for later.
   #
-  my %hl_limits = poly_iteration(%its_limits);
+  my %hl_limits = poly_iteration(%old_limits);
 
 There are iteration limit values for:
 
@@ -2319,10 +2323,10 @@ Its default value is 60.
 
 =item laguerre
 
-The numeric method used by laguerre(). Laguerre's method is used within
+The numeric method used by L</laguerre()>. Laguerre's method is used within
 sturm_bisection_roots() once it has narrowed its search in on an individual
-root, and of course laguerre() may be called independently. Its default value is
-60.
+root, and of course laguerre() may be called independently. Its default value
+is 60.
 
 =item newtonraphson
 
