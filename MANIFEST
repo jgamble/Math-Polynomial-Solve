@@ -5,8 +5,6 @@ MANIFEST
 Makefile.PL
 META.json
 META.yml
-MYMETA.json
-MYMETA.yml
 lib/Math/Polynomial/Solve.pm
 README
 eg/cubic.m
