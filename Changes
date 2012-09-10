@@ -1,5 +1,13 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.64
+     Sep 10 2012
+	- Added Newton-Raphson to the keyword list in Build.PL. Someday
+	  those keywords will get used...
+	- Time to upload to CPAN.
+     Sep  6 2012
+	- I was confused about the use of the MYMETA files. They are
+	  now removed from the MANIFEST listing.
 2.63
      Sep  4 2012
 	- Yet more documentation improvement involving some minor
