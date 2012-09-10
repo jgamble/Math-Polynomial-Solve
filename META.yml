@@ -7,7 +7,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.3624
 dynamic_config: 0
-generated_by: 'Module::Build version 0.4, CPAN::Meta::Converter version 2.112621'
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -16,14 +16,14 @@ name: Math-Polynomial-Solve
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.63
+    version: 2.64
 requires:
   Math::Complex: 1.36
   perl: v5.8.3
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/jgamble/Math-Polynomial-Solve.git
-version: 2.63
+version: 2.64
 x_keyword:
   - math
   - polynomial
@@ -36,3 +36,4 @@ x_keyword:
   - Ferrari
   - Laguerre
   - Hessenberg
+  - Newton-Raphson
