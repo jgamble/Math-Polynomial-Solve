@@ -1,5 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.65
+     Sep 28 2012
+	- De-Fortran'd the matrix used by build_companion() and
+	  hqr_eigen_hessenberg(): it is now zero-based instead of one-based.
+	  The amount of memory it saves is probably not significant, but
+	  it does put the routines in line with other matrix-handling
+	  modules, which may be useful down the road.
 2.64
      Sep 10 2012
 	- Added Newton-Raphson to the keyword list in Build.PL. Someday
