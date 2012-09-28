@@ -64,7 +64,7 @@ use warnings;
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.64';
+our $VERSION = '2.65';
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -547,7 +547,7 @@ sub BASESQR () { BASE * BASE }
 sub build_companion
 {
 	my @coefficients = @_;
-	my $n = $#coefficients;
+	my $n = $#coefficients - 1;
 	my @h;			# The matrix.
 
 	#
@@ -567,24 +567,24 @@ sub build_companion
 	# Who knows, but if we are, then we can skip all the
 	# complicated looping.
 	#
-	if ($n == 1)
+	if ($n == 0)
 	{
-		$h[1][1] = -$coefficients[0];
+		$h[0][0] = -$coefficients[0];
 		return \@h;
 	}
 
 	#
 	# Next: set up the diagonal matrix.
 	#
-	for my $i (1 .. $n)
+	for my $i (0 .. $n)
 	{
-		for my $j (1 .. $n)
+		for my $j (0 .. $n)
 		{
 			$h[$i][$j] = 0.0;
 		}
 	}
 
-	for my $i (2 .. $n)
+	for my $i (1 .. $n)
 	{
 		$h[$i][$i - 1] = 1.0;
 	}
@@ -592,7 +592,7 @@ sub build_companion
 	#
 	# And put in the coefficients.
 	#
-	for my $i (1 .. $n)
+	for my $i (0 .. $n)
 	{
 		$h[$i][$n] = - (pop @coefficients);
 	}
@@ -615,7 +615,7 @@ sub build_companion
 	while ($noconv)
 	{
 		$noconv = 0;
-		for my $i (1 .. $n)
+		for my $i (0 .. $n)
 		{
 			#
 			# Touch only non-zero elements of companion.
@@ -628,16 +628,16 @@ sub build_companion
 			else
 			{
 				$c = 0.0;
-				for my $j (1 .. $n - 1)
+				for my $j (0 .. $n - 1)
 				{
 					$c += abs($h[$j][$n]);
 				}
 			}
 
 			my $r;
-			if ($i == 1)
+			if ($i == 0)
 			{
-				$r = abs($h[1][$n]);
+				$r = abs($h[0][$n]);
 			}
 			elsif ($i != $n)
 			{
@@ -679,9 +679,9 @@ sub build_companion
 				#C	 $h($j,$i)=$h($j,$i)*$f
 				#C   enddo
 				#C begin specific code. Touch only non-zero elements of companion.
-				if ($i == 1)
+				if ($i == 0)
 				{
-					$h[1][$n] *= $g;
+					$h[0][$n] *= $g;
 				}
 				else
 				{
@@ -694,7 +694,7 @@ sub build_companion
 				}
 				else
 				{
-					for my $j (1 .. $n)
+					for my $j (0 .. $n)
 					{
 						$h[$j][$i] *= $f;
 					}
@@ -738,7 +738,7 @@ sub hqr_eigen_hessenberg
 	my @w;
 
 	ROOT:
-	while ($n > 0)
+	while ($n >= 0)
 	{
 		my $its = 0;
 		my $na  = $n - 1;
@@ -748,8 +748,8 @@ sub hqr_eigen_hessenberg
 			#
 			# Look for single small sub-diagonal element;
 			#
-			my $l = 1;
-			for my $d (reverse 2 .. $n)
+			my $l = 0;
+			for my $d (reverse 1 .. $n)
 			{
 				if (abs( $h[$d][ $d - 1 ] ) <= $epsilon *
 				    (abs( $h[ $d - 1 ][ $d - 1 ] ) +
@@ -816,7 +816,7 @@ sub hqr_eigen_hessenberg
 				#
 
 				$t += $x;
-				for my $i (1 .. $n)
+				for my $i (0 .. $n)
 				{
 					$h[$i][$i] -= $x;
 				}
@@ -1038,7 +1038,6 @@ sub poly_roots
 
 		#
 		### Balanced Companion Matrix
-		##### (row and column 0 will be undefs)...
 		##### $matrix_ref
 		#
 		# QR iterations from the matrix.
