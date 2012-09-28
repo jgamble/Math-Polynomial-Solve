@@ -7,7 +7,7 @@ my $build = Module::Build->new(
 
 	dist_abstract => 'Find the Roots of Polynomial Equations',
 	dist_author => ['John M. Gamble <jgamble@cpan.org>'],
-	dist_version => '2.64',
+	dist_version => '2.65',
 	dist_name => 'Math-Polynomial-Solve',
 
 	requires => {
@@ -16,7 +16,7 @@ my $build = Module::Build->new(
 	},
 
 	configure_requires => {
-		'Module::Build' => '0.3624',
+		'Module::Build' => '0.4',
 	},
 
 	build_requires => {
