@@ -553,14 +553,10 @@ sub build_companion
 	#
 	### build_companion called with: @coefficients
 	#
-	# First step:  Divide by the leading coefficient.
+	# First step:  Divide by the leading coefficient and negate.
 	#
-	my $cn = shift @coefficients;
-
-	foreach my $c (@coefficients)
-	{
-		$c /= $cn;
-	}
+	my $cn = - (shift @coefficients);
+	map($_ /= $cn, @coefficients);
 
 	#
 	# Why would we be calling this for a linear equation?
@@ -569,7 +565,7 @@ sub build_companion
 	#
 	if ($n == 0)
 	{
-		$h[0][0] = -$coefficients[0];
+		$h[0][0] = $coefficients[0];
 		return \@h;
 	}
 
@@ -578,7 +574,9 @@ sub build_companion
 	#
 	for my $i (0 .. $n)
 	{
-		for my $j (0 .. $n)
+		$h[$i][$n] = pop @coefficients;
+
+		for my $j (0 .. $n - 1)
 		{
 			$h[$i][$j] = 0.0;
 		}
@@ -587,14 +585,6 @@ sub build_companion
 	for my $i (1 .. $n)
 	{
 		$h[$i][$i - 1] = 1.0;
-	}
-
-	#
-	# And put in the coefficients.
-	#
-	for my $i (0 .. $n)
-	{
-		$h[$i][$n] = - (pop @coefficients);
 	}
 
 	#
@@ -2536,53 +2526,69 @@ from that source anymore.
 
 He referenced the following articles:
 
+=over 3
+
+=item
+
 R. S. Martin, G. Peters and J. H. Wilkinson, "The QR Algorithm for Real Hessenberg
 Matrices", Numer. Math. 14, 219-231(1970).
+
+=item
 
 B. N. Parlett and C. Reinsch, "Balancing a Matrix for Calculation of Eigenvalues
 and Eigenvectors", Numer. Math. 13, 293-304(1969).
 
+=item
+
 Alan Edelman and H. Murakami, "Polynomial Roots from Companion Matrix
 Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
 
-For starting out, you may want to read
+=item
 
 William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling
-I<Numerical Recipes in C>.
-Cambridge University Press, 1988.
-They have a web site for their book, L<http://www.nr.com/>.
+I<Numerical Recipes in C>.  Cambridge University Press, 1988.  L<http://www.nr.com/>.
+
+=back
+
+For an overview (and useful algorithms), this is probably the book to start with.
 
 =head2 Sturm's Sequence and Laguerre's Method
+
+=over 3
+
+=item
 
 Dörrie, Heinrich. I<100 Great Problems of Elementary Mathematics; Their History and Solution>.
 New York: Dover Publications, 1965. Translated by David Antin.
 
-=over 5
+=back
 
 Discusses Charles Sturm's 1829 paper with an eye towards mathematical proof
 rather than an algorithm, but is still very useful.
 
-=back
+=over 3
+
+=item
 
 Glassner, Andrew S. I<Graphics Gems>. Boston: Academic Press, 1990. 
 
-=over 5
+=back
 
 The chapter "Using Sturm Sequences to Bracket Real Roots
 of Polynomial Equations" (by D. G. Hook and P. R. McAree) has a clearer
 description of the actual steps needed to implement Sturm's method.
 
-=back
+=over 3
+
+=item
 
 Acton, Forman S. I<Numerical Methods That Work>. New York: Harper & Row, Publishers, 1970.
 
-=over 5
+=back
 
 Lively, opinionated book on numerical equation solving. I looked it up when it
 became obvious that everyone was quoting Acton when discussing Laguerre's
 method.
-
-=back
 
 =head2 Newton-Raphson
 
@@ -2592,8 +2598,14 @@ L<http://en.wikipedia.org/wiki/Newton%27s_method>.
 
 =head1 SEE ALSO
 
+=over 3
+
+=item
+
 Forsythe, George E., Michael A. Malcolm, and Cleve B. Moler
 I<Computer Methods for Mathematical Computations>. Prentice-Hall, 1977.
+
+=back
 
 =head1 AUTHOR
 
