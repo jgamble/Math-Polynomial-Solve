@@ -35,11 +35,6 @@ my $build = Module::Build->new(
 				Newton-Raphson) ],
 		resources => {
 			repository => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
-#			repository => {
-#				url => 'git://github.com/jgamble/Math-Polynomial-Solve.git',
-#				web => 'https://github.com/jgamble/Math-Polynomial-Solve',
-#				type => 'git',
-#			},
 		},
 	},
 
