@@ -1,6 +1,10 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.65
+     Dec 6 2012
+	- Merged in changes: eliminated a loop in build_companion() and
+	  changed one of the foreach loops to a map.
+	- Added cubic.pl and quartic.pl scripts to the eg/ directory.
      Sep 28 2012
 	- De-Fortran'd the matrix used by build_companion() and
 	  hqr_eigen_hessenberg(): it is now zero-based instead of one-based.
