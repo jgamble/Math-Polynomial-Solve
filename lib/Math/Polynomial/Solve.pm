@@ -31,6 +31,7 @@ use warnings;
 		poly_roots
 		poly_option
 		build_companion
+		balance_matrix
 		hqr_eigen_hessenberg
 		get_hessenberg
 		set_hessenberg
@@ -2035,6 +2036,26 @@ for gaps of zeros in the coefficients that are multiples of the prime numbers
 less than or equal to 31 (2, 3, 5, et cetera).
 
 =back
+
+=head3 build_companion
+
+Creates the initial companion matrix. Returns a reference to an array of arrays
+(the internal representation of a matrix). This reference may be used as an
+argument to the L<Math::Matrix> contructor:
+
+    my $cm = build_companion(@coef);
+
+    my $m = Math::Matrix->new(@$cm);   # Note that we have to de-reference.
+    $m->print();
+
+The Wikipedia article at L<http://en.wikipedia.org/wiki/Companion_matrix/> has
+more information on the subject.
+
+=head3 balance_matrix
+
+
+=head3 hqr_eigen_hessenberg
+
 
 =head2 Classical Functions
 
