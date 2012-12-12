@@ -30,6 +30,8 @@ use warnings;
 	'numeric' => [ qw(
 		poly_roots
 		poly_option
+		build_companion
+		hqr_eigen_hessenberg
 		get_hessenberg
 		set_hessenberg
 	) ],
@@ -700,7 +702,7 @@ sub build_companion
 # @roots = hqr_eigen_hessenberg($matrix_ref)
 #
 # Finds the eigenvalues of a real upper Hessenberg matrix,
-# H, stored in the array $h(1:n,1:n).  Returns a list
+# H, stored in the array $h(0:n-1,0:n-1).  Returns a list
 # of real and/or complex numbers.
 #
 sub hqr_eigen_hessenberg
