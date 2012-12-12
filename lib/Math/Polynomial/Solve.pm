@@ -476,7 +476,7 @@ sub quartic_roots
 	elsif (abs($g * $g) < $epsilon)
 	{
 		#
-		### "Quartic branch 2, $g equals 0, within epsilon...
+		### Quartic branch 2, $g equals 0, within epsilon...
 		#
 		# Another special case: g == 0.  We have a quadratic
 		# with y-squared.
@@ -588,6 +588,22 @@ sub build_companion
 	{
 		$h[$i][$i - 1] = 1.0;
 	}
+
+	return \@h;
+}
+
+#
+# $matrix_ref = balance_matrix($matrix_ref);
+#
+# Balance the companion matrix created by build_companion().
+#
+# Return a reference to the N by N matrix.
+#
+sub balance_matrix
+{
+	my($ref) = @_;
+	my @h = @$ref;
+	my $n = $#h;
 
 	#
 	##### @h
@@ -1027,6 +1043,8 @@ sub poly_roots
 	if ($option{hessenberg} or $#coefficients > 4)
 	{
 		my $matrix_ref = build_companion(@coefficients);
+
+		$matrix_ref = balance_matrix($matrix_ref);
 
 		#
 		### Balanced Companion Matrix
