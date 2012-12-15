@@ -31,6 +31,7 @@ my $build = Module::Build->new(
 
 	meta_merge => {
 		keyword => [ qw(math polynomial quadratic cubic quartic matrix
+				companion-matrix
 			        Sturm Nickalls Ferrari Laguerre Hessenberg
 				Newton-Raphson) ],
 		resources => {
