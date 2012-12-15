@@ -1,6 +1,13 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.65
+     Dec 12 2012
+	- Split balance_matrix() off of build_companion() to let
+	  build_companion() return a 'pure' companion matrix.
+	- Start documenting all this.
+     Dec 11 2012
+	- Add build_companion() and hqr_eigen_hessenberg() to the
+	  EXPORT list.
      Dec 6 2012
 	- Merged in changes: eliminated a loop in build_companion() and
 	  changed one of the foreach loops to a map.
