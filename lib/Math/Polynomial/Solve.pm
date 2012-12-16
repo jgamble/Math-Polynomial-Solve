@@ -542,10 +542,10 @@ sub BASE ()    { 2 }
 sub BASESQR () { BASE * BASE }
 
 #
-# $matrix_ref = build_companion(@coefficients);
+# @cm = build_companion(@coefficients);
 #
-# Build the Companion Matrix of the N degree polynomial.  Return a
-# reference to the N by N matrix.
+# Build the Companion Matrix of the N degree polynomial.
+# Return an array of arrays representing the N by N matrix.
 #
 sub build_companion
 {
@@ -569,7 +569,7 @@ sub build_companion
 	if ($n == 0)
 	{
 		$h[0][0] = $coefficients[0];
-		return \@h;
+		return @h;
 	}
 
 	#
@@ -590,26 +590,25 @@ sub build_companion
 		$h[$i][$i - 1] = 1.0;
 	}
 
-	return \@h;
+	return @h;
 }
 
 #
-# $matrix_ref = balance_matrix($matrix_ref);
+# @matrix = balance_matrix(@cm);
 #
 # Balance the companion matrix created by build_companion().
 #
-# Return a reference to the N by N matrix.
+# Return an array of arrays representing the N by N matrix.
 #
 sub balance_matrix
 {
-	my($ref) = @_;
-	my @h = @$ref;
+	my @h = @_;
 	my $n = $#h;
 
 	#
-	##### @h
-	#
 	### Balancing the unsymmetric matrix A.
+	#
+	##### @h
 	#
 	# Perl code translated by Nick Ing-Simmons from FORTRAN code
 	# by Hiroshi Murakami.
@@ -712,11 +711,15 @@ sub balance_matrix
 		}	# for $i
 	}	# while $noconv
 
-	return \@h;
+	#
+	### Returning balanced matrix.
+	##### @h
+	#
+	return @h;
 }
 
 #
-# @roots = hqr_eigen_hessenberg($matrix_ref)
+# @roots = hqr_eigen_hessenberg(@matrix)
 #
 # Finds the eigenvalues of a real upper Hessenberg matrix,
 # H, stored in the array $h(0:n-1,0:n-1).  Returns a list
@@ -724,10 +727,11 @@ sub balance_matrix
 #
 sub hqr_eigen_hessenberg
 {
-	my $ref = shift;
-	my @h   = @$ref;
-	my $n   = $#h;
+	my @h = @_;
+	my $n = $#h;
 
+	#
+	### hqr_eigen_hessenberg()
 	#
 	# Eigenvalue Computation by the Householder QR method for the
 	# Real Hessenberg matrix.
@@ -741,10 +745,9 @@ sub hqr_eigen_hessenberg
 	#   Numer. Math. 14, 219-231(1970).
 	#
 	my($p, $q, $r);
-	my($w, $x, $y);
 	my $t = 0.0;
 
-	my @w;
+	my @roots;
 
 	ROOT:
 	while ($n >= 0)
@@ -754,6 +757,8 @@ sub hqr_eigen_hessenberg
 
 		while ($its < $iteration{hessenberg})
 		{
+			my($w, $x, $y);
+
 			#
 			# Look for single small sub-diagonal element;
 			#
@@ -776,8 +781,8 @@ sub hqr_eigen_hessenberg
 				#
 				# One (real) root found.
 				#
-				push @w, $x + $t;
 				$n--;
+				push @roots, $x + $t;
 				next ROOT;
 			}
 
@@ -798,16 +803,16 @@ sub hqr_eigen_hessenberg
 					#
 					$y = -$y if ( $p < 0.0 );
 					$y += $p;
-					push @w, $x - $w / $y;
-					push @w, $x + $y;
+					push @roots, $x - $w / $y;
+					push @roots, $x + $y;
 				}
 				else
 				{
 					#
 					# Complex or twin pair.
 					#
-					push @w, $x + $p - $y * i;
-					push @w, $x + $p + $y * i;
+					push @roots, $x + $p - $y * i;
+					push @roots, $x + $p + $y * i;
 				}
 
 				$n -= 2;
@@ -972,7 +977,7 @@ sub hqr_eigen_hessenberg
 			}	# for $k
 		}	# while $its
 	}	# while $n
-	return @w;
+	return @roots;
 }
 
 #
@@ -1043,17 +1048,12 @@ sub poly_roots
 	#
 	if ($option{hessenberg} or $#coefficients > 4)
 	{
-		my $matrix_ref = build_companion(@coefficients);
-
-		$matrix_ref = balance_matrix($matrix_ref);
-
-		#
-		### Balanced Companion Matrix
-		##### $matrix_ref
 		#
 		# QR iterations from the matrix.
 		#
-		@x = hqr_eigen_hessenberg($matrix_ref);
+		@x = hqr_eigen_hessenberg(
+			balance_matrix(build_companion(@coefficients))
+			);
 	}
 	elsif ($#coefficients == 4)
 	{
@@ -1952,6 +1952,15 @@ root list before calling one of the root-finding functions.
 By default, C<poly_roots()> will use the Hessenberg matrix method for solving
 polynomials. This can be changed by calling L</poly_options()>.
 
+The method of poly_roots() is almost equivalent to
+
+  @x = hqr_eigen_hessenberg(
+        balance_matrix(build_companion(@coefficients))
+        );
+
+except this doesn't check for zero coefficients and ignores the settings of
+C<poly_options()>.
+
 =head3 get_hessenberg() I<DEPRECATED>
 
 Returns 1 or 0 depending upon whether C<poly_roots()> always makes use of
@@ -2045,7 +2054,7 @@ argument to the L<Math::Matrix> contructor:
 
     my $cm = build_companion(@coef);
 
-    my $m = Math::Matrix->new(@$cm);   # Note that we have to de-reference.
+    my $m = Math::Matrix->new(@cm);
     $m->print();
 
 The Wikipedia article at L<http://en.wikipedia.org/wiki/Companion_matrix/> has
@@ -2053,9 +2062,11 @@ more information on the subject.
 
 =head3 balance_matrix
 
+Balances the matrix for eigenvalue calculation.
 
 =head3 hqr_eigen_hessenberg
 
+Returns the roots of the polynomial equation by solving the matrix created by C<build_companion()> and C<balance_matrix()>. See L</poly_roots()>.
 
 =head2 Classical Functions
 
