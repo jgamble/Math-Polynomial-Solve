@@ -1,6 +1,14 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.65
+     Dec 15 2012
+	- Having made build_companion() and balance_matrix()
+	  exportable, change their return values from array references
+	  to arrays. This makes them easier to use with other modules.
+	- balance_matrix and hqr_eigen_hessenberg() now take an array
+	  as a parameter, for the same reason.
+	- Moved hqr_eigen_hessenberg() local variables deeper into
+	  the loop in which they're used.
      Dec 12 2012
 	- Split balance_matrix() off of build_companion() to let
 	  build_companion() return a 'pure' companion matrix.
