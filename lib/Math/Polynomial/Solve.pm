@@ -534,13 +534,6 @@ sub quartic_roots
 # From the netlib archive: http://netlib.bell-labs.com/netlib/search.html
 # In particular http://netlib.bell-labs.com/netlib/opt/companion.tgz
 
-#       BASE is the base of the floating point representation on the machine.
-#       It is 16 for base 16 float : for example, IBM system 360/370.
-#       It is 2  for base  2 float : for example, IEEE float.
-
-sub BASE ()    { 2 }
-sub BASESQR () { BASE * BASE }
-
 #
 # @cm = build_companion(@coefficients);
 #
@@ -562,20 +555,10 @@ sub build_companion
 	map($_ /= $cn, @coefficients);
 
 	#
-	# Why would we be calling this for a linear equation?
-	# Who knows, but if we are, then we can skip all the
-	# complicated looping.
-	#
-	if ($n == 0)
-	{
-		$h[0][0] = $coefficients[0];
-		return @h;
-	}
-
-	#
 	# Next: set up the diagonal matrix.
 	#
-	for my $i (0 .. $n)
+	$h[0][$n] = pop @coefficients;
+	for my $i (1 .. $n)
 	{
 		$h[$i][$n] = pop @coefficients;
 
@@ -583,15 +566,18 @@ sub build_companion
 		{
 			$h[$i][$j] = 0.0;
 		}
-	}
-
-	for my $i (1 .. $n)
-	{
 		$h[$i][$i - 1] = 1.0;
 	}
 
 	return @h;
 }
+
+#       BASE is the base of the floating point representation on the machine.
+#       It is 16 for base 16 float : for example, IBM system 360/370.
+#       It is 2  for base  2 float : for example, IEEE float.
+
+sub BASE ()    { 2 }
+sub BASESQR () { BASE * BASE }
 
 #
 # @matrix = balance_matrix(@cm);
