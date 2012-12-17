@@ -5,7 +5,7 @@ author:
 build_requires:
   Test::Simple: 0
 configure_requires:
-  Module::Build: 0.3624
+  Module::Build: 0.4
 dynamic_config: 0
 generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
 license: perl
@@ -16,14 +16,14 @@ name: Math-Polynomial-Solve
 provides:
   Math::Polynomial::Solve:
     file: lib/Math/Polynomial/Solve.pm
-    version: 2.64
+    version: 2.65
 requires:
   Math::Complex: 1.36
   perl: v5.8.3
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/jgamble/Math-Polynomial-Solve.git
-version: 2.64
+version: 2.65
 x_keyword:
   - math
   - polynomial
@@ -31,6 +31,7 @@ x_keyword:
   - cubic
   - quartic
   - matrix
+  - companion-matrix
   - Sturm
   - Nickalls
   - Ferrari
