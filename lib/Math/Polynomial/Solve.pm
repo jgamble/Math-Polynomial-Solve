@@ -544,7 +544,7 @@ sub build_companion
 {
 	my @coefficients = @_;
 	my $n = $#coefficients - 1;
-	my @h;			# The matrix.
+	my @h;
 
 	#
 	### build_companion called with: @coefficients
@@ -557,17 +557,13 @@ sub build_companion
 	#
 	# Next: set up the diagonal matrix.
 	#
-	$h[0][$n] = pop @coefficients;
-	for my $i (1 .. $n)
+	for my $i (0 .. $n)
 	{
 		$h[$i][$n] = pop @coefficients;
-
-		for my $j (0 .. $n - 1)
-		{
-			$h[$i][$j] = 0.0;
-		}
-		$h[$i][$i - 1] = 1.0;
+		map($h[$i][$_] = 0.0, 0 .. $n - 1);
 	}
+
+	map($h[$_][$_ - 1] = 1.0, 1 .. $n);
 
 	return @h;
 }
@@ -575,7 +571,6 @@ sub build_companion
 #       BASE is the base of the floating point representation on the machine.
 #       It is 16 for base 16 float : for example, IBM system 360/370.
 #       It is 2  for base  2 float : for example, IEEE float.
-
 sub BASE ()    { 2 }
 sub BASESQR () { BASE * BASE }
 
