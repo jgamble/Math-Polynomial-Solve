@@ -1,6 +1,11 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.65
+     Dec 16 2012
+	- Removed the early return if-block in build_companion(). The code
+	  it was skipping is no longer in the function to be skipped, having
+	  been moved to balance_matrix().
+	- Changed the single-index loops in build_companion() to map operations.
      Dec 15 2012
 	- Having made build_companion() and balance_matrix()
 	  exportable, change their return values from array references
