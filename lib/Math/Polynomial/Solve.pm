@@ -2029,9 +2029,9 @@ less than or equal to 31 (2, 3, 5, et cetera).
 
 =head3 build_companion
 
-Creates the initial companion matrix. Returns a reference to an array of arrays
-(the internal representation of a matrix). This reference may be used as an
-argument to the L<Math::Matrix> contructor:
+Creates the initial companion matrix. Returns an array of arrays (the
+internal representation of a matrix). This may be used as an argument to
+the L<Math::Matrix> contructor:
 
     my $cm = build_companion(@coef);
 
@@ -2142,21 +2142,19 @@ This is equivalent to:
 
   my @chain = poly_sturm_chain(@coefficients);
   my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
-  $unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+  $no_unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
 
 =head3 sturm_bisection_roots()
 
 Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses the
 bisection method combined with C<sturm_real_range_count()> to narrow the range
-to a single root, then uses L</laguerre()> to find the value.
+to a single root, then uses L</laguerre()> to find its value.
 
   my($from, $to) = (-1000, 0);
   my @chain = poly_sturm_chain(@coefficients);
   my @roots = sturm_bisection_roots(\@chain, $from, $to);
 
 As it is using the Sturm functions, it will find only the real roots.
-
-Internally, laguerre() is used by sturm_bisection_roots().
 
 =head3 poly_sturm_chain()
 
@@ -2202,7 +2200,7 @@ to examine the internals of the Sturm functions:
     print $xval[$j], "\n",
           "\t", join(", ", @s), "], sign count = ",
           sturm_sign_count(@s), "\n\n";
-    }
+  }
 
 Similar examinations can be made at plus and minus infinity:
 
