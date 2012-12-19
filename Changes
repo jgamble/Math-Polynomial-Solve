@@ -1,5 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.66
+     Dec 19 2012
+	- Corrected a line in the documentation that stated build_companion()
+	  returned a reference to an array of arrays. It used to, but now
+	  that it's exported, it returns an array of arrays (no reference).
+	- Fixed a brace mismatch in example code, and deleted a redundant
+	  line about laguerre() in Sturm documentation.
 2.65
      Dec 16 2012
 	- Removed the early return if-block in build_companion(). The code
