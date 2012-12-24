@@ -2569,6 +2569,8 @@ Matrices", Numer. Math. 14, 219-231(1970).
 B. N. Parlett and C. Reinsch, "Balancing a Matrix for Calculation of Eigenvalues
 and Eigenvectors", Numer. Math. 13, 293-304(1969).
 
+Fortran code for this routine is at L<http://netlib.sandia.gov/eispack/balanc.f>, and is the basis for L</balance_matrix()>.
+
 =item
 
 Alan Edelman and H. Murakami, "Polynomial Roots from Companion Matrix
