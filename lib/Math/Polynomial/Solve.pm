@@ -1939,8 +1939,8 @@ The method of poly_roots() is almost equivalent to
         balance_matrix(build_companion(@coefficients))
         );
 
-except this doesn't check for zero coefficients and ignores the settings of
-C<poly_options()>.
+except this wouldn't check for leading and trailing zero coefficients, and it
+ignores the settings of C<poly_options()>.
 
 =head3 get_hessenberg() I<DEPRECATED>
 
@@ -2033,10 +2033,10 @@ Creates the initial companion matrix. Returns an array of arrays (the
 internal representation of a matrix). This may be used as an argument to
 the L<Math::Matrix> contructor:
 
-    my $cm = build_companion(@coef);
+  my $cm = build_companion(@coef);
 
-    my $m = Math::Matrix->new(@cm);
-    $m->print();
+  my $m = Math::Matrix->new(@cm);
+  $m->print();
 
 The Wikipedia article at L<http://en.wikipedia.org/wiki/Companion_matrix/> has
 more information on the subject.
@@ -2047,7 +2047,8 @@ Balances the matrix for eigenvalue calculation.
 
 =head3 hqr_eigen_hessenberg
 
-Returns the roots of the polynomial equation by solving the matrix created by C<build_companion()> and C<balance_matrix()>. See L</poly_roots()>.
+Returns the roots of the polynomial equation by solving the matrix created by
+C<build_companion()> and C<balance_matrix()>. See L</poly_roots()>.
 
 =head2 Classical Functions
 
@@ -2532,7 +2533,7 @@ His matlab cubic solver is at
 L<http://people.mech.kuleuven.ac.be/~bruyninc/matlab/cubic.m>.
 
 Andy Stein has written a version of cubic.m that will work with
-vectors.  It is included with this package in the eg directory.
+vectors.  It is included with this package in the C<eg> directory.
 
 =head2 The quartic
 
@@ -2544,16 +2545,17 @@ at L<http://forum.swarthmore.edu/dr.math/faq/faq.cubic.equations.html>.
 =head2 Quintic and higher.
 
 Back when this module could only solve polynomials of degrees 1 through 4,
-Matz Kindahl, the author of Math::Polynomial, suggested the C<poly_roots()>
-function. Later on, Nick Ing-Simmons, who was working on a perl binding
-to the GNU Scientific Library, sent a perl translation of Hiroshi
+Matz Kindahl, the original author of Math::Polynomial, suggested the
+C<poly_roots()> function. Later on, Nick Ing-Simmons, who was working on a
+perl binding to the GNU Scientific Library, sent a perl translation of Hiroshi
 Murakami's Fortran implementation of the QR Hessenberg algorithm, and it
 fit very well into the C<poly_roots()> function. Quintics and higher degree
 polynomials can now be solved, albeit through numeric analysis methods.
 
 Hiroshi Murakami's Fortran routines were at
 L<http://netlib.bell-labs.com/netlib/>, but do not seem to be available
-from that source anymore.
+from that source anymore. However, his files have been located and are now
+included in the C<references/qralg> directory.
 
 He referenced the following articles:
 
@@ -2575,11 +2577,6 @@ Fortran code for this routine is at L<http://netlib.sandia.gov/eispack/balanc.f>
 
 Alan Edelman and H. Murakami, "Polynomial Roots from Companion Matrix
 Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
-
-=item
-
-William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling
-I<Numerical Recipes in C>.  Cambridge University Press, 1988.  L<http://www.nr.com/>.
 
 =back
 
@@ -2637,6 +2634,11 @@ L<http://en.wikipedia.org/wiki/Newton%27s_method>.
 
 Forsythe, George E., Michael A. Malcolm, and Cleve B. Moler
 I<Computer Methods for Mathematical Computations>. Prentice-Hall, 1977.
+
+=item
+
+William Press, Brian P. Flannery, Saul A. Teukolsky, and William T. Vetterling
+I<Numerical Recipes in C>.  Cambridge University Press, 1988.  L<http://www.nr.com/>.
 
 =back
 
