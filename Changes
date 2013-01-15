@@ -1,6 +1,15 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.66
+     Jan 14 2013
+	- Document existence of Fortran code.
+     Jan 3 2013
+	- Found Hiroshi Murakami's Fortran code on an old flash drive!
+	  Added it to the references directory, under 'qralg' (he stated
+	  it was freely available for this purpose in an e-mail Nick
+	  Ing-Simmons forwarded to me).
+	- Replaced Dick Nickalls's cubic paper with an updated one that
+	  he pointed me to (it has a few corrections).
      Dec 24 2012
 	- Added a reference in the documentation for balance_matrix().
      Dec 19 2012
