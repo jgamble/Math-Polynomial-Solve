@@ -122,7 +122,7 @@ my $epsilon;
 
 BEGIN
 {
-	$epsilon = 0.25;
+	$epsilon = 0.125;
 	my $epsilon2 = $epsilon/2.0;
 
 	while (1.0 + $epsilon2 > 1.0)
@@ -2033,7 +2033,7 @@ Creates the initial companion matrix. Returns an array of arrays (the
 internal representation of a matrix). This may be used as an argument to
 the L<Math::Matrix> contructor:
 
-  my $cm = build_companion(@coef);
+  my @cm = build_companion(@coef);
 
   my $m = Math::Matrix->new(@cm);
   $m->print();
@@ -2043,7 +2043,8 @@ more information on the subject.
 
 =head3 balance_matrix
 
-Balances the matrix for eigenvalue calculation.
+Balances (a diagonal similarity transform) the matrix. Used to help prevent
+rounding errors, which makes eigenvalue calculation more accurate.
 
 =head3 hqr_eigen_hessenberg
 
