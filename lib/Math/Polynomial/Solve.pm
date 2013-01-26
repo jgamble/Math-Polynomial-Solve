@@ -2043,8 +2043,11 @@ more information on the subject.
 
 =head3 balance_matrix
 
-Balances (a diagonal similarity transform) the matrix. Used to help prevent
-rounding errors, which makes eigenvalue calculation more accurate.
+Balances the matrix (makes the rows and columns have similar norms) by
+applying a matrix transformation with a diagonal matrix of powers of two.
+This is used to help prevent any rounding errors that occur if the elements
+of the matrix differ greatly in magnitude, making the eigenvalue calculations
+more accurate.
 
 =head3 hqr_eigen_hessenberg
 
