@@ -18,6 +18,10 @@ eg/sturmbisect.pl
 eg/sturmrange.pl
 reference/cubic1993.pdf
 reference/quartic2009.pdf
+reference/qralg/MAKEFILE
+reference/qralg/README
+reference/qralg/test.f
+reference/qralg/qralg.f
 t/coef.pl
 t/cubic.t
 t/derivative.t
