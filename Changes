@@ -1,6 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.66
+     Jan 25 2013
+	- Wrote a better paragraph describing balance_matrix().
+     Jan 15 2013
+	- Corrected the build_companion() example (varible was a scalar
+	  instead of an array).
+	- Took a first stab at documenting balance_matrix().
      Jan 14 2013
 	- Document existence of Fortran code.
      Jan 3 2013
