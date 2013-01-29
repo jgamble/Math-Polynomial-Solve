@@ -2046,8 +2046,7 @@ more information on the subject.
 Balances the matrix (makes the rows and columns have similar norms) by
 applying a matrix transformation with a diagonal matrix of powers of two.
 This is used to help prevent any rounding errors that occur if the elements
-of the matrix differ greatly in magnitude, making the eigenvalue calculations
-more accurate.
+of the matrix differ greatly in magnitude.
 
 =head3 hqr_eigen_hessenberg
 
