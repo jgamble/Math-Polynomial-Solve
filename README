@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 2.66, 29 January 2013.
+	Math::Polynomial::Solve, version 2.67, 29 January 2013.
 ------------------------------------------------------------------------
 >>>                                                                     <<<
 >>>NOTE: FUNCTIONS set_hessenberg() AND get_hessenberg() ARE DEPRECATED.<<<
@@ -35,8 +35,8 @@ in the web page Karl's Calculus Tutor,
 INSTALLATION:
 
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.66.tar.gz
-	tar xvf Math-Polynomial-Solve-2.66.tar
+	gzip -d Math-Polynomial-Solve-2.67.tar.gz
+	tar xvf Math-Polynomial-Solve-2.67.tar
 
 Go into the resulting directory, and type:
 	perl Build.PL
