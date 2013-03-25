@@ -64,8 +64,11 @@ use warnings;
 	) ],
 );
 
-@EXPORT_OK = ( @{ $EXPORT_TAGS{'classical'} }, @{ $EXPORT_TAGS{'numeric'} },
-	@{ $EXPORT_TAGS{'sturm'} }, @{ $EXPORT_TAGS{'utility'} } );
+@EXPORT_OK = ( ascending_order,
+	@{ $EXPORT_TAGS{'classical'} },
+	@{ $EXPORT_TAGS{'numeric'} },
+	@{ $EXPORT_TAGS{'sturm'} },
+	@{ $EXPORT_TAGS{'utility'} } );
 
 our $VERSION = '2.66';
 
@@ -136,6 +139,17 @@ BEGIN
 }
 
 #
+# Flag to determine whether calling order is
+# ($an_1, $an_2, $an_3, ...) or if it is
+# ($a0, $a1, $a2, $a3, ...)
+#
+# The flag is only going to exist for about three
+# versions, starting with version 2.67, as the default
+# changes over a deprecation cycle.
+#
+my $ascending_flag = 0;		# default 0, in a later version it will be 1.
+
+#
 # sign($x);
 #
 #
@@ -192,6 +206,20 @@ sub set_hessenberg
 {
 	carp "set_hessenberg() is DEPRECATED. Please use \"poly_option(hessenberg => $_[0]);\" instead.";
 	$option{hessenberg} = ($_[0])? 1: 0;
+}
+
+#
+# $asending = ascending_order();
+# $oldorder = ascending_order($neworder);
+#
+# Returns the machine epsilon value used internally by this module.
+# If overriding the machine epsilon, returns the old value.
+#
+sub ascending_order
+{
+	my $ascend = $ascending_order;
+	$ascending_order  $_[0] if (scalar @_ > 0);
+	return $ascend;
 }
 
 #
@@ -1916,6 +1944,58 @@ find the number of real roots present in a range of X values.
 In addition to the root-finding functions, the internal functions have
 also been exported for your use.
 
+=head2 EXPORTED BY DEFAULT
+
+=head3 ascending_order()
+
+Changes the default order of the coefficents to the functions.
+
+When Math::Polynomial::Solve was originally written, it followed the
+calling convention of L<Math::Polynomial>, using the highest degree
+coefficient, followed by the next highest degree coefficient, and so
+on in descending order.
+
+Later it was re-written, and the order of the coefficients were put
+in ascending order, e.g.:
+
+  use Math::Polynomial;
+
+  #
+  # Create the polynomial x**3 - 6*x - 1.
+  #
+  $fpx = Math::Polynomial->new(-1, -6, 0, 8);
+
+If you use Math::Polynomial with this module, it will probably be
+more convenient to change the default parameter list of
+Math::Polynomial::Solve's functions, using the ascending_order() function:
+
+  use Math::Polynomial;
+  use Math::Polynomial::Solve qw(:classical :numeric);
+
+  ascending_order(1);
+
+  my $fp4 = Math::Polynomial->interpolate([1 .. 4], [14, 19, 25, 32]);
+
+  #
+  # Find roots of $fp4.
+  #
+
+  my @fp4_roots = quartic_roots($fp4->coefficients);
+
+or
+
+  my @fp4_roots = poly_roots($fp4->coefficients);
+
+If C<ascending_order(1)> had not been called, the previous line of code
+would have been written instead as
+
+  my @fp4_roots = poly_roots(reverse $fp4->coefficients);
+
+The function is a temporary measure to help with the change in the API when
+version 3.00 of this module is released. At that point coefficients will be
+in ascending order by default, and you will need to use C<ascending_order(0)>
+to use the old (current) style, although you will get a deprecation warning.
+
 =head2 Numeric Functions
 
 These are the functions that calculate the polynomial's roots through numeric
@@ -2498,8 +2578,12 @@ and a remainder.
 
 =head1 EXPORT
 
-There are no default exports. The functions may be individually named in an
-export list, but there are also four export tags:
+Currently there is one default export, L<ascending_order|ascending_order()>,
+although this function will be deprecated after version 3.00 of this module
+is released.
+
+The remaining functions may be individually named in an export list,
+but there are also four export tags:
 L<classical|Classical Functions>,
 L<numeric|Numeric Functions>,
 L<sturm|Sturm Functions>, and
