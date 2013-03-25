@@ -1,5 +1,10 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.67
+     Mar 25 2013
+	- Added the ascending_order() function, the $asending_flag
+	  variable, and the documentation for the function. Actual
+	  code comes later.
 2.66
      Jan 25 2013
 	- Wrote a better paragraph describing balance_matrix().
