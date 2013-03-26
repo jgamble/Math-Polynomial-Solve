@@ -217,8 +217,8 @@ sub set_hessenberg
 #
 sub ascending_order
 {
-	my $ascend = $ascending_order;
-	$ascending_order  $_[0] if (scalar @_ > 0);
+	my $ascend = $ascending_flag;
+	$ascending_flag = !!$_[0] if (scalar @_ > 0);
 	return $ascend;
 }
 
@@ -321,7 +321,7 @@ sub poly_iteration
 #
 sub linear_roots
 {
-	my($a, $b) = @_;
+	my($a, $b) = ($ascending_flag)? reverse @_: @_;
 
 	if (abs($a) < $epsilon)
 	{
@@ -338,7 +338,7 @@ sub linear_roots
 #
 sub quadratic_roots
 {
-	my($a, $b, $c) = @_;
+	my($a, $b, $c) = ($ascending_flag)? reverse @_: @_;
 
 	if (abs($a) < $epsilon)
 	{
@@ -363,7 +363,7 @@ sub quadratic_roots
 #
 sub cubic_roots
 {
-	my($a, $b, $c, $d) = @_;
+	my($a, $b, $c, $d) = ($ascending_flag)? reverse @_: @_;
 	my @x;
 
 	if (abs($a) < $epsilon)
@@ -449,7 +449,7 @@ sub cubic_roots
 #
 sub quartic_roots
 {
-	my($a,$b,$c,$d,$e) = @_;
+	my($a,$b,$c,$d,$e) = ($ascending_flag)? reverse @_: @_;
 	my @x = ();
 
 	if (abs($a) < $epsilon)
@@ -570,7 +570,7 @@ sub quartic_roots
 #
 sub build_companion
 {
-	my @coefficients = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 	my $n = $#coefficients - 1;
 	my @h;
 
@@ -997,7 +997,7 @@ sub hqr_eigen_hessenberg
 #
 sub poly_roots
 {
-	my(@coefficients) = @_;
+	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
 	my(@x, @zero_x);
 	my $subst_degree = 1;
 
@@ -1006,7 +1006,8 @@ sub poly_roots
 	#
 	# Check for zero coefficients in the higher-powered terms.
 	#
-	shift @coefficients while (scalar @coefficients and abs($coefficients[0]) < $epsilon);
+	shift @coefficients while (scalar @coefficients and
+				   abs($coefficients[0]) < $epsilon);
 
 	if (@coefficients == 0)
 	{
@@ -1017,10 +1018,11 @@ sub poly_roots
 	#
 	# How about zero coefficients in the low terms?
 	#
-	while (scalar @coefficients and abs($coefficients[$#coefficients]) < $epsilon)
+	while (scalar @coefficients and
+	       abs($coefficients[$#coefficients]) < $epsilon)
 	{
 		push @zero_x, 0;
-		pop @coefficients;
+		pop @coefficients
 	}
 
 	#
@@ -1029,10 +1031,12 @@ sub poly_roots
 	#
 	### %option
 	#
-	if ($option{root_function} and poly_nonzero_term_count(@coefficients) == 2)
+	if ($option{root_function} and
+	    poly_nonzero_term_count(@coefficients) == 2)
 	{
 		return  @zero_x,
-			root(-$coefficients[$#coefficients]/$coefficients[0], $#coefficients);
+			root(-$coefficients[$#coefficients]/$coefficients[0],
+			     $#coefficients);
 	}
 
 	#
@@ -1055,6 +1059,13 @@ sub poly_roots
 	#### @coefficients
 	#### $subst_degree
 	#
+
+	#
+	# The following root solvers do their own coefficient
+	# reversing, so undo the earlier reversal now.
+	#
+	@coefficients = reverse @coefficients if ($ascending_flag);
+
 	if ($option{hessenberg} or $#coefficients > 4)
 	{
 		#
@@ -1101,7 +1112,7 @@ sub poly_roots
 #
 sub poly_analysis
 {
-	my(@coefficients) = @_;
+	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
 	my @czp;
 	my $m = 1;
 
@@ -1165,7 +1176,7 @@ sub poly_analysis
 #
 sub poly_nonzero_term_count
 {
-	my(@coefficients) = @_;
+	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
 	my $nzc = 0;
 
 	for my $j (0..$#coefficients)
@@ -1184,7 +1195,7 @@ sub poly_nonzero_term_count
 #
 sub simplified_form
 {
-	my @coefficients = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 
 	shift @coefficients while (scalar @coefficients and abs($coefficients[0]) < $epsilon);
 
@@ -1208,7 +1219,7 @@ sub simplified_form
 #
 sub poly_derivative
 {
-	my @coefficients = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 	my $degree = $#coefficients;
 
 	return () if ($degree < 1);
@@ -1227,7 +1238,7 @@ sub poly_derivative
 #
 sub poly_antiderivative
 {
-	my @coefficients = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 	my $degree = scalar @coefficients;
 
 	return (0) if ($degree < 1);
