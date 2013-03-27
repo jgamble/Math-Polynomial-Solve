@@ -218,7 +218,7 @@ sub set_hessenberg
 sub ascending_order
 {
 	my $ascend = $ascending_flag;
-	$ascending_flag = !!$_[0] if (scalar @_ > 0);
+	$ascending_flag = ($_[0] == 0)? 0: 1 if (scalar @_ > 0);
 	return $ascend;
 }
 
@@ -1259,7 +1259,7 @@ sub poly_evaluate
 {
 	my($coef_ref, $xval_ref) = @_;
 
-	my @coefficients = @$coef_ref;
+	my @coefficients = ($ascending_flag)? reverse @$coef_ref: @$coef_ref;
 	my @values;
 
 	#
@@ -1303,7 +1303,7 @@ sub poly_evaluate
 sub poly_derivaluate
 {
 	my($coef_ref, $x) = @_;
-	my(@coefficients) = @$coef_ref;
+	my(@coefficients) = ($ascending_flag)? reverse @$coef_ref: @$coef_ref;
 	my $n = $#coefficients;
 	my $val = shift @coefficients;
 	my $d1val = $val * $n;
