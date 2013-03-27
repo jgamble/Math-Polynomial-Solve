@@ -51,13 +51,9 @@ ascending_order(1);
 foreach (@quadratic_case)
 {
 	my @coef = reverse @$_;
-	my $n = $#coef;
 	my @x = quadratic_roots(@coef);
-	my $cn_1 = -sumof(@x) * $coef[0];
-	my $c0 = prodof(@x) * $coef[0];
-	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"quadratic_roots: [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
@@ -74,7 +70,7 @@ foreach (@cubic_case)
 	my $c0 = prodof(@x) * $coef[0];
 	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"cubic_roots: [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
@@ -91,7 +87,7 @@ foreach (@quartic_case)
 	my $c0 = prodof(@x) * $coef[0];
 	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"quartic_roots: [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
@@ -110,7 +106,7 @@ foreach (@polyrootf_case)
 	my $c0 = prodof(@x) * $coef[0];
 	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"poly_roots with root_function: [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
@@ -129,13 +125,12 @@ foreach (@quadratic_case, @cubic_case, @quartic_case, @polyrootf_case)
 	my $c0 = prodof(@x) * $coef[0];
 	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"all: [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
 	#print "\nmy \$c0 = $c0; \$coef[$n] = ", $coef[$n], "\n";
 	#print rootformat(@x), "\n\n";
 }
-
 
 1;
