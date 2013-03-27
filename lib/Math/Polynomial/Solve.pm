@@ -64,13 +64,13 @@ use warnings;
 	) ],
 );
 
-@EXPORT_OK = ( ascending_order,
+@EXPORT_OK = ( 'ascending_order',
 	@{ $EXPORT_TAGS{'classical'} },
 	@{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} },
 	@{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.66';
+our $VERSION = '2.67';
 
 #
 # Options to set or unset to force poly_roots() to use different
