@@ -1,4 +1,12 @@
 use Math::Complex;
+use Math::Polynomial::Solve qw(:utility);
+
+sub allzeroes
+{
+	my($p_ref, @xvals) = @_;
+	my @yvals = grep {fltcmp($_, 0) != 0} poly_evaluate($p_ref, @xvals);
+	return (scalar @yvals)? 0: 1;
+}
 
 sub sumof
 {
