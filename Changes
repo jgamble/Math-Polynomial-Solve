@@ -1,6 +1,13 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     Mar 28 2013
+	- Fixed use of $ascending_flag in the :classical and :numeric
+	  functions. Left to do are :sturm and :utility functions.
+	- Updated test files for quadratic, cubic, quartic, and the
+	  generic poly_roots() functions. They now use Test::More
+	  and a new allzeroes() function for testing.
+	- New test file zyxw.t for the ascending_order() checks.
      Mar 25 2013
 	- Added the ascending_order() function, the $asending_flag
 	  variable, and the documentation for the function. Actual
