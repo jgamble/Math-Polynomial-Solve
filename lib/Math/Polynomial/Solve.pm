@@ -13,7 +13,7 @@ use warnings;
 # Three # for "I am here" messages, four # for variable dumps.
 # Five # for a dump of the companion matrix.
 #
-#use Smart::Comments q(####);
+#use Smart::Comments q(###);
 
 @ISA = qw(Exporter);
 
@@ -372,7 +372,20 @@ sub cubic_roots
 		return @x;
 	}
 
-	return (0, quadratic_roots($a, $b, $c)) if (abs($d) < $epsilon);
+	#
+	# We're calling exported functions that also check
+	# the $ascending_flag. To avoid reversing the reversed,
+	# temporarily set the flag to zero and reset before returning.
+	#
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 0;
+
+	if (abs($d) < $epsilon)
+	{
+		@x = quadratic_roots($a, $b, $c);
+		$ascending_flag = $temp_ascending_flag;
+		return (0, @x);
+	}
 
 	my $xN = -$b/3/$a;
 	my $yN = $d + $xN * ($c + $xN * ($b + $a * $xN));
@@ -440,6 +453,7 @@ sub cubic_roots
 		@x = ($xN + $delta, $xN + $delta, $xN - 2 * $delta);
 	}
 
+	$ascending_flag = $temp_ascending_flag;
 	return @x;
 }
 
@@ -458,7 +472,20 @@ sub quartic_roots
 		return @x;
 	}
 
-	return (0, cubic_roots($a, $b, $c, $d)) if (abs($e) < $epsilon);
+	#
+	# We're calling exported functions that also check
+	# the $ascending_flag. To avoid reversing the reversed,
+	# temporarily set the flag to zero and reset before returning.
+	#
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 0;
+
+	if (abs($e) < $epsilon)
+	{
+		@x = cubic_roots($a, $b, $c, $d);
+		$ascending_flag = $temp_ascending_flag;
+		return (0, @x);
+	}
 
 	#
 	# First step:  Divide by the leading coefficient.
@@ -552,6 +579,7 @@ sub quartic_roots
 		push @x, quadratic_roots(1, -$alpha, $gamma);
 	}
 
+	$ascending_flag = $temp_ascending_flag;
 	return ($x[0] - $b4, $x[1] - $b4, $x[2] - $b4, $x[3] - $b4);
 }
 
@@ -1366,6 +1394,8 @@ sub poly_divide
 
 	my @numerator = @$n_ref;
 	my @divisor = @$d_ref;
+	#my @numerator = ($ascending_flag)? reverse @$n_ref: @$n_ref;
+	#my @divisor = ($ascending_flag)? reverse @$d_ref: @$d_ref;
 	my @quotient;
 
 	#
@@ -1435,7 +1465,7 @@ sub poly_constmult
 #
 sub poly_sturm_chain
 {
-	my @coefficients = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 	my $degree = $#coefficients;
 	my @chain;
 	my($q, $r);
@@ -1476,7 +1506,7 @@ sub poly_sturm_chain
 #
 sub poly_real_root_count
 {
-	my(@coefficients) = @_;
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
 
 	my @chain = poly_sturm_chain(@coefficients);
 
