@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl poly1.t'
 
-use Test::Simple tests => 9;
+use Test::More tests => 9;
 
 use Math::Polynomial::Solve qw(poly_roots fltcmp);
 use Math::Complex;
@@ -26,21 +26,21 @@ my @case = (
 	[1950773,  7551423,  -1682934,  137445,  -4961,  67],
 );
 
+#
+# The last case is an oddball one, and I'm upping the tolerance
+# for it.
+#
+poly_tolerance(fltcmp => 4.5e-8);
+
 foreach (@case)
 {
 	my @coef = @$_;
-	my $n = $#coef;
 	my @x = poly_roots(@coef);
-	my $cn_1 = -sumof(@x) * $coef[0];
-	my $c0 = prodof(@x) * $coef[0];
-	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"   [ " . join(", ", @coef) . " ]");
 
-	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
-	#print "\nmy \$c0 = $c0; \$coef[$n] = ", $coef[$n], "\n";
-	print rootformat(@x), "\n\n";
+	#diag(rootformat(@x), "\n\n");
 }
 
 1;
