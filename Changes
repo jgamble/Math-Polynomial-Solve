@@ -1,6 +1,9 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     Apr 1 2013
+	- Start in on using $ascending_flags for the :utility functions.
+	- Note ascending_order()'s use at length in the README file.
      Mar 28 2013
 	- Fixed use of $ascending_flag in the :classical and :numeric
 	  functions. Left to do are :sturm and :utility functions.
