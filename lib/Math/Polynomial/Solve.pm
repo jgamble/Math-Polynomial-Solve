@@ -1204,7 +1204,7 @@ sub poly_analysis
 #
 sub poly_nonzero_term_count
 {
-	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
+	my(@coefficients) = @_;
 	my $nzc = 0;
 
 	for my $j (0..$#coefficients)
@@ -1236,7 +1236,7 @@ sub simplified_form
 	my $a = $coefficients[0];
 	$coefficients[$_] /= $a for (0..$#coefficients);
 
-	return @coefficients;
+	return ($ascending_flag)? reverse @coefficients: @coefficients;
 }
 
 #
@@ -1255,7 +1255,7 @@ sub poly_derivative
 	$coefficients[$_] *= $degree-- for (0..$degree - 2);
 
 	pop @coefficients;
-	return @coefficients;
+	return ($ascending_flag)? reverse @coefficients: @coefficients;
 }
 
 #
@@ -1274,7 +1274,7 @@ sub poly_antiderivative
 	$coefficients[$_] /= $degree-- for (0..$degree - 2);
 
 	push @coefficients, 0;
-	return @coefficients;
+	return ($ascending_flag)? reverse @coefficients: @coefficients;
 }
 
 #
