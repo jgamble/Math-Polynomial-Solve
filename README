@@ -4,10 +4,30 @@
 >>>NOTE: FUNCTIONS set_hessenberg() AND get_hessenberg() ARE DEPRECATED.<<<
 >>>                ----------------     ----------------                <<<
 >>>  YOU WILL GET MESSAGES TO THAT EFFECT IN CODE. THE FUNCTIONS WILL   <<<
->>>  BE REMOVED WITH THE FORTHCOMING VERSION 2.70.                      <<<
+>>>  BE REMOVED WITH THE FORTHCOMING VERSION 2.70 (to be released in    <<<
+>>>  early January 2014).                                               <<<
 >>>                                                                     <<<
 >>>The function poly_option() replaces them. See the documentation for  <<<
 >>>more details.                                                        <<<
+>>>                                                                     <<<
+>>>NOTE #2: New function ascending_order() has been added to make       <<<
+>>>  Math::Polynomial::Solve consistent with Math::Polynomial.          <<<
+>>>                                                                     <<<
+>>>  When the order of the coefficients passed into and returned from   <<<
+>>>  the Math::Polynomial objects changed order, it left the order      <<<
+>>>  of the coefficients of this package out sync. Flatly changing the  <<<
+>>>  the order of the parameter to the functions seemed a little        <<<
+>>>  unfriendly, so an intermediate step has been created.              <<<
+>>>                                                                     <<<
+>>>  Everywhere you pass in a list of coefficients, you may place       <<<
+>>>  them in ascending power order by calling the new function          <<<
+>>>  ascending_order(1).                                                <<<
+>>>                                                                     <<<
+>>>  The default order will remain descending power order until version <<<
+>>>  3.00 is released, at which point ascending order will be the       <<<
+>>>  default, and you will need to call ascending_order(0) to get the   <<<
+>>>  old calling style. Some time after that, ascending_order() will    <<<
+>>>  be deprecated, and some time after that it will be removed.        <<<
 >>>                                                                     <<<
 
 This package provides a set of functions that find the roots of
