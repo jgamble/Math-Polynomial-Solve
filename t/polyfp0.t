@@ -3,7 +3,7 @@
 # four or less. Cases are all 0.9216 times the values of the cases
 # in poly0.t.
 #
-use Test::Simple tests => 22;
+use Test::More tests => 22;
 
 use Math::Polynomial::Solve qw(:numeric fltcmp);
 use Math::Complex;
@@ -35,18 +35,12 @@ poly_option(hessenberg => 0);
 foreach (@case)
 {
 	my @coef = @$_;
-	my $n = $#coef;
 	my @x = poly_roots(@coef);
-	my $cn_1 = -sumof(@x) * $coef[0];
-	my $c0 = prodof(@x) * $coef[0];
-	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"   [ " . join(", ", @coef) . " ]");
 
-	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
-	#print "\nmy \$c0 = $c0; \$coef[$n] = ", $coef[$n], "\n";
-	#print rootformat(@x), "\n\n";
+	#diag(rootformat(@x), "\n\n");
 }
 
 #
@@ -58,18 +52,12 @@ poly_option(hessenberg => 1);
 foreach (@case)
 {
 	my @coef = @$_;
-	my $n = $#coef;
 	my @x = poly_roots(@coef);
-	my $cn_1 = -sumof(@x) * $coef[0];
-	my $c0 = prodof(@x) * $coef[0];
-	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok(allzeroes(\@coef, @x),
 		"   [ " . join(", ", @coef) . " ]");
 
-	#print "\nmy \$b = $b; \$coef[1] = ", $coef[1], "\n";
-	#print "\nmy \$e = $e; \$coef[$n] = ", $coef[$n], "\n";
-	#print rootformat(@x), "\n\n";
+	#diag(rootformat(@x), "\n\n");
 }
 
 1;
