@@ -168,6 +168,8 @@ sub sign
 # $x > $y, and 0 if the arguments are equal, the difference being that
 # the comparisons are made within a tolerance set in poly_tolerance().
 #
+# In the :utility export set.
+#
 sub fltcmp
 {
 	my($a, $b) = @_;
@@ -184,6 +186,8 @@ sub fltcmp
 # Returns the machine epsilon value used internally by this module.
 # If overriding the machine epsilon, returns the old value.
 #
+# In the :utility export set.
+#
 sub epsilon
 {
 	my $eps = $epsilon;
@@ -195,6 +199,8 @@ sub epsilon
 # Get/Set the flags that tells the module to use the QR Hessenberg
 # method regardless of the degree of the polynomial.
 # OBSOLETE: use poly_option() instead!
+#
+# In the :utility export set.
 #
 sub get_hessenberg
 {
@@ -225,6 +231,8 @@ sub ascending_order
 #
 # poly_option(opt1 => 1, opt2 => 0, ...);
 #
+# In the :numeric export set.
+#
 sub poly_option
 {
 	my %opts = @_;
@@ -253,6 +261,8 @@ sub poly_option
 
 #
 # poly_tolerance(opt1 => n, opt2 => n, ...);
+#
+# In the :utility export set.
 #
 sub poly_tolerance
 {
@@ -284,6 +294,8 @@ sub poly_tolerance
 
 #
 # poly_iteration(opt1 => n, opt2 => n, ...);
+#
+# In the :utility export set.
 #
 sub poly_iteration
 {
@@ -318,6 +330,7 @@ sub poly_iteration
 #
 # @x = linear_roots($a, $b)
 #
+# In the :classical export set.
 #
 sub linear_roots
 {
@@ -335,6 +348,7 @@ sub linear_roots
 #
 # @x = quadratic_roots($a, $b, $c)
 #
+# In the :classical export set.
 #
 sub quadratic_roots
 {
@@ -360,6 +374,7 @@ sub quadratic_roots
 #
 # @x = cubic_roots($a, $b, $c, $d)
 #
+# In the :classical export set.
 #
 sub cubic_roots
 {
@@ -460,6 +475,7 @@ sub cubic_roots
 #
 # @x = quartic_roots($a, $b, $c, $d, $e)
 #
+# In the :classical export set.
 #
 sub quartic_roots
 {
@@ -596,6 +612,8 @@ sub quartic_roots
 # Build the Companion Matrix of the N degree polynomial.
 # Return an array of arrays representing the N by N matrix.
 #
+# In the :numeric export set.
+#
 sub build_companion
 {
 	my @coefficients = ($ascending_flag)? reverse @_: @_;
@@ -636,6 +654,8 @@ sub BASESQR () { BASE * BASE }
 # Balance the companion matrix created by build_companion().
 #
 # Return an array of arrays representing the N by N matrix.
+#
+# In the :numeric export set.
 #
 sub balance_matrix
 {
@@ -761,6 +781,8 @@ sub balance_matrix
 # Finds the eigenvalues of a real upper Hessenberg matrix,
 # H, stored in the array $h(0:n-1,0:n-1).  Returns a list
 # of real and/or complex numbers.
+#
+# In the :numeric export set.
 #
 sub hqr_eigen_hessenberg
 {
@@ -1023,6 +1045,8 @@ sub hqr_eigen_hessenberg
 # Coefficients are fed in highest degree first.  Equation 5x**5 + 4x**4 + 2x + 8
 # would be fed in with @x = poly_roots(5, 4, 0, 0, 2, 8);
 #
+# In the :numeric export set.
+#
 sub poly_roots
 {
 	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
@@ -1202,6 +1226,8 @@ sub poly_analysis
 #
 # Count the number of non-zero terms. Simple enough, yes?
 #
+# In the :utility export set.
+#
 sub poly_nonzero_term_count
 {
 	my(@coefficients) = @_;
@@ -1220,6 +1246,8 @@ sub poly_nonzero_term_count
 # Return polynomial without any leading zero coefficients and in
 # a monic polynomial form (all coefficients divided by the coefficient
 # of the highest power).
+#
+# In the :utility export set.
 #
 sub simplified_form
 {
@@ -1245,6 +1273,8 @@ sub simplified_form
 # Returns the derivative of a polynomial. The constant value is
 # lost of course.
 #
+# In the :utility export set.
+#
 sub poly_derivative
 {
 	my @coefficients = ($ascending_flag)? reverse @_: @_;
@@ -1264,6 +1294,8 @@ sub poly_derivative
 # Returns the antiderivative of a polynomial. The constant value is
 # always set to zero; to override this $integral[$#integral] = $const;
 #
+# In the :utility export set.
+#
 sub poly_antiderivative
 {
 	my @coefficients = ($ascending_flag)? reverse @_: @_;
@@ -1282,6 +1314,8 @@ sub poly_antiderivative
 #
 # Returns a list of y-points on the polynomial for a corresponding
 # list of x-points, using Horner's method.
+#
+# In the :utility export set.
 #
 sub poly_evaluate
 {
@@ -1327,6 +1361,8 @@ sub poly_evaluate
 #
 # Returns p(x), p'(x), and p"(x) of the polynomial for an
 # x-value, using Horner's method.
+#
+# In the :utility export set.
 #
 sub poly_derivaluate
 {
@@ -1387,6 +1423,8 @@ sub poly_derivaluate
 # Synthetic division for polynomials. Returns references to the quotient
 # and the remainder.
 #
+# In the :utility export set.
+#
 sub poly_divide
 {
 	my $n_ref = shift;
@@ -1445,11 +1483,19 @@ sub poly_divide
 	#
 	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
 	push @numerator, 0 unless (@numerator);
+
+	if ($ascending_flag)
+	{
+		@numerator = reverse @numerator;
+		@quotient = reverse @quotient;
+	}
 	return (\@quotient, \@numerator);
 }
 
 #
 # @new_coeffients = poly_constmult(\@coefficients, $multiplier);
+#
+# In the :utility export set.
 #
 sub poly_constmult
 {
@@ -1462,6 +1508,7 @@ sub poly_constmult
 #
 # @sturm_seq = poly_sturm_chain(@coefficients)
 #
+# In the :sturm export set.
 #
 sub poly_sturm_chain
 {
@@ -1504,6 +1551,8 @@ sub poly_sturm_chain
 # a polynomial. Use this if you don't intend to do anything else
 # requiring the Sturm chain.
 #
+# In the :sturm export set.
+#
 sub poly_real_root_count
 {
 	my @coefficients = ($ascending_flag)? reverse @_: @_;
@@ -1521,6 +1570,8 @@ sub poly_real_root_count
 # a polynomial over a range in X. Use this if you don't intend to do
 # anything else requiring the Sturm chain.
 #
+# In the :sturm export set.
+#
 sub sturm_real_root_range_count
 {
 	my($chain_ref, $x0, $x1) = @_;
@@ -1535,6 +1586,8 @@ sub sturm_real_root_range_count
 #
 # Using the bisection method on the root count method of Sturm, finds
 # the real roots of a polynomial function. Will not find complex roots.
+#
+# In the :sturm export set.
 #
 sub sturm_bisection_roots
 {
@@ -1624,6 +1677,8 @@ sub sturm_bisection_roots
 #
 # Return an array of signs from the chain at minus infinity.
 #
+# In the :sturm export set.
+#
 sub sturm_sign_minus_inf
 {
 	my($chain_ref) = @_;
@@ -1642,6 +1697,8 @@ sub sturm_sign_minus_inf
 # @signs = sturm_plus_inf(\@chain);
 #
 # Return an array of signs from the chain at infinity.
+#
+# In the :sturm export set.
 #
 sub sturm_sign_plus_inf
 {
@@ -1662,6 +1719,8 @@ sub sturm_sign_plus_inf
 #
 # Return an array of signs for each x-value passed in each function in
 # the Sturm chain.
+#
+# In the :sturm export set.
 #
 sub sturm_sign_chain
 {
@@ -1710,6 +1769,8 @@ sub sturm_sign_chain
 #
 # Count the number of changes from sign to sign in the array.
 #
+# In the :sturm export set.
+#
 sub sturm_sign_count
 {
 	my @sign_seq = @_;
@@ -1730,6 +1791,8 @@ sub sturm_sign_count
 #
 # Find the roots nearby the given X values.
 #
+# In the :utility export set.
+#
 sub laguerre
 {
 	no Math::Complex;
@@ -1737,6 +1800,14 @@ sub laguerre
 	my $n = $#$p_ref;
 	my @xvalues;
 	my @roots;
+
+	my $temp_ascending_flag = $ascending_flag;
+
+	if ($ascending_flag)
+	{
+		$ascending_flag = 0;
+		$p_ref = [reverse @$p_ref];
+	}
 
 	#
 	# Allow some flexibility in sending the x-values.
@@ -1818,6 +1889,8 @@ sub laguerre
 		### root found at iteration $its
 		#### $x
 	}
+
+	$ascending_flag = $temp_ascending_flag;
 	return @roots;
 }
 
@@ -1826,6 +1899,8 @@ sub laguerre
 #
 # Find the roots nearby the given X values.
 #
+# In the :utility export set.
+#
 sub newtonraphson
 {
 	no Math::Complex;
@@ -1833,6 +1908,14 @@ sub newtonraphson
 	my $n = $#$p_ref;
 	my @xvalues;
 	my @roots;
+
+	my $temp_ascending_flag = $ascending_flag;
+
+	if ($ascending_flag)
+	{
+		$ascending_flag = 0;
+		$p_ref = [reverse @$p_ref];
+	}
 
 	#
 	# Allow some flexibility in sending the x-values.
@@ -1888,6 +1971,8 @@ sub newtonraphson
 		### root found at iteration $its
 		#### $x
 	}
+
+	$ascending_flag = $temp_ascending_flag;
 	return @roots;
 }
 
