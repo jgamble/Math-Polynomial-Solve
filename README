@@ -14,14 +14,28 @@
 >>>  Math::Polynomial::Solve consistent with Math::Polynomial.          <<<
 >>>                                                                     <<<
 >>>  When the order of the coefficients passed into and returned from   <<<
->>>  the Math::Polynomial objects changed order, it left the order      <<<
+>>>  the Math::Polynomial objects reversed order, it left the order     <<<
 >>>  of the coefficients of this package out sync. Flatly changing the  <<<
->>>  the order of the parameter to the functions seemed a little        <<<
->>>  unfriendly, so an intermediate step has been created.              <<<
+>>>  the order of the parameters to the M::P::S functions seemed a      <<<
+>>>  little unfriendly, so an intermediate step has been created.       <<<
 >>>                                                                     <<<
 >>>  Everywhere you pass in a list of coefficients, you may place       <<<
 >>>  them in ascending power order by calling the new function          <<<
->>>  ascending_order(1).                                                <<<
+>>>  ascending_order(1). That is:                                       <<<
+>>>                                                                     <<<
+>>>      # Solve x**3 + 3*X**2 + 3*x + 5
+>>>                                                                     <<<
+>>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
+>>>      my @roots = cubic_roots(reverse $p1->coefficients);            <<<
+>>>                                                                     <<<
+>>>  becomes                                                            <<<
+>>>                                                                     <<<
+>>>      ascending_order(1);                                            <<<
+>>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
+>>>      my @roots = cubic_roots($p1->coefficients);                    <<<
+>>>                                                                     <<<
+>>>  The ascending_order() function will affect ALL functions in        <<<
+>>>  Math::Polynomial::Solve that take coefficients as their arguments. <<<
 >>>                                                                     <<<
 >>>  The default order will remain descending power order until version <<<
 >>>  3.00 is released, at which point ascending order will be the       <<<
