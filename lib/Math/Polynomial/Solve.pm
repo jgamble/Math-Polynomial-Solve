@@ -13,7 +13,7 @@ use warnings;
 # Three # for "I am here" messages, four # for variable dumps.
 # Five # for a dump of the companion matrix.
 #
-#use Smart::Comments q(###);
+#use Smart::Comments q(####);
 
 @ISA = qw(Exporter);
 
@@ -152,6 +152,7 @@ my $ascending_flag = 0;		# default 0, in a later version it will be 1.
 #
 # sign($x);
 #
+# Not exported.
 #
 sub sign
 {
@@ -1162,6 +1163,7 @@ sub poly_roots
 # the original equation are found by taking the cube roots of each
 # root of the quadratic.
 #
+# Not exported.
 sub poly_analysis
 {
 	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
@@ -1432,9 +1434,13 @@ sub poly_divide
 
 	my @numerator = @$n_ref;
 	my @divisor = @$d_ref;
-	#my @numerator = ($ascending_flag)? reverse @$n_ref: @$n_ref;
-	#my @divisor = ($ascending_flag)? reverse @$d_ref: @$d_ref;
 	my @quotient;
+
+	if ($ascending_flag)
+	{
+		@numerator = reverse @numerator;
+		@divisor = reverse @divisor;
+	}
 
 	#
 	# Just checking... removing any leading zeros.
@@ -1489,6 +1495,7 @@ sub poly_divide
 		@numerator = reverse @numerator;
 		@quotient = reverse @quotient;
 	}
+
 	return (\@quotient, \@numerator);
 }
 
@@ -1512,10 +1519,17 @@ sub poly_constmult
 #
 sub poly_sturm_chain
 {
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
+	my @coefficients = @_;
 	my $degree = $#coefficients;
 	my @chain;
 	my($q, $r);
+	my $temp_ascending_flag = $ascending_flag;
+
+	if ($ascending_flag)
+	{
+		@coefficients = reverse @coefficients;
+		$ascending_flag = 0;
+	}
 
 	my $f1 = [@coefficients];
 	my $f2 = [poly_derivative(@coefficients)];
@@ -1541,6 +1555,7 @@ sub poly_sturm_chain
 	### poly_sturm_chain:
 	#### @chain
 	#
+	$ascending_flag = $temp_ascending_flag;
 	return @chain;
 }
 
@@ -1556,11 +1571,25 @@ sub poly_sturm_chain
 sub poly_real_root_count
 {
 	my @coefficients = ($ascending_flag)? reverse @_: @_;
+	my $temp_ascending_flag = $ascending_flag;
+
+	if ($ascending_flag)
+	{
+		@coefficients = reverse @coefficients;
+		$ascending_flag = 0;
+	}
 
 	my @chain = poly_sturm_chain(@coefficients);
 
-	return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+	my $count = 
+		sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
 		sturm_sign_count(sturm_sign_plus_inf(\@chain));
+
+	$ascending_flag = $temp_ascending_flag;
+	return $count;
+
+	#return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+	#	sturm_sign_count(sturm_sign_plus_inf(\@chain));
 }
 
 #
