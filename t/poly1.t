@@ -1,9 +1,9 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl poly1.t'
 
-use Test::More tests => 9;
+use Test::More tests => 18;
 
-use Math::Polynomial::Solve qw(poly_roots fltcmp);
+use Math::Polynomial::Solve qw(poly_roots fltcmp ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
@@ -39,6 +39,20 @@ foreach (@case)
 
 	ok(allzeroes(\@coef, @x),
 		"   [ " . join(", ", @coef) . " ]");
+
+	#diag(rootformat(@x), "\n\n");
+}
+
+ascending_order(1);
+
+poly_tolerance(fltcmp => 2.0e-7);
+foreach (@case)
+{
+	my @coef = @$_;
+	my @x = poly_roots(@coef);
+
+	ok(allzeroes(\@coef, @x),
+		"   [ " . join(", ", reverse @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
 }

@@ -2,9 +2,9 @@
 # Tests of the poly_roots() function, all of polynomials of degree
 # four or less.
 #
-use Test::More tests => 24;
+use Test::More tests => 48;
 
-use Math::Polynomial::Solve qw(:numeric fltcmp);
+use Math::Polynomial::Solve qw(:numeric fltcmp ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
@@ -56,6 +56,42 @@ foreach (@case)
 
 	ok(allzeroes(\@coef, @x),
 		"   [ " . join(", ", @coef) . " ]");
+
+	#diag(rootformat(@x), "\n\n");
+}
+
+ascending_order(1);
+
+#
+# All of these tests will be dispatched to the
+# quadratic_roots, cubic_roots, and quartic_roots functions.
+#
+poly_option(hessenberg => 0);
+
+foreach (@case)
+{
+	my @coef = @$_;
+	my @x = poly_roots(@coef);
+
+	ok(allzeroes(\@coef, @x),
+		"   [ " . join(", ", reverse @coef) . " ]");
+
+	#diag(rootformat(@x), "\n\n");
+}
+
+#
+# Repeate, except that the next line sets the
+# 'always use the iterative matrix' flag.
+#
+poly_option(hessenberg => 1);
+
+foreach (@case)
+{
+	my @coef = @$_;
+	my @x = poly_roots(@coef);
+
+	ok(allzeroes(\@coef, @x),
+		"   [ " . join(", ", reverse @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
 }
