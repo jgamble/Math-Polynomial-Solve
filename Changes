@@ -1,6 +1,8 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     Apr 12 2013
+	- Get sturm0.t testing with $ascending_flag, and Test::More.
      Apr 11 2013
 	- Testing via division.t tests correctly again, with or without
 	  the $ascending_flag set.
