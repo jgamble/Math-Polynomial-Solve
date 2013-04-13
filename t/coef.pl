@@ -43,6 +43,19 @@ sub polycmp
 	return 0;
 }
 
+sub polychain2str
+{
+	my(@chain) = @_;
+	my $str = "";
+	foreach my $j (0..$#chain)
+	{
+		my @c = @{$chain[$j]};
+		$str .= sprintf("    f%2d: [", $j) . join(", ", @c) . "]\n";
+	}
+	return $str;
+}
+
+
 sub cartesian_format_signed($$@)
 {
 	my($fmt_re, $fmt_im, @numbers) = @_;
