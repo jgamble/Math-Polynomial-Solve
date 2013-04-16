@@ -39,8 +39,8 @@ foreach my $cref (@case)
 		my($fn) = @{$chain[$#chain]};	# get the last (constant) polynomial.
 		ok(fltcmp($c, $fn) == 0, "Polynomial: [" . join(", ", @polynomial) . "], fn = $fn");
 
-		diag("\nPolynomial: [", join(", ", @polynomial), "]");
-		diag(polychain2str(@chain));
+		#diag("\nPolynomial: [", join(", ", @polynomial), "]");
+		#diag(polychain2str(@chain));
 	}
 	else
 	{
@@ -62,8 +62,8 @@ foreach my $cref (@case)
 		my($fn) = @{$chain[$#chain]};	# get the last (constant) polynomial.
 		ok(fltcmp($c, $fn) == 0, "Polynomial: [" . join(", ", @polynomial) . "], fn = $fn");
 
-		diag("\nPolynomial: [", join(", ", @polynomial), "]");
-		diag(polychain2str(@chain));
+		#diag("\nPolynomial: [", join(", ", @polynomial), "]");
+		#diag(polychain2str(@chain));
 	}
 	else
 	{

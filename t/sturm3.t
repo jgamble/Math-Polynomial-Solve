@@ -1,9 +1,9 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl sturm2.t'
 
-use Test::Simple tests => 5;
+use Test::More tests => 10;
 
-use Math::Polynomial::Solve qw(:sturm :utility);
+use Math::Polynomial::Solve qw(:sturm :utility ascending_order);
 use strict;
 use warnings;
 require "t/coef.pl";
@@ -17,20 +17,37 @@ my @case = (
 );
 
 
-while (@case)
+foreach my $cref (@case)
 {
-	my $p = shift @case;
-
-	my @polynomial = @$p;
+	my @polynomial = @$cref;
 	my @chain = poly_sturm_chain(@polynomial);
 
 	my @roots = sturm_bisection_roots(\@chain, -10000, 0);
-	my @zeros = poly_evaluate(\@polynomial, \@roots);
+	my @zeroes = poly_evaluate(\@polynomial, \@roots);
 
-	my $c = 0;
-	$c += abs(fltcmp($_, 0.0)) foreach(@zeros);
-	ok($c == 0,
-		"Polynomial: [" . join(", ", @polynomial) . "], nonzero count = $c");
+	ok(allzeroes($cref, @roots),
+		"Polynomial: [" . join(", ", @polynomial) . "]," .
+	   "'zeroes' are (" . join(", ", @zeroes) . ")");
+
+	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
+	#diag(polychain2str(@chain));
+}
+
+ascending_order(1);
+foreach my $cref (@case)
+{
+	my @polynomial = reverse @$cref;
+	my @chain = poly_sturm_chain(@polynomial);
+
+	my @roots = sturm_bisection_roots(\@chain, -10000, 0);
+	my @zeroes = poly_evaluate(\@polynomial, \@roots);
+
+	ok(allzeroes($cref, @roots),
+		"Polynomial: [" . join(", ", @polynomial) . "]," .
+	   "'zeroes' are (" . join(", ", @zeroes) . ")");
+
+	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
+	#diag(polychain2str(@chain));
 }
 
 exit(0);
