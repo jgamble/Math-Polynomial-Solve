@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 2.67, 29 January 2013.
+	Math::Polynomial::Solve, version 2.67, 16 April 2013.
 ------------------------------------------------------------------------
 >>>                                                                     <<<
 >>>NOTE: FUNCTIONS set_hessenberg() AND get_hessenberg() ARE DEPRECATED.<<<
@@ -23,16 +23,19 @@
 >>>  them in ascending power order by calling the new function          <<<
 >>>  ascending_order(1). That is:                                       <<<
 >>>                                                                     <<<
->>>      # Solve x**3 + 3*X**2 + 3*x + 5
+>>>      # Solve x**3 + 3*X**2 + 3*x + 5                                <<<
 >>>                                                                     <<<
 >>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
 >>>      my @roots = cubic_roots(reverse $p1->coefficients);            <<<
 >>>                                                                     <<<
->>>  becomes                                                            <<<
+>>>  can become:                                                        <<<
 >>>                                                                     <<<
 >>>      ascending_order(1);                                            <<<
 >>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
 >>>      my @roots = cubic_roots($p1->coefficients);                    <<<
+>>>                                                                     <<<
+>>>  without having to worry if you used the reverse operator           <<<
+>>>  everywhere you should have.                                        <<<
 >>>                                                                     <<<
 >>>  The ascending_order() function will affect ALL functions in        <<<
 >>>  Math::Polynomial::Solve that take coefficients as their arguments. <<<
