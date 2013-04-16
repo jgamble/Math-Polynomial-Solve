@@ -3,12 +3,14 @@ Revision history for Perl extension Math::Polynomial::Solve.
 2.67
      Apr 15 2013
 	- Test files sturm1.t, sturm2.t, and sturm3.t also use
-	  Test::More and test with the $ascending_flag.
+	  Test::More and test with the ascending_order().
+	- Add ascending_order() tests to pderival.t.
+	- Add ascending_order() tests to peval.t.
      Apr 12 2013
-	- Get sturm0.t testing with $ascending_flag, and Test::More.
+	- Get sturm0.t testing with ascending_order(), and Test::More.
      Apr 11 2013
 	- Testing via division.t tests correctly again, with or without
-	  the $ascending_flag set.
+	  the ascending_order() set.
 	- Start in on the :sturm functions to recognize $ascending_flag.
      Apr 4 2013
 	- Completed (maybe) adding $ascending_flag to the :utility
