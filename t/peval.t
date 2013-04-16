@@ -1,9 +1,9 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl peval.t'
 
-use Test::Simple tests => 4;
+use Test::Simple tests => 8;
 
-use Math::Polynomial::Solve qw(quartic_roots poly_evaluate fltcmp);
+use Math::Polynomial::Solve qw(quartic_roots poly_evaluate fltcmp ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
@@ -20,6 +20,23 @@ my @case = (
 foreach (@case)
 {
 	my @coef = @$_;
+	my @x = quartic_roots(@coef);
+
+	my @y = poly_evaluate(\@coef, \@x);
+
+	#rootprint(@x);
+
+	ok( (fltcmp($y[0], 0.0) == 0 and
+		fltcmp($y[1], 0.0) == 0 and
+		fltcmp($y[2], 0.0) == 0 and
+		fltcmp($y[3], 0.0) == 0),
+		"   [ " . join(", ", @coef) . " ]");
+}
+
+ascending_order(1);
+foreach (@case)
+{
+	my @coef = reverse @$_;
 	my @x = quartic_roots(@coef);
 
 	my @y = poly_evaluate(\@coef, \@x);
