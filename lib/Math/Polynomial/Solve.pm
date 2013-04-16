@@ -2110,8 +2110,8 @@ calling convention of L<Math::Polynomial>, using the highest degree
 coefficient, followed by the next highest degree coefficient, and so
 on in descending order.
 
-Later it was re-written, and the order of the coefficients were put
-in ascending order, e.g.:
+Later Math::Polynomial was re-written, and the order of the coefficients were
+put in ascending order, e.g.:
 
   use Math::Polynomial;
 
