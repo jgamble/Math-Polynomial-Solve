@@ -3,7 +3,7 @@
 
 use Test::More tests => 28;	# Twice the number of scalar @case.
 
-use Math::Polynomial::Solve qw(quartic_roots :util ascending_order);
+use Math::Polynomial::Solve qw(quartic_roots :utility ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
