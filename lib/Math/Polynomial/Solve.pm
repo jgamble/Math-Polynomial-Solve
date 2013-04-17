@@ -225,7 +225,12 @@ sub set_hessenberg
 sub ascending_order
 {
 	my $ascend = $ascending_flag;
-	$ascending_flag = ($_[0] == 0)? 0: 1 if (scalar @_ > 0);
+
+	if (scalar @_ > 0)
+	{
+		$ascending_flag = ($_[0] == 0)? 0: 1;
+	}
+
 	return $ascend;
 }
 
@@ -1436,10 +1441,12 @@ sub poly_divide
 	my @divisor = @$d_ref;
 	my @quotient;
 
+	my $temp_ascending_flag = $ascending_flag;
 	if ($ascending_flag)
 	{
 		@numerator = reverse @numerator;
 		@divisor = reverse @divisor;
+		$ascending_flag = 0;
 	}
 
 	#
@@ -1490,12 +1497,13 @@ sub poly_divide
 	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
 	push @numerator, 0 unless (@numerator);
 
-	if ($ascending_flag)
+	if ($temp_ascending_flag)
 	{
 		@numerator = reverse @numerator;
 		@quotient = reverse @quotient;
 	}
 
+	$ascending_flag = $temp_ascending_flag;
 	return (\@quotient, \@numerator);
 }
 
@@ -1527,8 +1535,8 @@ sub poly_sturm_chain
 
 	if ($ascending_flag)
 	{
-		@coefficients = reverse @coefficients;
 		$ascending_flag = 0;
+		@coefficients = reverse @coefficients;
 	}
 
 	my $f1 = [@coefficients];
@@ -1536,20 +1544,28 @@ sub poly_sturm_chain
 
 	push @chain, $f1;
 
-	return @chain if ($degree < 1);
+	#
+	# NOTE:
+	# Go back to the 2.66 version of this block once
+	# the $ascending_flag check is obsolete.
+	#
+	SKIPIT: {
+		last SKIPIT if ($degree < 1); #return @chain if ($degree < 1);
 
-	push @chain, $f2;
-
-	return @chain if ($degree < 2);
-
-	do
-	{
-		($q, $r) = poly_divide($f1, $f2);
-		$f1 = $f2;
-		$f2 = [poly_constmult($r, -1)];
 		push @chain, $f2;
+
+		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
+
+		do
+		{
+			($q, $r) = poly_divide($f1, $f2);
+			$f1 = $f2;
+			$f2 = [poly_constmult($r, -1)];
+			push @chain, $f2;
+		}
+		while ($#$r > 0);
+
 	}
-	while ($#$r > 0);
 
 	#
 	### poly_sturm_chain:
@@ -1570,7 +1586,7 @@ sub poly_sturm_chain
 #
 sub poly_real_root_count
 {
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
+	my @coefficients = @_;
 	my $temp_ascending_flag = $ascending_flag;
 
 	if ($ascending_flag)
@@ -1759,6 +1775,14 @@ sub sturm_sign_chain
 	my @sign_chain;
 	my $col = 0;
 
+	#
+	# Temporarily force $ascending_flag to zero because
+	# the first row of the chain will have the the
+	# coefficients in that order.
+	#
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 0;
+
 	push @sign_chain, [] for (0..$x_count);
 
 	foreach my $p_ref (@$chain_ref)
@@ -1790,6 +1814,7 @@ sub sturm_sign_chain
 		$col++;
 	}
 
+	$ascending_flag = $temp_ascending_flag;
 	return @sign_chain;
 }
 
@@ -2386,7 +2411,7 @@ This is equivalent to:
 =head3 sturm_bisection_roots()
 
 Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses the
-bisection method combined with C<sturm_real_range_count()> to narrow the range
+bisection method combined with C<sturm_real_root_range_count()> to narrow the range
 to a single root, then uses L</laguerre()> to find its value.
 
   my($from, $to) = (-1000, 0);
