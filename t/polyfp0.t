@@ -94,5 +94,6 @@ foreach (@case)
 		"   [ " . join(", ", @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
+}
 
 1;
