@@ -1,6 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     Apr 17 2013
+	- Fix $ascending_flag checks in sturm functions with early
+	  returns, or the sturm functions that use the first entry
+	  in the chain for the (unreversed) polynomial.
+	- Removed zyxw.t, as the existing test files now check
+	  ascending_order() themselves.
      Apr 15 2013
 	- Test files sturm1.t, sturm2.t, and sturm3.t also use
 	  Test::More and test with the ascending_order().
