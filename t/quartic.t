@@ -1,9 +1,9 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl quartic.t'
 
-use Test::More tests => 14;	# Twice the number of scalar @case.
+use Test::More tests => 28;	# Twice the number of scalar @case.
 
-use Math::Polynomial::Solve qw(quartic_roots fltcmp poly_constmult);
+use Math::Polynomial::Solve qw(quartic_roots :util ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
@@ -23,6 +23,30 @@ my @case = (
 foreach (@case)
 {
 	my @coef = @$_;
+	my @x = quartic_roots(@coef);
+
+	ok(allzeroes(\@coef, @x),
+		"   [ " . join(", ", @coef) . " ]");
+
+	#diag(rootformat(@x), "\n\n");
+
+	#
+	# Again, with the negative coefficients.
+	#
+	@coef = poly_constmult(\@coef, -1);
+	@x = quartic_roots(@coef);
+
+	ok(allzeroes(\@coef, @x),
+		"   [ " . join(", ", @coef) . " ]");
+
+	#diag(rootformat(@x), "\n\n");
+}
+
+ascending_order(1);
+
+foreach (@case)
+{
+	my @coef = reverse @$_;
 	my @x = quartic_roots(@coef);
 
 	ok(allzeroes(\@coef, @x),

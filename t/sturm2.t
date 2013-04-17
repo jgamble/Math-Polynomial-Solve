@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl sturm2.t'
 
-use Test::Simple tests => 34;
+use Test::More tests => 34;
 
 use Math::Polynomial::Solve qw(:sturm ascending_order);
 use strict;
