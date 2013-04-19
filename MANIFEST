@@ -9,8 +9,11 @@ lib/Math/Polynomial/Solve.pm
 README
 eg/cubic.m
 eg/cubic.pl
-eg/division.pl
 eg/derivtest.pl
+eg/division.pl
+eg/hqr.pl
+eg/laguerre.pl
+eg/nr.pl
 eg/poly.pl
 eg/quartic.pl
 eg/sturm.pl
