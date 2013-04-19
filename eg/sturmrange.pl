@@ -1,12 +1,18 @@
 #!/bin/perl
 #
 use Carp;
+use Getopt::Long;
 use Math::Polynomial::Solve qw(:sturm);
 use strict;
 use warnings;
 #use IO::Prompt;
 
 my $line;
+my $ascending = 0;
+
+GetOptions('ascending' => \$ascending);
+
+ascending_order($ascending);
 
 while ($line = prompt("Polynomial: "))
 {
