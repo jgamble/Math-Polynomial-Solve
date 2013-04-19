@@ -1,6 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     Apr 19 2013
+	- Add --ascending flag to the perl scripts in the eg/ directory.
+	  Use test individual functions
+	- Added files hqr.pl, laguerre.pl, and nr.pl to the eg/
+	  directory, and added them to the MANIFEST. Again, new scripts
+	  for trying individual functions.
      Apr 17 2013
 	- Fix $ascending_flag checks in sturm functions with early
 	  returns, or the sturm functions that use the first entry
