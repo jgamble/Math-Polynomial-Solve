@@ -2,13 +2,19 @@
 #
 #
 use Carp;
-use Math::Polynomial::Solve qw(:classical);
+use Getopt::Long;
+use Math::Polynomial::Solve qw(:classical ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
 #use IO::Prompt;
 
 my $line;
+my $ascending = 0;
+
+GetOptions('ascending' => \$ascending);
+
+ascending_order($ascending);
 
 while ($line = prompt("Cubic: ", -num))
 {
