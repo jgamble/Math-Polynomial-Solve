@@ -2091,6 +2091,27 @@ or
   my @x4 = quartic_roots($a, $b, $c, $d, $e);
 
 or
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial;
+  use Math::Polynomial::Solve qw(:classical ascending_order);
+
+  ascending_order(1); # Change default coefficient order for M::P::S.
+
+  #
+  # Form 8*x**3 - 6*x - 1
+  #
+  my $p1 = Math::Polynomial->new(-1, -6, 0, 8);
+
+  #
+  # Use Math::Polynomial's coefficient order.
+  # If ascending_order() had not been called,
+  # the statement would be:
+  #
+  # my @roots = poly_roots(reverse $p1->coefficients);
+  #
+  my @roots = poly_roots($p1->coefficients);
+
+or
 
   use Math::Polynomial::Solve qw(:utility);
 
@@ -2141,7 +2162,7 @@ put in ascending order, e.g.:
   use Math::Polynomial;
 
   #
-  # Create the polynomial x**3 - 6*x - 1.
+  # Create the polynomial 8*x**3 - 6*x - 1.
   #
   $fpx = Math::Polynomial->new(-1, -6, 0, 8);
 
@@ -2159,7 +2180,6 @@ Math::Polynomial::Solve's functions, using the ascending_order() function:
   #
   # Find roots of $fp4.
   #
-
   my @fp4_roots = quartic_roots($fp4->coefficients);
 
 or

@@ -1,9 +1,11 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.67
+     May  3 2013
+	- Some documentation tweaks on the use of ascending_order().
+	- Code seems stable after use; time to upload to CPAN.
      Apr 19 2013
 	- Add --ascending flag to the perl scripts in the eg/ directory.
-	  Use test individual functions
 	- Added files hqr.pl, laguerre.pl, and nr.pl to the eg/
 	  directory, and added them to the MANIFEST. Again, new scripts
 	  for trying individual functions.
