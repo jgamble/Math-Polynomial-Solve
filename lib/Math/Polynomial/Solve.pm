@@ -33,8 +33,6 @@ use warnings;
 		build_companion
 		balance_matrix
 		hqr_eigen_hessenberg
-		get_hessenberg
-		set_hessenberg
 	) ],
 	'sturm' => [ qw(
 		poly_real_root_count
@@ -194,25 +192,6 @@ sub epsilon
 	my $eps = $epsilon;
 	$epsilon = $_[0] if (scalar @_ > 0);
 	return $eps;
-}
-
-#
-# Get/Set the flags that tells the module to use the QR Hessenberg
-# method regardless of the degree of the polynomial.
-# OBSOLETE: use poly_option() instead!
-#
-# In the :utility export set.
-#
-sub get_hessenberg
-{
-	carp "get_hessenberg() is DEPRECATED. Please use \"\%opts = poly_option(); \$opts{hessenberg};\" instead.";
-	return $option{hessenberg};
-}
-
-sub set_hessenberg
-{
-	carp "set_hessenberg() is DEPRECATED. Please use \"poly_option(hessenberg => $_[0]);\" instead.";
-	$option{hessenberg} = ($_[0])? 1: 0;
 }
 
 #
@@ -2222,32 +2201,11 @@ The method of poly_roots() is almost equivalent to
 except this wouldn't check for leading and trailing zero coefficients, and it
 ignores the settings of C<poly_options()>.
 
-=head3 get_hessenberg() I<DEPRECATED>
-
-Returns 1 or 0 depending upon whether C<poly_roots()> always makes use of
-the Hessenberg matrix method or not.
-
-B<NOTE>: this function is replaced by the option function C<poly_option()>.
-
-=head3 set_hessenberg() I<DEPRECATED>
-
-Sets or removes the condition that forces the use of the Hessenberg matrix
-regardless of the polynomial's degree.  A zero argument forces the
-use of classical methods for polynomials of degree less than five, a
-non-zero argument forces C<poly_roots()> to always use the matrix method.
-The default state of the module is to always use the matrix method.
-This is a complete change from the default behavior in versions less than v2.50.
-
-B<NOTE>: this function is replaced by the option function C<poly_option()>.
-
 =head3 poly_option()
 
 Set options that affect the behavior of the C<poly_roots()> function. All
 options are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
 and L</poly_tolerance()>.
-
-This is the option function that deprecates C<set_hessenberg()> and
-C<get_hessenberg()>.
 
 Options may be set and saved:
 
