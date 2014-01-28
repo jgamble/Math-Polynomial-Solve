@@ -1,5 +1,11 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.70
+     Jan 27 2014
+	- Made documentation changes to the README file in anticipation
+	  of removing set_hessenberg() and get_hessenberg(). Also made
+	  version number 2.70.
+	- Removed get_hessenberg() and set_hessenberg() from the code.
 2.67
      May  3 2013
 	- Some documentation tweaks on the use of ascending_order().
