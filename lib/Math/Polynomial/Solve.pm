@@ -1,8 +1,9 @@
 package Math::Polynomial::Solve;
 
-require 5.008003;
+require 5.010001;
 
 use Math::Complex;
+use Math::Util qw(:polynomial);
 use Carp;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -1263,15 +1264,11 @@ sub simplified_form
 #
 sub poly_derivative
 {
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
-	my $degree = $#coefficients;
+	my @coefficients = ($ascending_flag)? @_: reverse @_;
 
-	return () if ($degree < 1);
+	my $d_ref = pl_derivative(\@coefficients);
 
-	$coefficients[$_] *= $degree-- for (0..$degree - 2);
-
-	pop @coefficients;
-	return ($ascending_flag)? reverse @coefficients: @coefficients;
+	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
 }
 
 #
@@ -1284,15 +1281,11 @@ sub poly_derivative
 #
 sub poly_antiderivative
 {
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
-	my $degree = scalar @coefficients;
+	my @coefficients = ($ascending_flag)? @_: reverse @_;
 
-	return (0) if ($degree < 1);
+	my $d_ref = pl_antiderivative(\@coefficients);
 
-	$coefficients[$_] /= $degree-- for (0..$degree - 2);
-
-	push @coefficients, 0;
-	return ($ascending_flag)? reverse @coefficients: @coefficients;
+	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
 }
 
 #
@@ -1307,39 +1300,9 @@ sub poly_evaluate
 {
 	my($coef_ref, $xval_ref) = @_;
 
-	my @coefficients = ($ascending_flag)? reverse @$coef_ref: @$coef_ref;
-	my @values;
+	my @coefficients = ($ascending_flag)? @$coef_ref: reverse @$coef_ref;
 
-	#
-	# Allow some flexibility in sending the x-values.
-	#
-	if (ref $xval_ref eq "ARRAY")
-	{
-		@values = @$xval_ref;
-	}
-	else
-	{
-		#
-		# It could happen. Someone might type \$x instead of $x.
-		#
-		@values = ((ref $xval_ref eq "SCALAR")? $$xval_ref: $xval_ref);
-	}
-
-	#
-	# Move the leading coefficient off the polynomial list
-	# and use it as our starting value(s).
-	#
-	my @results = (shift @coefficients) x scalar @values;
-
-	foreach my $c (@coefficients)
-	{
-		foreach my $j (0..$#values)
-		{
-			$results[$j] = $results[$j] * $values[$j] + $c;
-		}
-	}
-
-	return wantarray? @results: $results[0];
+	return pl_horner(\@coefficients, $xval_ref);
 }
 
 #
@@ -1509,7 +1472,7 @@ sub poly_sturm_chain
 	my @coefficients = @_;
 	my $degree = $#coefficients;
 	my @chain;
-	my($q, $r);
+	my($q, $r, $f1, $f2);
 	my $temp_ascending_flag = $ascending_flag;
 
 	if ($ascending_flag)
@@ -1517,9 +1480,12 @@ sub poly_sturm_chain
 		$ascending_flag = 0;
 		@coefficients = reverse @coefficients;
 	}
+	else
+	{
+	}
 
-	my $f1 = [@coefficients];
-	my $f2 = [poly_derivative(@coefficients)];
+	$f1 = [@coefficients];
+	$f2 = [poly_derivative(@coefficients)];
 
 	push @chain, $f1;
 
