@@ -11,8 +11,9 @@ my $build = Module::Build->new(
 	dist_name => 'Math-Polynomial-Solve',
 
 	requires => {
-		perl=> '5.8.3',
+		perl=> '5.10.1',
 		'Math::Complex'=> '1.36',  # Bugfix of Im().
+		'Math::Utils' => '1.00',
 	},
 
 	configure_requires => {
