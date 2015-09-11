@@ -3,7 +3,7 @@ package Math::Polynomial::Solve;
 require 5.010001;
 
 use Math::Complex;
-use Math::Util qw(:polynomial);
+use Math::Util qw(:polynomial :utility);
 use Carp;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -147,18 +147,6 @@ BEGIN
 # changes over a deprecation cycle.
 #
 my $ascending_flag = 0;		# default 0, in a later version it will be 1.
-
-#
-# sign($x);
-#
-# Not exported.
-#
-sub sign
-{
-	return 1 if ($_[0] > 0);
-	return -1 if ($_[0] < 0);
-	return 0;
-}
 
 #
 # if (fltcmp($x, $y) == 0) { ... }
@@ -1650,7 +1638,7 @@ sub sturm_sign_minus_inf
 		push @signs, ((($#coefficients & 1) == 1)? -1: 1) * sign($coefficients[0]);
 	}
 
-	return @signs
+	return @signs;
 }
 
 #
@@ -1664,6 +1652,7 @@ sub sturm_sign_plus_inf
 {
 	my($chain_ref) = @_;
 	my @signs;
+	#my @signs = map{ sign(${$_}[0]) } @$chain_ref;
 
 	foreach my $c (@$chain_ref)
 	{
@@ -1671,7 +1660,7 @@ sub sturm_sign_plus_inf
 		push @signs, sign($coefficients[0]);
 	}
 
-	return @signs
+	return @signs;
 }
 
 #
@@ -1703,6 +1692,7 @@ sub sturm_sign_chain
 	foreach my $p_ref (@$chain_ref)
 	{
 		my @ysigns = map($_ = sign($_), poly_evaluate($p_ref, $xvals_ref));
+		#my @ysigns = sign(poly_evaluate($p_ref, $xvals_ref));
 
 		#
 		# We just retrieved the signs of a single function across
