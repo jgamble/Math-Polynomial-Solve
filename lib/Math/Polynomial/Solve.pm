@@ -1382,71 +1382,41 @@ sub poly_divide
 	my @numerator = @$n_ref;
 	my @divisor = @$d_ref;
 	my @quotient;
+	my @remainder;
 
 	my $temp_ascending_flag = $ascending_flag;
-	if ($ascending_flag)
+	unless ($ascending_flag)
 	{
 		@numerator = reverse @numerator;
 		@divisor = reverse @divisor;
-		$ascending_flag = 0;
+		$ascending_flag = 1;
 	}
 
 	#
 	# Just checking... removing any leading zeros.
 	#
-	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
-	shift @divisor while (@divisor and abs($divisor[0]) < $epsilon);
+	pop @numerator while (@numerator and abs($numerator[$#numerator]) < $epsilon);
+	pop @divisor while (@divisor and abs($divisor[$#divisor]) < $epsilon);
 
-	my $n_degree = $#numerator;
-	my $d_degree = $#divisor;
-	my $q_degree = $n_degree - $d_degree;
+	my($quo_ref, $rem_ref) = pl_div(\@numerator, \@divisor);
 
-	return ([0], \@numerator) if ($q_degree < 0);
-	return (undef, undef) if ($d_degree < 0);
-
-	#
-	### poly_divide():
-	#### @numerator
-	#### by
-	#### @divisor
-	#
-	my $lead_coefficient = $divisor[0];
-
-	#
-	# Perform the synthetic division. The remainder will
-	# be what's left in the numerator.
-	#
-	for my $j (0..$q_degree)
-	{
-		#
-		# Get the next term for the quotient. We shift
-		# off the lead numerator term, which would become
-		# zero due to subtraction anyway.
-		#
-		my $q = (shift @numerator)/$lead_coefficient;
-
-		push @quotient, $q;
-
-		for my $k (1..$d_degree)
-		{
-			$numerator[$k - 1] -= $q * $divisor[$k];
-		}
-	}
+	@quotient = @{$quo_ref};
+	@remainder = @{$rem_ref};
 
 	#
 	# And once again, check for leading zeros in the remainder.
 	#
-	shift @numerator while (@numerator and abs($numerator[0]) < $epsilon);
-	push @numerator, 0 unless (@numerator);
+	pop @remainder while (@remainder and abs($remainder[$#remainder]) < $epsilon);
+	push @remainder, 0 unless (@remainder);
 
 	if ($temp_ascending_flag)
 	{
-		@numerator = reverse @numerator;
+		@remainder = reverse @remainder;
 		@quotient = reverse @quotient;
 	}
 
 	$ascending_flag = $temp_ascending_flag;
-	return (\@quotient, \@numerator);
+	return (\@quotient, \@remainder);
 }
 
 #
