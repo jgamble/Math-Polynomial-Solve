@@ -1290,7 +1290,7 @@ sub poly_evaluate
 
 	my @coefficients = ($ascending_flag)? @$coef_ref: reverse @$coef_ref;
 
-	return pl_horner(\@coefficients, $xval_ref);
+	return pl_evaluate(\@coefficients, $xval_ref);
 }
 
 #
