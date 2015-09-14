@@ -1935,11 +1935,6 @@ sub newtonraphson
 	return @roots;
 }
 
-sub poly_gcd
-{
-	my($c1_ref, $c2_ref) = @_;
-}
-
 
 1;
 __END__
