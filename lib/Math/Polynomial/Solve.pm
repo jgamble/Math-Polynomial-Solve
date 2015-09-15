@@ -2048,8 +2048,54 @@ also been exported for your use.
 =head2 DEPRECATED FUNCTIONS
 
 Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
-Consequently the module now uses Math::Utils itself, and will remove those
-duplicatede :utility functions in two releases.
+Consequently this module now uses Math::Utils itself, and will remove the
+redundant :utility functions by the next two releases.
+
+
+Note that the L<polynomial functions|Math::Utils/polynomial tag> 
+in Math::Utils all take the polynomial
+coefficients in ascending order, left to right.
+
+Scheduled to be removed are:
+
+=over 4
+
+=item fltcmp()
+
+Use Math::Utils's generate_fltcmp() or generate_relational() to
+create comparison functions with a built-in tolerance.
+
+=item poly_div()
+
+Use Math::Utils's pl_div(). Note that unlike poly_div(), checking for
+leading zeros isn't done by pl_div(), and is expected to be done by
+the caller.
+
+=item poly_evaluate()
+
+Use Math::Utils's pl_evaluate().
+
+=item poly_derivative()
+
+Use Math::Utils's pl_derivative().
+
+=item poly_antiderivative()
+
+Use Math::Utils's pl_antiderivative().
+
+=item poly_derivaluate()
+
+Use Math::Utils's to be determined.
+
+=item poly_constmult()
+
+Use Math::Utils's to be determined.
+
+=item simplified_form()
+
+Use Math::Utils's to be determined.
+
+=back
 
 =head2 EXPORTED BY DEFAULT
 
