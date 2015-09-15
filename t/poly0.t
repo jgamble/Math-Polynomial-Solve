@@ -4,7 +4,7 @@
 #
 use Test::More tests => 48;
 
-use Math::Polynomial::Solve qw(:numeric fltcmp ascending_order);
+use Math::Polynomial::Solve qw(:numeric ascending_order);
 use Math::Complex;
 use strict;
 use warnings;

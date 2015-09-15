@@ -3,12 +3,15 @@
 #
 use Test::Simple tests => 30;
 
-use Math::Polynomial::Solve qw(:numeric poly_nonzero_term_count fltcmp);
+use Math::Polynomial::Solve qw(:numeric poly_nonzero_term_count);
 use Math::Complex;
+use Math::Utils qw(:compare)
 use strict;
 use warnings;
 
 require "t/coef.pl";
+
+my $fltcmp = generate_fltcmp();
 
 my @case = (
 	[1, 0, 1],
@@ -37,7 +40,7 @@ foreach (@case)
 	my $c0 = prodof(@x) * $coef[0];
 	$c0 = -$c0 if ($n % 2 == 1);
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok((&$fltcmp($cn_1, $coef[1]) == 0 and &$fltcmp($c0, $coef[$n]) == 0),
 		" varsubst => 0,   [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$cn_1 = $cn_1; \$coef[1] = ", $coef[1], "\n";
@@ -61,7 +64,7 @@ foreach (@case)
 	$c0 = -$c0 if ($n % 2 == 1);
 
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok((&$fltcmp($cn_1, $coef[1]) == 0 and &$fltcmp($c0, $coef[$n]) == 0),
 		" varsubst => 1, nz terms = $tc,   [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$b = $b; \$coef[1] = ", $coef[1], "\n";
@@ -85,7 +88,7 @@ foreach (@case)
 	$c0 = -$c0 if ($n % 2 == 1);
 
 
-	ok((fltcmp($cn_1, $coef[1]) == 0 and fltcmp($c0, $coef[$n]) == 0),
+	ok((&$fltcmp($cn_1, $coef[1]) == 0 and &$fltcmp($c0, $coef[$n]) == 0),
 		" varsubst => 1, nz terms = $tc,   [ " . join(", ", @coef) . " ]");
 
 	#print "\nmy \$b = $b; \$coef[1] = ", $coef[1], "\n";
