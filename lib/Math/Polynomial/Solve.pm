@@ -2045,6 +2045,12 @@ find the number of real roots present in a range of X values.
 In addition to the root-finding functions, the internal functions have
 also been exported for your use.
 
+=head2 DEPRECATED FUNCTIONS
+
+Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
+Consequently the module now uses Math::Utils itself, and will remove those
+duplicatede :utility functions in two releases.
+
 =head2 EXPORTED BY DEFAULT
 
 =head3 ascending_order()
@@ -2417,6 +2423,9 @@ more information on the subject.
 
 =head3 fltcmp()
 
+The function is DEPRECATED. See L<Math::Utils> and the section "compare tag"
+for a replacement.
+
 Compare two floating point numbers within a degree of accuracy.
 
 Like most functions ending in "cmp", this one returns -1 if the first
@@ -2565,6 +2574,9 @@ method, a method for finding a root near the starting X value.
 A comparison function that determines if one argument is less than, equal to,
 or greater than, the other. Comparisons are made within a range determined by
 the tolerance.
+
+This item is DEPRECATED, and will be removed in two releases. Use the module
+L<Math::Utils> under the section "compare tag" for a replacement.
 
 =back
 
