@@ -5,7 +5,7 @@ use Test::Simple tests => 30;
 
 use Math::Polynomial::Solve qw(:numeric poly_nonzero_term_count);
 use Math::Complex;
-use Math::Utils qw(:compare)
+use Math::Utils qw(:compare);
 use strict;
 use warnings;
 
