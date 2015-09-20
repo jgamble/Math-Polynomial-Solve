@@ -3,7 +3,7 @@ package Math::Polynomial::Solve;
 require 5.010001;
 
 use Math::Complex;
-use Math::Util qw(:polynomial :utility);
+use Math::Utils qw(:polynomial :utility);
 use Carp;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -1397,7 +1397,7 @@ sub poly_divide
 	pop @remainder while (@remainder and abs($remainder[$#remainder]) < $epsilon);
 	push @remainder, 0 unless (@remainder);
 
-	if ($temp_ascending_flag)
+	unless ($temp_ascending_flag)
 	{
 		@remainder = reverse @remainder;
 		@quotient = reverse @quotient;
@@ -1429,18 +1429,10 @@ sub poly_sturm_chain
 {
 	my @coefficients = @_;
 	my $degree = $#coefficients;
-	my @chain;
-	my($q, $r, $f1, $f2);
-	my $temp_ascending_flag = $ascending_flag;
+	my(@chain, @remd);
+	my($f1, $f2);
 
-	if ($ascending_flag)
-	{
-		$ascending_flag = 0;
-		@coefficients = reverse @coefficients;
-	}
-	else
-	{
-	}
+	@coefficients = reverse @coefficients unless ($ascending_flag);
 
 	$f1 = [@coefficients];
 	$f2 = [poly_derivative(@coefficients)];
@@ -1461,20 +1453,25 @@ sub poly_sturm_chain
 
 		do
 		{
-			($q, $r) = poly_divide($f1, $f2);
+			my ($q, $r) = pl_div($f1, $f2);
 			$f1 = $f2;
-			$f2 = [poly_constmult($r, -1)];
+
+			#
+			# Remove any leading zeros in the remainder.
+			#
+			@remd = @{$r};
+			pop @remd while (@remd and abs($remd[$#remd]) < $epsilon);
+
+			$f2 = (@remd)? [poly_constmult(\@remd, -1)]: [0];
 			push @chain, $f2;
 		}
-		while ($#$r > 0);
-
+		while ($#remd > 0);
 	}
 
 	#
 	### poly_sturm_chain:
 	#### @chain
 	#
-	$ascending_flag = $temp_ascending_flag;
 	return @chain;
 }
 
@@ -1492,10 +1489,10 @@ sub poly_real_root_count
 	my @coefficients = @_;
 	my $temp_ascending_flag = $ascending_flag;
 
-	if ($ascending_flag)
+	unless ($ascending_flag)
 	{
 		@coefficients = reverse @coefficients;
-		$ascending_flag = 0;
+		$ascending_flag = 1;
 	}
 
 	my @chain = poly_sturm_chain(@coefficients);
@@ -1680,19 +1677,19 @@ sub sturm_sign_chain
 	my $col = 0;
 
 	#
-	# Temporarily force $ascending_flag to zero because
+	# Temporarily force $ascending_flag to one because
 	# the first row of the chain will have the the
 	# coefficients in that order.
 	#
 	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 0;
+	$ascending_flag = 1;
 
 	push @sign_chain, [] for (0..$x_count);
 
 	foreach my $p_ref (@$chain_ref)
 	{
-		my @ysigns = map($_ = sign($_), poly_evaluate($p_ref, $xvals_ref));
-		#my @ysigns = sign(poly_evaluate($p_ref, $xvals_ref));
+		my @ysigns = map($_ = sign($_), pl_evaluate($p_ref, $xvals_ref));
+		#my @ysigns = sign(pl_evaluate($p_ref, $xvals_ref));
 
 		#
 		# We just retrieved the signs of a single function across
@@ -1760,13 +1757,7 @@ sub laguerre
 	my @xvalues;
 	my @roots;
 
-	my $temp_ascending_flag = $ascending_flag;
-
-	if ($ascending_flag)
-	{
-		$ascending_flag = 0;
-		$p_ref = [reverse @$p_ref];
-	}
+	$p_ref = [reverse @$p_ref] unless ($ascending_flag);
 
 	#
 	# Allow some flexibility in sending the x-values.
@@ -1799,7 +1790,7 @@ sub laguerre
 			# Get the values of the function and its first and
 			# second derivatives at X.
 			#
-			my($y, $dy, $d2y) = poly_derivaluate($p_ref, $x);
+			my($y, $dy, $d2y) = pl_dxevaluate($p_ref, $x);
 
 			if (abs($y) <= $tolerance{laguerre})
 			{
@@ -1809,7 +1800,7 @@ sub laguerre
 
 			#
 			#### At Iteration: $its
-			#### X: $x
+			#### x: $x
 			#### f(x): $y
 			#### f'(x): $dy
 			#### f''(x): $d2y
@@ -1849,7 +1840,6 @@ sub laguerre
 		#### $x
 	}
 
-	$ascending_flag = $temp_ascending_flag;
 	return @roots;
 }
 
@@ -1868,13 +1858,7 @@ sub newtonraphson
 	my @xvalues;
 	my @roots;
 
-	my $temp_ascending_flag = $ascending_flag;
-
-	if ($ascending_flag)
-	{
-		$ascending_flag = 0;
-		$p_ref = [reverse @$p_ref];
-	}
+	$p_ref = [reverse @$p_ref] unless ($ascending_flag);
 
 	#
 	# Allow some flexibility in sending the x-values.
@@ -1903,10 +1887,10 @@ sub newtonraphson
 		for (;;)
 		{
 			#
-			# Get the values of the function and its first and
-			# second derivatives at X.
+			# Get the values of the function and its
+			# first derivative at X.
 			#
-			my($y, $dy, $d2y) = poly_derivaluate($p_ref, $x);
+			my($y, $dy, undef) = pl_dxevaluate($p_ref, $x);
 			my $dx = $y/$dy;
 			$x -= $dx;
 
@@ -1918,10 +1902,9 @@ sub newtonraphson
 
 			#
 			#### At Iteration: $its
-			#### X: $x
+			#### x: $x
 			#### f(x): $y
 			#### f'(x): $dy
-			#### f''(x): $d2y
 			#
 			croak "Too many iterations ($its) at dx=$dx\n" if ($its >= $iteration{newtonraphson});
 			$its++;
@@ -1931,7 +1914,6 @@ sub newtonraphson
 		#### $x
 	}
 
-	$ascending_flag = $temp_ascending_flag;
 	return @roots;
 }
 
@@ -2065,9 +2047,9 @@ Scheduled to be removed are:
 Use Math::Utils's generate_fltcmp() or generate_relational() to
 create comparison functions with a built-in tolerance.
 
-=item poly_div()
+=item poly_divide()
 
-Use Math::Utils's pl_div(). Note that unlike poly_div(), checking for
+Use Math::Utils's pl_div(). Note that unlike poly_divide(), checking for
 leading zeros isn't done by pl_div(), and is expected to be done by
 the caller.
 
@@ -2085,7 +2067,7 @@ Use Math::Utils's pl_antiderivative().
 
 =item poly_derivaluate()
 
-Use Math::Utils's to be determined.
+Use Math::Utils's pl_dxevaluate().
 
 =item poly_constmult()
 
