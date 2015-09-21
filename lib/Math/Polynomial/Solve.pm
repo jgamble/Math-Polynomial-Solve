@@ -1676,20 +1676,12 @@ sub sturm_sign_chain
 	my @sign_chain;
 	my $col = 0;
 
-	#
-	# Temporarily force $ascending_flag to one because
-	# the first row of the chain will have the the
-	# coefficients in that order.
-	#
-	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 1;
-
 	push @sign_chain, [] for (0..$x_count);
 
 	foreach my $p_ref (@$chain_ref)
 	{
-		my @ysigns = map($_ = sign($_), pl_evaluate($p_ref, $xvals_ref));
-		#my @ysigns = sign(pl_evaluate($p_ref, $xvals_ref));
+		#my @ysigns = map($_ = sign($_), pl_evaluate($p_ref, $xvals_ref));
+		my @ysigns = sign(pl_evaluate($p_ref, $xvals_ref));
 
 		#
 		# We just retrieved the signs of a single function across
@@ -1716,7 +1708,6 @@ sub sturm_sign_chain
 		$col++;
 	}
 
-	$ascending_flag = $temp_ascending_flag;
 	return @sign_chain;
 }
 
@@ -2071,11 +2062,11 @@ Use Math::Utils's pl_dxevaluate().
 
 =item poly_constmult()
 
-Use Math::Utils's to be determined.
+Not duplicated in Math::Utils, use L<Math::VecStat>'s vecprod().
 
 =item simplified_form()
 
-Use Math::Utils's to be determined.
+This function is simply going to be dropped.
 
 =back
 
