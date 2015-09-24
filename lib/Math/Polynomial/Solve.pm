@@ -1435,7 +1435,7 @@ sub poly_sturm_chain
 	@coefficients = reverse @coefficients unless ($ascending_flag);
 
 	$f1 = [@coefficients];
-	$f2 = [poly_derivative(@coefficients)];
+	$f2 = pl_derivative(\@coefficients);
 
 	push @chain, $f1;
 
@@ -1451,6 +1451,10 @@ sub poly_sturm_chain
 
 		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
 
+		#
+		### poly_sturm_chain chain before do loop:
+		#### @chain
+		#
 		do
 		{
 			my ($q, $r) = pl_div($f1, $f2);
@@ -1632,7 +1636,7 @@ sub sturm_sign_minus_inf
 	foreach my $c (@$chain_ref)
 	{
 		my @coefficients = @$c;
-		push @signs, ((($#coefficients & 1) == 1)? -1: 1) * sign($coefficients[0]);
+		push @signs, ((($#coefficients & 1) == 1)? -1: 1) * sign($coefficients[$#coefficients]);
 	}
 
 	return @signs;
@@ -1654,7 +1658,7 @@ sub sturm_sign_plus_inf
 	foreach my $c (@$chain_ref)
 	{
 		my @coefficients = @$c;
-		push @signs, sign($coefficients[0]);
+		push @signs, sign($coefficients[$#coefficients]);
 	}
 
 	return @signs;

@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl sturm0.t'
 
-use Test::More tests => 32;
+use Test::More tests => 16;
 
 use Math::Polynomial::Solve qw(:sturm ascending_order);
 use Math::Utils qw(:compare);
@@ -35,29 +35,6 @@ foreach my $cref (@case)
 	my($p, $c) = @$cref;
 
 	my @polynomial = @$p;
-	my @chain = poly_sturm_chain( @polynomial );
-
-	if (scalar @chain)
-	{
-		my($fn) = @{$chain[$#chain]};	# get the last (constant) polynomial.
-		ok(&$fltcmp($c, $fn) == 0, "Polynomial: [" . join(", ", @polynomial) . "], fn = $fn");
-
-		#diag("\nPolynomial: [", join(", ", @polynomial), "]");
-		#diag(polychain2str(@chain));
-	}
-	else
-	{
-		ok(0,  "Polynomial: [" . join(", ", @polynomial) . "], chain fails");
-	}
-}
-
-ascending_order(1);
-
-foreach my $cref (@case)
-{
-	my($p, $c) = @$cref;
-
-	my @polynomial = reverse @$p;
 	my @chain = poly_sturm_chain( @polynomial );
 
 	if (scalar @chain)
