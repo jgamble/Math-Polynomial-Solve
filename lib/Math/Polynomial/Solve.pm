@@ -14,7 +14,7 @@ use warnings;
 # Three # for "I am here" messages, four # for variable dumps.
 # Five # for a dump of the companion matrix.
 #
-#use Smart::Comments q(####);
+#use Smart::Comments q(#####);
 
 @ISA = qw(Exporter);
 
@@ -1440,9 +1440,7 @@ sub poly_sturm_chain
 	push @chain, $f1;
 
 	#
-	# NOTE:
-	# Go back to the 2.66 version of this block once
-	# the $ascending_flag check is obsolete.
+	# Start the first links of the chain.
 	#
 	SKIPIT: {
 		last SKIPIT if ($degree < 1); #return @chain if ($degree < 1);
@@ -1452,8 +1450,8 @@ sub poly_sturm_chain
 		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
 
 		#
-		### poly_sturm_chain chain before do loop:
-		#### @chain
+		##### poly_sturm_chain chain before do loop:
+		##### @chain
 		#
 		do
 		{
@@ -1466,15 +1464,15 @@ sub poly_sturm_chain
 			@remd = @{$r};
 			pop @remd while (@remd and abs($remd[$#remd]) < $epsilon);
 
-			$f2 = (@remd)? [poly_constmult(\@remd, -1)]: [0];
+			$f2 = (@remd)? [map {$_ * -1} @remd]: [0];
 			push @chain, $f2;
 		}
 		while ($#remd > 0);
 	}
 
 	#
-	### poly_sturm_chain:
-	#### @chain
+	##### poly_sturm_chain:
+	##### @chain
 	#
 	return @chain;
 }
@@ -1491,25 +1489,11 @@ sub poly_sturm_chain
 sub poly_real_root_count
 {
 	my @coefficients = @_;
-	my $temp_ascending_flag = $ascending_flag;
-
-	unless ($ascending_flag)
-	{
-		@coefficients = reverse @coefficients;
-		$ascending_flag = 1;
-	}
 
 	my @chain = poly_sturm_chain(@coefficients);
 
-	my $count = 
-		sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+	return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
 		sturm_sign_count(sturm_sign_plus_inf(\@chain));
-
-	$ascending_flag = $temp_ascending_flag;
-	return $count;
-
-	#return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
-	#	sturm_sign_count(sturm_sign_plus_inf(\@chain));
 }
 
 #
@@ -1531,6 +1515,97 @@ sub sturm_real_root_range_count
 }
 
 #
+# @roots = sturm_bisection(\@chain, $from, $to);
+#
+# Using the bisection method on the root count method of Sturm, finds
+# the boundaries around the roots of a polynomial function. Will not find complex roots.
+#
+# In the :sturm export set.
+#
+sub sturm_bisection
+{
+	my($chain_ref, $from, $to) = @_;
+	my(@coefficients) = @{${$chain_ref}[0]};
+	my @boundaries;
+
+	#
+	#### @coefficients
+	#
+	#
+	# If we have a linear equation, just solve the thing. We're not
+	# going to find a useful second derivative, after all. (Which
+	# would raise the question of why we're here without a useful
+	# Sturm chain, but never mind...)
+	#
+	if ($#coefficients == 1)
+	{
+		my $root = linear_roots(@coefficients);
+		return [$root, $root];
+	}
+
+	#
+	# Do Sturm bisection here.
+	#
+	my $range_count = sturm_real_root_range_count($chain_ref, $from, $to);
+
+	#
+	# If we're down to one root in this range, use Laguerre's method
+	# to hunt it down.
+	#
+	if ($range_count == 1)
+	{
+		push @boundaries, [$from, $to];
+	}
+	elsif ($range_count > 1)
+	{
+		my $its = 0;
+
+		ROOT:
+		for (;;)
+		{
+			my $mid = ($to + $from)/2.0;
+			my $frommid_count = sturm_real_root_range_count($chain_ref, $from, $mid);
+			my $midto_count = sturm_real_root_range_count($chain_ref, $mid, $to);
+
+			#
+			#### $its
+			#### $from
+			#### $mid
+			#### $to
+			#### $frommid_count
+			#### $midto_count
+			#
+
+			#
+			# Bisect again if we only narrowed down to a range
+			# containing all the roots.
+			#
+			if ($frommid_count == 0)
+			{
+				$from = $mid;
+			}
+			elsif ($midto_count == 0)
+			{
+				$to = $mid;
+			}
+			else
+			{
+				#
+				# We've divided the roots between two ranges. Do it
+				# again until each range has a single root in it.
+				#
+				push @boundaries, sturm_bisection($chain_ref, $from, $mid);
+				push @boundaries, sturm_bisection($chain_ref, $mid, $to);
+				last ROOT;
+			}
+			croak "Too many iterations ($its) at mid=$mid\n" if ($its >= $iteration{sturm_bisection});
+			$its++;
+		}
+	}
+	return @boundaries;
+}
+
+#
 # @roots = sturm_bisection_roots(\@chain, $from, $to);
 #
 # Using the bisection method on the root count method of Sturm, finds
@@ -1539,6 +1614,38 @@ sub sturm_real_root_range_count
 # In the :sturm export set.
 #
 sub sturm_bisection_roots
+{
+	my($chain_ref, $from, $to) = @_;
+	my($cref0) = ${$chain_ref}[0];
+	my @boundaries = sturm_bisection($chain_ref, $from, $to);
+	my @roots;
+
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 1;
+
+	#
+	#### sturm_bisection() returns: @boundaries
+	#
+	for my $bracket (@boundaries)
+	{
+		my ($left, $right) = @$bracket;
+		push @roots, laguerre($cref0, ($left + $right)/2.0);
+	}
+
+	$ascending_flag = $temp_ascending_flag;
+
+	return @roots;
+}
+
+#
+# @roots = sturm_bisection_roots(\@chain, $from, $to);
+#
+# Using the bisection method on the root count method of Sturm, finds
+# the real roots of a polynomial function. Will not find complex roots.
+#
+# In the :sturm export set.
+#
+sub sturm_bisection_roots_old
 {
 	my($chain_ref, $from, $to) = @_;
 	my(@coefficients) = @{${$chain_ref}[0]};
@@ -1586,8 +1693,8 @@ sub sturm_bisection_roots
 			#
 			#### $its
 			#### $from
-			#### $to
 			#### $mid
+			#### $to
 			#### $frommid_count
 			#### $midto_count
 			#
@@ -1678,13 +1785,11 @@ sub sturm_sign_chain
 	my $fn_count = $#$chain_ref;
 	my $x_count = $#$xvals_ref;
 	my @sign_chain;
-	my $col = 0;
 
 	push @sign_chain, [] for (0..$x_count);
 
 	foreach my $p_ref (@$chain_ref)
 	{
-		#my @ysigns = map($_ = sign($_), pl_evaluate($p_ref, $xvals_ref));
 		my @ysigns = sign(pl_evaluate($p_ref, $xvals_ref));
 
 		#
@@ -1708,10 +1813,12 @@ sub sturm_sign_chain
 		{
 			push @{$sign_chain[$j]}, shift @ysigns;
 		}
-
-		$col++;
 	}
 
+	#
+	##### sturm_sign_chain() returns
+	##### @sign_chain: @sign_chain
+	#
 	return @sign_chain;
 }
 
@@ -1772,9 +1879,9 @@ sub laguerre
 	foreach my $x (@xvalues)
 	{
 		#
-		### laguerre: looking near $x
-		### Coefficient: @$p_ref
-		### Degree: $n
+		#### laguerre looking near: $x
+		#### Coefficient: @$p_ref
+		#### Degree: $n
 		#
 		my $its = 0;
 
@@ -1806,9 +1913,9 @@ sub laguerre
 			$f = - $f if (abs($g - $f) > abs($g + $f));
 
 			#
-			#### g = $g
-			#### h = $h
-			#### f = $f
+			#### g: $g
+			#### h: $h
+			#### f: $f
 			#
 			# Divide by the largest value of $g plus
 			# $f, bearing in mind that $f is the result
@@ -2028,7 +2135,6 @@ Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
 Consequently this module now uses Math::Utils itself, and will remove the
 redundant :utility functions by the next two releases.
 
-
 Note that the L<polynomial functions|Math::Utils/polynomial tag> 
 in Math::Utils all take the polynomial
 coefficients in ascending order, left to right.
@@ -2123,7 +2229,7 @@ would have been written instead as
 The function is a temporary measure to help with the change in the API when
 version 3.00 of this module is released. At that point coefficients will be
 in ascending order by default, and you will need to use C<ascending_order(0)>
-to use the old (current) style, although you will get a deprecation warning.
+to use the old (current) style.
 
 =head2 Numeric Functions
 
@@ -2598,8 +2704,8 @@ A comparison function that determines if one argument is less than, equal to,
 or greater than, the other. Comparisons are made within a range determined by
 the tolerance.
 
-This item is DEPRECATED, and will be removed in two releases. Use the module
-L<Math::Utils> under the section "compare tag" for a replacement.
+Since this function is L<deprecated|/DEPRECATED FUNCTIONS>, its tolerance
+will also be removed when the function is remvoed.
 
 =back
 
@@ -2612,6 +2718,10 @@ Leading zeros are removed before returning the derivative, so the length
 of the returned polynomial may be even shorter than expected from the length of the original
 polynomial. Returns an empty list if the polynomial is a simple constant.
 
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> and the tag
+:polynomial for a replacement.
+
 =head3 poly_antiderivative()
 
 Returns the coefficients of the antiderivative of the polynomial. The
@@ -2620,11 +2730,18 @@ constant term is set to zero; to override this use
   @integral = poly_antiderivative(@coefficients);
   $integral[$#integral] = $const_term;
 
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> and the tag
+:polynomial for a replacement.
+
 =head3 simplified_form()
 
 Return the polynomial adjusted by removing any leading zero coefficients
 and placing it in a monic polynomial form (all coefficients divided by the
 coefficient of the highest power).
+
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases.
 
 =head3 poly_evaluate()
 
@@ -2651,8 +2768,13 @@ or return a scalar.
   my $x_median = ($xvals[0] + $xvals[$#xvals])/2.0;
   my $y_median = poly_evaluate(\@coefficients, $x_median);
 
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> under the section
+"polynomial tag" for a replacement.
 
 =head3 poly_derivaluate();
+
+This is one of the L<deprecated functions|/DEPRECATED FUNCTIONS>
 
 Given an X value, returns the y-values of the polynomial, its first derivative,
 and its second derivative.
@@ -2666,6 +2788,10 @@ If the polynomial is a linear equation, the second derivative value will be
 zero.  Similarly, if the "equation" is a constant, the first derivative value
 will be zero.
 
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> under the section
+"polynomial tag" for a replacement.
+
 =head3 poly_nonzero_term_count()
 
 Returns a simple count of the number of coefficients that aren't zero.
@@ -2677,6 +2803,10 @@ C<poly_evaluate()>, uses the reference of the coefficient list.
 
   my @coefficients = (1, 7, 0, 12, 19);
   my @coef3 = poly_constmult(\@coefficients, 3);
+
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> under the section
+"polynomial tag" for a replacement.
 
 =head3 poly_divide()
 
@@ -2690,11 +2820,13 @@ and a remainder.
   my @quotient = @$q;
   my @remainder = @$r;
 
+This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
+removed in two releases. Use the module L<Math::Utils> under the section
+"polynomial tag" for a replacement.
+
 =head1 EXPORT
 
-Currently there is one default export, L<ascending_order|ascending_order()>,
-although this function will be deprecated after version 3.00 of this module
-is released.
+Currently there is one default export, L<ascending_order|ascending_order()>.
 
 The remaining functions may be individually named in an export list,
 but there are also four export tags:
