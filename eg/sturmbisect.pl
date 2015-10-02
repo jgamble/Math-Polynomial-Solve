@@ -15,6 +15,8 @@ GetOptions('ascending' => \$ascending);
 
 ascending_order($ascending);
 
+print "Order = ", ascending_order()? "ascending": "descending (default)", "\n";
+
 while ($line = prompt("Polynomial: ", -num))
 {
 	my @coef = split(/,? /, $line);
@@ -27,12 +29,19 @@ while ($line = prompt("Polynomial: ", -num))
 
 	print "\nPolynomial: [", join(", ", @coef), "]\n";
 
+	my @brackets = sturm_bisection(\@chain, $xvals[0], $xvals[1]);
+	print "Bracketing ranges:\n";
+	for my $b (@brackets)
+	{
+		print "     [" . join(", ", @$b), "]\n";
+	}
+
 	my @roots = sturm_bisection_roots(\@chain, $xvals[0], $xvals[1]);
 	my @zeros = poly_evaluate(\@coef, \@roots);
 
 	my $c = 0;
 	$c += abs(fltcmp($_, 0.0)) foreach(@zeros);
-	print "zeros at: [", join(", ", @roots), "]\n\n";
+	print "\nroots at: [", join(", ", @roots), "]\n\n";
 	print "$c non-roots\n" if ($c);
 }
 
