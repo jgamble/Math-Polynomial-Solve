@@ -13,8 +13,9 @@ use warnings;
 #
 # Three # for "I am here" messages, four # for variable dumps.
 # Five # for a dump of the companion matrix.
+# Six # for sturm structs (sign chain, etc).
 #
-#use Smart::Comments q(#####);
+#use Smart::Comments q(######);
 
 @ISA = qw(Exporter);
 
@@ -39,6 +40,7 @@ use warnings;
 		poly_real_root_count
 		poly_sturm_chain
 		sturm_real_root_range_count
+		sturm_bisection
 		sturm_bisection_roots
 		sturm_sign_count
 		sturm_sign_chain
@@ -162,6 +164,7 @@ sub fltcmp
 {
 	my($a, $b) = @_;
 
+	return 0 if (abs($a - $b) <= $tolerance{fltcmp});
 	return -1 if ($a + $tolerance{fltcmp} < $b);
 	return 1 if ($a - $tolerance{fltcmp} > $b);
 	return 0;
@@ -1450,8 +1453,8 @@ sub poly_sturm_chain
 		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
 
 		#
-		##### poly_sturm_chain chain before do loop:
-		##### @chain
+		###### poly_sturm_chain chain before do loop:
+		###### @chain
 		#
 		do
 		{
@@ -1471,8 +1474,8 @@ sub poly_sturm_chain
 	}
 
 	#
-	##### poly_sturm_chain:
-	##### @chain
+	###### poly_sturm_chain:
+	###### @chain
 	#
 	return @chain;
 }
@@ -1511,14 +1514,27 @@ sub sturm_real_root_range_count
 
 	my @signs = sturm_sign_chain($chain_ref, [$x0, $x1]);
 
-	return sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+	my $count0 = sturm_sign_count(@{$signs[0]});
+	my $count1 = sturm_sign_count(@{$signs[1]});
+
+	#
+	###### (from, to): join(", ", ($x0, $x1))
+	###### sign count from: $count0
+	###### sign count to: $count1
+	#
+	return $count0 - $count1;
 }
 
 #
-# @roots = sturm_bisection(\@chain, $from, $to);
+# @boundaries = sturm_bisection(\@chain, $from, $to);
 #
 # Using the bisection method on the root count method of Sturm, finds
-# the boundaries around the roots of a polynomial function. Will not find complex roots.
+# the boundaries around the roots of a polynomial function.
+#
+# The elements of @boundaries will be two-element arrays bracketing
+# the root on the left and right.
+#
+# Will not bracket complex roots.
 #
 # In the :sturm export set.
 #
@@ -1540,7 +1556,13 @@ sub sturm_bisection
 	if ($#coefficients == 1)
 	{
 		my $root = linear_roots(@coefficients);
-		return [$root, $root];
+
+		#
+		# But make sure the root is within the
+		# asked-for range.
+		#
+		return () if ($root < $from or $root > $to);
+		return ([$root, $root]);
 	}
 
 	#
@@ -1552,55 +1574,55 @@ sub sturm_bisection
 	# If we're down to one root in this range, use Laguerre's method
 	# to hunt it down.
 	#
-	if ($range_count == 1)
-	{
-		push @boundaries, [$from, $to];
-	}
-	elsif ($range_count > 1)
-	{
-		my $its = 0;
+	return () if ($range_count == 0);
+	return ([$from, $to]) if ($range_count == 1);
 
-		ROOT:
-		for (;;)
+	#
+	# More than one root in this range, so subdivide
+	# until each root has its own range.
+	#
+	my $its = 0;
+
+	ROOT:
+	for (;;)
+	{
+		my $mid = ($to + $from)/2.0;
+		my $frommid_count = sturm_real_root_range_count($chain_ref, $from, $mid);
+		my $midto_count = sturm_real_root_range_count($chain_ref, $mid, $to);
+
+		#
+		#### $its
+		#### $from
+		#### $mid
+		#### $to
+		#### $frommid_count
+		#### $midto_count
+		#
+
+		#
+		# Bisect again if we only narrowed down to a range
+		# containing all the roots.
+		#
+		if ($frommid_count == 0)
 		{
-			my $mid = ($to + $from)/2.0;
-			my $frommid_count = sturm_real_root_range_count($chain_ref, $from, $mid);
-			my $midto_count = sturm_real_root_range_count($chain_ref, $mid, $to);
-
-			#
-			#### $its
-			#### $from
-			#### $mid
-			#### $to
-			#### $frommid_count
-			#### $midto_count
-			#
-
-			#
-			# Bisect again if we only narrowed down to a range
-			# containing all the roots.
-			#
-			if ($frommid_count == 0)
-			{
-				$from = $mid;
-			}
-			elsif ($midto_count == 0)
-			{
-				$to = $mid;
-			}
-			else
-			{
-				#
-				# We've divided the roots between two ranges. Do it
-				# again until each range has a single root in it.
-				#
-				push @boundaries, sturm_bisection($chain_ref, $from, $mid);
-				push @boundaries, sturm_bisection($chain_ref, $mid, $to);
-				last ROOT;
-			}
-			croak "Too many iterations ($its) at mid=$mid\n" if ($its >= $iteration{sturm_bisection});
-			$its++;
+			$from = $mid;
 		}
+		elsif ($midto_count == 0)
+		{
+			$to = $mid;
+		}
+		else
+		{
+			#
+			# We've divided the roots between two ranges. Do it
+			# again until each range has a single root in it.
+			#
+			push @boundaries, sturm_bisection($chain_ref, $from, $mid);
+			push @boundaries, sturm_bisection($chain_ref, $mid, $to);
+			last ROOT;
+		}
+		croak "Too many iterations ($its) at mid=$mid\n" if ($its >= $iteration{sturm_bisection});
+		$its++;
 	}
 	return @boundaries;
 }
@@ -1634,97 +1656,6 @@ sub sturm_bisection_roots
 
 	$ascending_flag = $temp_ascending_flag;
 
-	return @roots;
-}
-
-#
-# @roots = sturm_bisection_roots(\@chain, $from, $to);
-#
-# Using the bisection method on the root count method of Sturm, finds
-# the real roots of a polynomial function. Will not find complex roots.
-#
-# In the :sturm export set.
-#
-sub sturm_bisection_roots_old
-{
-	my($chain_ref, $from, $to) = @_;
-	my(@coefficients) = @{${$chain_ref}[0]};
-	my @roots;
-
-	#
-	#### @coefficients
-	#
-	#
-	# If we have a linear equation, just solve the thing. We're not
-	# going to find a useful second derivative, after all. (Which
-	# would raise the question of why we're here without a useful
-	# Sturm chain, but never mind...)
-	#
-	if ($#coefficients == 1)
-	{
-		push @roots, linear_roots(@coefficients);
-		return @roots;
-	}
-
-	#
-	# Do Sturm bisection here.
-	#
-	my $range_count = sturm_real_root_range_count($chain_ref, $from, $to);
-
-	#
-	# If we're down to one root in this range, use Laguerre's method
-	# to hunt it down.
-	#
-	if ($range_count == 1)
-	{
-		push @roots, laguerre(\@coefficients, ($from + $to)/2.0);
-	}
-	elsif ($range_count > 1)
-	{
-		my $its = 0;
-
-		ROOT:
-		for (;;)
-		{
-			my $mid = ($to + $from)/2.0;
-			my $frommid_count = sturm_real_root_range_count($chain_ref, $from, $mid);
-			my $midto_count = sturm_real_root_range_count($chain_ref, $mid, $to);
-
-			#
-			#### $its
-			#### $from
-			#### $mid
-			#### $to
-			#### $frommid_count
-			#### $midto_count
-			#
-
-			#
-			# Bisect again if we only narrowed down to a range
-			# containing all the roots.
-			#
-			if ($frommid_count == 0)
-			{
-				$from = $mid;
-			}
-			elsif ($midto_count == 0)
-			{
-				$to = $mid;
-			}
-			else
-			{
-				#
-				# We've divided the roots between two ranges. Do it
-				# again until each range has a single root in it.
-				#
-				push @roots, sturm_bisection_roots($chain_ref, $from, $mid);
-				push @roots, sturm_bisection_roots($chain_ref, $mid, $to);
-				last ROOT;
-			}
-			croak "Too many iterations ($its) at mid=$mid\n" if ($its >= $iteration{sturm_bisection});
-			$its++;
-		}
-	}
 	return @roots;
 }
 
@@ -1816,8 +1747,8 @@ sub sturm_sign_chain
 	}
 
 	#
-	##### sturm_sign_chain() returns
-	##### @sign_chain: @sign_chain
+	###### sturm_sign_chain() returns
+	###### @sign_chain: @sign_chain
 	#
 	return @sign_chain;
 }
@@ -2805,8 +2736,7 @@ C<poly_evaluate()>, uses the reference of the coefficient list.
   my @coef3 = poly_constmult(\@coefficients, 3);
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> under the section
-"polynomial tag" for a replacement.
+removed in two releases. Use the module L<Math::VecStat> for a replacement.
 
 =head3 poly_divide()
 
