@@ -24,13 +24,14 @@ foreach my $cref (@case)
 	my @plroots = poly_roots(@polynomial);
 	my @chain = poly_sturm_chain(@polynomial);
 
-	my @roots = sturm_bisection_roots(\@chain, -10000, 0);
+	my @roots = sturm_bisection_roots(\@chain, -10000, 100);
 	my @zeroes = poly_evaluate(\@polynomial, \@roots);
 
-	ok(allzeroes($cref, @roots),
-		"Polynomial: [" . join(", ", @polynomial) . "]," .
-	   " 'zeroes' are (" . join(", ", @zeroes) . ")" .
-	   " but poly_roots() returns (" . join(", ", @plroots) . ")"
+	ok(allzeroes(\@polynomial, @roots),
+		"Polynomial: [" . join(", ", @polynomial) . "],\n" .
+	   " 'zeroes' are (" . join(", ", @zeroes) . ")\n" .
+	   " sturm_bisection() returns (" . join(", ", @roots) . ")\n" .
+	   "      poly_roots() returns (" . join(", ", @plroots) . ")"
 	);
 
 	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
@@ -44,13 +45,14 @@ foreach my $cref (@case)
 	my @plroots = poly_roots(@polynomial);
 	my @chain = poly_sturm_chain(@polynomial);
 
-	my @roots = sturm_bisection_roots(\@chain, -10000, 0);
+	my @roots = sturm_bisection_roots(\@chain, -10000, 100);
 	my @zeroes = poly_evaluate(\@polynomial, \@roots);
 
-	ok(allzeroes($cref, @roots),
-		"Polynomial (ascending flag): [" . join(", ", @polynomial) . "]," .
-	   " 'zeroes' are (" . join(", ", @zeroes) . ")" .
-	   " but poly_roots() returns (" . join(", ", @plroots) . ")"
+	ok(allzeroes(\@polynomial, @roots),
+		"Polynomial (ascending flag): [" . join(", ", @polynomial) . "],\n" .
+	   " 'zeroes' are (" . join(", ", @zeroes) . ")\n" .
+	   " sturm_bisection() returns (" . join(", ", @roots) . ")\n" .
+	   "      poly_roots() returns (" . join(", ", @plroots) . ")"
 	);
 
 	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
