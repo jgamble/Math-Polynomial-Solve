@@ -1,44 +1,44 @@
-	Math::Polynomial::Solve, version 2.70, 14 March 2014.
+	Math::Polynomial::Solve, version 2.71, 14 October 2015.
 ------------------------------------------------------------------------
->>>                                                                     <<<
->>> As warned, set_hessenberg() and get_hessenberg() have been removed. <<<
->>>                                                                     <<<
->>>NOTE: New function ascending_order() has been added to make          <<<
->>>  Math::Polynomial::Solve consistent with Math::Polynomial.          <<<
->>>                                                                     <<<
->>>  When the order of the coefficients passed into and returned from   <<<
->>>  the Math::Polynomial objects reversed order, it left the order     <<<
->>>  of the coefficients of this package out sync. Flatly changing the  <<<
->>>  the order of the parameters to the M::P::S functions seemed a      <<<
->>>  little unfriendly, so an intermediate step has been created.       <<<
->>>                                                                     <<<
->>>  Everywhere you pass in a list of coefficients, you may place       <<<
->>>  them in ascending power order by calling the new function          <<<
->>>  ascending_order(1). That is:                                       <<<
->>>                                                                     <<<
->>>      # Solve x**3 + 3*X**2 + 3*x + 5                                <<<
->>>                                                                     <<<
->>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
->>>      my @roots = cubic_roots(reverse $p1->coefficients);            <<<
->>>                                                                     <<<
->>>  can become:                                                        <<<
->>>                                                                     <<<
->>>      ascending_order(1);                                            <<<
->>>      my @p1 = Math::Polynoial->new(5, 3, 3, 1);                     <<<
->>>      my @roots = cubic_roots($p1->coefficients);                    <<<
->>>                                                                     <<<
->>>  without having to worry if you used the reverse operator           <<<
->>>  everywhere you should have.                                        <<<
->>>                                                                     <<<
->>>  The ascending_order() function will affect ALL functions in        <<<
->>>  Math::Polynomial::Solve that take coefficients as their arguments. <<<
->>>                                                                     <<<
->>>  The default order will remain descending power order until version <<<
->>>  3.00 is released, at which point ascending order will be the       <<<
->>>  default, and you will need to call ascending_order(0) to get the   <<<
->>>  old calling style. Some time after that, ascending_order() will    <<<
->>>  be deprecated, and some time after that it will be removed.        <<<
->>>                                                                     <<<
+Coming changes:
+
+Most of the functions under the :utility tag have been
+moved to Math::Utils. See the DEPRECATED FUNCTIONS section of the
+documentation, as well as the documentation of Math-Utils (there will
+be some parameter changes as well).
+
+The functions will be removed by version 2.80.
+------------------------------------------------------------------------
+
+By release 3.00 (scheduled for approximately end of 2017), the default order
+of the the coefficients of the polynomials will be changed to an ascending
+order, to match that of Math::Polynomial. To help with the change, the
+function ascending_order() is exported by default.
+
+Currently if your polynomial is the cubic x**3 + 3*x**2 + 11* x + 5,
+then all functions are called with the polynomials in descending order.
+For example,
+
+        my @cubic = (1, 3, 11, 5);
+        my @roots = cubic_roots(@cubic);
+
+To get a jump on the change (or to just have less-confusing code if
+you're also using Math::Polynomial), use ascending_order(). For example,
+
+        ascending_order(1);
+
+        my @cubic = (5, 11, 3, 1);
+        my @roots = cubic_roots(@cubic);
+
+After version 3.00 is released, you can still maintain the old order
+by calling ascending_order():
+
+        ascending_order(0);          # Keep it the old way.
+
+        my @cubic = (1, 3, 11, 5);
+        my @roots = cubic_roots(@cubic);
+
+------------------------------------------------------------------------
 
 This package provides a set of functions that find the roots of
 polynomials up to degree 4 using the classical methods; a function
@@ -47,7 +47,7 @@ QR Hessenberg algorithm; and functions that implement Sturm's
 sequence for counting the number of real, unique roots in a range.
 
 These functions can be exported by name or by tag (:classical, :numeric,
-:sturm, and :utility). The utility tag exports the functions that 
+:sturm, and :utility). The utility tag exports the functions that
 are used internally and which previously were private to the module.
 See the documentation for more information.
 
@@ -65,8 +65,8 @@ in the web page Karl's Calculus Tutor,
 INSTALLATION:
 
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.70.tar.gz
-	tar xvf Math-Polynomial-Solve-2.70.tar
+	gzip -d Math-Polynomial-Solve-2.71.tar.gz
+	tar xvf Math-Polynomial-Solve-2.71.tar
 
 Go into the resulting directory, and type:
 	perl Build.PL
@@ -79,6 +79,6 @@ Install the module:
 	Build install
 
 
-Copyright (c) 2010 John M. Gamble. All rights reserved. This program is
+Copyright (c) 2015 John M. Gamble. All rights reserved. This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.

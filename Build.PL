@@ -7,13 +7,13 @@ my $build = Module::Build->new(
 
 	dist_abstract => 'Find the Roots of Polynomial Equations',
 	dist_author => ['John M. Gamble <jgamble@cpan.org>'],
-	dist_version => '2.70',
+	dist_version => '2.71',
 	dist_name => 'Math-Polynomial-Solve',
 
 	requires => {
 		perl=> '5.10.1',
 		'Math::Complex'=> '1.36',  # Bugfix of Im().
-		'Math::Utils' => '1.00',
+		'Math::Utils' => '1.06',
 	},
 
 	configure_requires => {

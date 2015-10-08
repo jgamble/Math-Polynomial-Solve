@@ -1,12 +1,11 @@
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl sturm01.t'
+# `make test'. After `make install' it should work as `perl 31-sturm.t'
 
 use Test::More tests => 34;
 
 use Math::Polynomial::Solve qw(:sturm ascending_order);
 use strict;
 use warnings;
-require "t/coef.pl";
 
 my @case = (
 	[[1], 0],
@@ -34,9 +33,6 @@ foreach my $cref (@case)
 	my @polynomial = @$p;
 
 	ok(poly_real_root_count(@polynomial) == $n, "Polynomial: [" . join(", ", @polynomial) . "]");
-
-	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
-	#diag("Has " . poly_real_roots(@polynomial) . " real unique roots.\n");
 }
 
 ascending_order(1);
@@ -46,10 +42,7 @@ foreach my $cref (@case)
 	my($p, $n) = @$cref;
 	my @polynomial = reverse @$p;
 
-	ok(poly_real_root_count(@polynomial) == $n, "Polynomial: [" . join(", ", @polynomial) . "]");
-
-	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
-	#diag("Has " . poly_real_roots(@polynomial) . " real unique roots.\n");
+	ok(poly_real_root_count(@polynomial) == $n, "Polynomial (ascending): [" . join(", ", @polynomial) . "]");
 }
 
 exit(0);

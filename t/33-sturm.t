@@ -1,8 +1,7 @@
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl sturm3.t'
+# `make test'. After `make install' it should work as `perl 33-sturm.t'
 
-use Test::More tests => 2;
-#use Test::More tests => 10;
+use Test::More tests => 10;
 
 use Math::Polynomial::Solve qw(:sturm :utility poly_roots ascending_order);
 use strict;
@@ -11,11 +10,11 @@ require "t/coef.pl";
 
 my @case = (
 	[20, 200, -4, -1],
+	[2, 3, 1],
+	[1, 2, 3, 4],
+	[6, 15, 10, 0, -1],
+	[2, 6, 5, 0, -1],
 );
-	#[2, 3, 1],
-	#[1, 2, 3, 4],
-	#[6, 15, 10, 0, -1],
-	#[2, 6, 5, 0, -1],
 
 
 foreach my $cref (@case)
@@ -33,9 +32,6 @@ foreach my $cref (@case)
 	   " sturm_bisection() returns (" . join(", ", @roots) . ")\n" .
 	   "      poly_roots() returns (" . join(", ", @plroots) . ")"
 	);
-
-	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
-	#diag(polychain2str(@chain));
 }
 
 ascending_order(1);
@@ -49,14 +45,11 @@ foreach my $cref (@case)
 	my @zeroes = poly_evaluate(\@polynomial, \@roots);
 
 	ok(allzeroes(\@polynomial, @roots),
-		"Polynomial (ascending flag): [" . join(", ", @polynomial) . "],\n" .
+		"Polynomial (ascending): [" . join(", ", @polynomial) . "],\n" .
 	   " 'zeroes' are (" . join(", ", @zeroes) . ")\n" .
 	   " sturm_bisection() returns (" . join(", ", @roots) . ")\n" .
 	   "      poly_roots() returns (" . join(", ", @plroots) . ")"
 	);
-
-	#diag("\nPolynomial: [", join(", ", @polynomial), "]");
-	#diag(polychain2str(@chain));
 }
 
 exit(0);
