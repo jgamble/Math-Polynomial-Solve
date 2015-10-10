@@ -1,5 +1,16 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.71
+     Oct 8 2015
+	- Document functions deprecated by Math-Utils and Math-VecStat.
+	- Change internal use from now-deprecated functions to functions
+	  in Math-Utils and Math-VecStat (this is mostly in the Sturm
+	  functions.)
+	- New function sturm_bisection(). Code comes from
+	  sturm_bisection_root(), which now calls it.
+	- Fix (deprecated, but in use) fltcmp() to avoid an error that
+	  could result in fltcmp thinking equal values are less than.
+
 2.70
      Jan 27 2014
 	- Made documentation changes to the README file in anticipation
