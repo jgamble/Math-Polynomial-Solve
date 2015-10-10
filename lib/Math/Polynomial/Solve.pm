@@ -71,7 +71,7 @@ use warnings;
 	@{ $EXPORT_TAGS{'sturm'} },
 	@{ $EXPORT_TAGS{'utility'} } );
 
-our $VERSION = '2.67';
+our $VERSION = '2.71';
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -165,9 +165,8 @@ sub fltcmp
 	my($a, $b) = @_;
 
 	return 0 if (abs($a - $b) <= $tolerance{fltcmp});
-	return -1 if ($a + $tolerance{fltcmp} < $b);
-	return 1 if ($a - $tolerance{fltcmp} > $b);
-	return 0;
+	return -1 if ($a < $b);
+	return 1;
 }
 
 #
@@ -1638,7 +1637,7 @@ sub sturm_bisection
 sub sturm_bisection_roots
 {
 	my($chain_ref, $from, $to) = @_;
-	my($cref0) = ${$chain_ref}[0];
+	my $cref0 = ${$chain_ref}[0];
 	my @boundaries = sturm_bisection($chain_ref, $from, $to);
 	my @roots;
 
@@ -2373,11 +2372,24 @@ This is equivalent to:
   my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
   $no_unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
 
+=head3 sturm_bisection()
+
+Finds the boundaries around the roots of a polynomial function,
+using the root count method of Sturm.
+
+ @boundaries = sturm_bisection(\@chain, $from, $to);
+
+The elements of @boundaries will be a list of two-element arrays, each
+element bracketing a root.
+
+It will not bracket complex roots.
+
+
 =head3 sturm_bisection_roots()
 
-Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses the
-bisection method combined with C<sturm_real_root_range_count()> to narrow the range
-to a single root, then uses L</laguerre()> to find its value.
+Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses
+sturm_bisection() function to bracket the roots of the polynomial
+then uses L</laguerre()> to close in on each root.
 
   my($from, $to) = (-1000, 0);
   my @chain = poly_sturm_chain(@coefficients);
