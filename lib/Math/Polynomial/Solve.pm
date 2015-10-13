@@ -2005,6 +2005,7 @@ or
   my @x4 = quartic_roots($a, $b, $c, $d, $e);
 
 or
+
   use Math::Complex;  # The roots may be complex numbers.
   use Math::Polynomial;
   use Math::Polynomial::Solve qw(:classical ascending_order);
@@ -2384,11 +2385,13 @@ element bracketing a root.
 
 It will not bracket complex roots.
 
+This allows you to use a different root-finding function than laguerre(),
+which is the default function used by sturm_bisection_roots().
 
 =head3 sturm_bisection_roots()
 
-Return the I<real> roots counted by L</sturm_real_root_range_count()>. Uses
-sturm_bisection() function to bracket the roots of the polynomial
+Return the I<real> roots counted by L</sturm_real_root_range_count()>.
+Uses L</sturm_bisection()> to bracket the roots of the polynomial,
 then uses L</laguerre()> to close in on each root.
 
   my($from, $to) = (-1000, 0);
@@ -2478,6 +2481,11 @@ examples of its use.
 These are internal functions used by the other functions listed above
 that may also be useful to the user, or which affect the behavior of
 other functions. They are all exported under the tag "utility".
+
+Because many of these functions are useful outside the area of polynomials,
+they have been taken, with changes, to the module L<Math::Utils>, and
+have been deprecated for this module. See L</DEPRECATED FUNCTIONS>
+for more information, and the descriptions below for details.
 
 =head3 epsilon()
 
