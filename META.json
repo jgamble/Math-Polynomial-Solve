@@ -4,7 +4,7 @@
       "John M. Gamble <jgamble@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Module::Build version 0.4203",
    "license" : [
       "perl_5"
    ],
@@ -27,14 +27,15 @@
       "runtime" : {
          "requires" : {
             "Math::Complex" : "1.36",
-            "perl" : "v5.8.3"
+            "Math::Utils" : "1.06",
+            "perl" : "v5.10.1"
          }
       }
    },
    "provides" : {
       "Math::Polynomial::Solve" : {
          "file" : "lib/Math/Polynomial/Solve.pm",
-         "version" : "2.67"
+         "version" : "2.71"
       }
    },
    "release_status" : "stable",
@@ -46,20 +47,5 @@
          "url" : "git://github.com/jgamble/Math-Polynomial-Solve.git"
       }
    },
-   "version" : "2.70",
-   "x_keyword" : [
-      "math",
-      "polynomial",
-      "quadratic",
-      "cubic",
-      "quartic",
-      "matrix",
-      "companion-matrix",
-      "Sturm",
-      "Nickalls",
-      "Ferrari",
-      "Laguerre",
-      "Hessenberg",
-      "Newton-Raphson"
-   ]
+   "version" : "2.71"
 }
