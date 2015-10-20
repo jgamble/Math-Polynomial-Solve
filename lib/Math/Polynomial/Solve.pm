@@ -65,11 +65,13 @@ use warnings;
 	) ],
 );
 
-@EXPORT_OK = ( 'ascending_order',
+@EXPORT_OK = (
 	@{ $EXPORT_TAGS{'classical'} },
 	@{ $EXPORT_TAGS{'numeric'} },
 	@{ $EXPORT_TAGS{'sturm'} },
 	@{ $EXPORT_TAGS{'utility'} } );
+
+@EXPORT = ( 'ascending_order' );
 
 our $VERSION = '2.71';
 
@@ -150,40 +152,165 @@ BEGIN
 #
 my $ascending_flag = 0;		# default 0, in a later version it will be 1.
 
-#
-# if (fltcmp($x, $y) == 0) { ... }
-#
-# Compare two floating point numbers to a certain degree of accuracy.
-# Like other functions ending in "cmp", returns -1 if $x < $y, 1 if
-# $x > $y, and 0 if the arguments are equal, the difference being that
-# the comparisons are made within a tolerance set in poly_tolerance().
-#
-# In the :utility export set.
-#
-sub fltcmp
-{
-	my($a, $b) = @_;
+=encoding utf8
 
-	return 0 if (abs($a - $b) <= $tolerance{fltcmp});
-	return -1 if ($a < $b);
-	return 1;
-}
+=head1 NAME
 
-#
-# $eps = epsilon();
-# $oldeps = epsilon($neweps);
-#
-# Returns the machine epsilon value used internally by this module.
-# If overriding the machine epsilon, returns the old value.
-#
-# In the :utility export set.
-#
-sub epsilon
-{
-	my $eps = $epsilon;
-	$epsilon = $_[0] if (scalar @_ > 0);
-	return $eps;
-}
+Math::Polynomial::Solve - Find the roots of polynomial equations.
+
+=head1 SYNOPSIS
+
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial::Solve qw(poly_roots);
+
+  my @x = poly_roots(@coefficients);
+
+or
+
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial::Solve qw(:numeric);  # See the EXPORT section
+
+  #
+  # Find roots using the matrix method.
+  #
+  my @x = poly_roots(@coefficients);
+
+  #
+  # Alternatively, use the classical methods instead of the matrix
+  # method if the polynomial degree is less than five.
+  #
+  poly_option(hessenberg => 0);
+  @x = poly_roots(@coefficients);
+
+or
+
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial::Solve qw(:classical);  # See the EXPORT section
+
+  #
+  # Find the polynomial roots using the classical methods.
+  #
+
+  # Find the roots of ax + b
+  my @x1 = linear_roots($a, $b);
+
+  # Find the roots of ax**2 + bx +c
+  my @x2 = quadratic_roots($a, $b, $c);
+
+  # Find the roots of ax**3 + bx**2 +cx + d
+  my @x3 = cubic_roots($a, $b, $c, $d);
+
+  # Find the roots of ax**4 + bx**3 +cx**2 + dx + e
+  my @x4 = quartic_roots($a, $b, $c, $d, $e);
+
+or
+
+  use Math::Complex;  # The roots may be complex numbers.
+  use Math::Polynomial;
+  use Math::Polynomial::Solve qw(:classical ascending_order);
+
+  ascending_order(1); # Change default coefficient order for M::P::S.
+
+  #
+  # Form 8*x**3 - 6*x - 1
+  #
+  my $p1 = Math::Polynomial->new(-1, -6, 0, 8);
+
+  #
+  # Use Math::Polynomial's coefficient order.
+  # If ascending_order() had not been called,
+  # the statement would be:
+  #
+  # my @roots = poly_roots(reverse $p1->coefficients);
+  #
+  my @roots = poly_roots($p1->coefficients);
+
+or
+
+  use Math::Polynomial::Solve qw(:utility);
+
+  my @coefficients = (89, 23, 23, 432, 27);
+
+  # Return a version of the polynomial with no leading zeroes
+  # and the leading coefficient equal to 1.
+  my @monic_form = simplified_form(@coefficients);
+
+  # Find the y-values of the polynomial at selected x-values.
+  my @xvals = (0, 1, 2, 3, 5, 7);
+  my @yvals = poly_evaluate(\@coefficients, \@xvals);
+
+or
+
+  use Math::Polynomial::Solve qw(:sturm);
+
+  # Find the number of unique real roots of the polynomial.
+  my $no_of_unique_roots = poly_real_root_count(@coefficients);
+
+=head1 DESCRIPTION
+
+This package supplies a set of functions that find the roots of
+polynomials, along with some utility functions.
+
+Roots will be either real or of type L<Math::Complex>.
+
+Functions making use of the Sturm sequence are also available, letting you
+find the number of real roots present in a range of X values.
+
+In addition to the root-finding functions, the internal functions have
+also been exported for your use.
+
+=head2 DEPRECATED FUNCTIONS
+
+Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
+Consequently this module now uses Math::Utils itself, and will remove the
+redundant :utility functions by the next two releases.
+
+Note that the L<polynomial functions|Math::Utils/polynomial tag> 
+in Math::Utils all take the polynomial
+coefficients in ascending order, left to right.
+
+Scheduled to be removed are:
+
+=over 4
+
+=item fltcmp()
+
+Use Math::Utils's generate_fltcmp() or generate_relational() to
+create comparison functions with a built-in tolerance.
+
+=item poly_divide()
+
+Use Math::Utils's pl_div(). Note that unlike poly_divide(), checking for
+leading zeros isn't done by pl_div(), and is expected to be done by
+the caller.
+
+=item poly_evaluate()
+
+Use Math::Utils's pl_evaluate().
+
+=item poly_derivative()
+
+Use Math::Utils's pl_derivative().
+
+=item poly_antiderivative()
+
+Use Math::Utils's pl_antiderivative().
+
+=item poly_derivaluate()
+
+Use Math::Utils's pl_dxevaluate().
+
+=item poly_constmult()
+
+Not duplicated in Math::Utils, use L<Math::VecStat>'s vecprod().
+
+=item simplified_form()
+
+This function is simply going to be dropped.
+
+=back
+
+=cut
 
 #
 # $asending = ascending_order();
@@ -205,10 +332,327 @@ sub ascending_order
 }
 
 #
-# poly_option(opt1 => 1, opt2 => 0, ...);
+# ($new_coefficients_ref, $varsubst) = poly_analysis(@coefficients);
 #
-# In the :numeric export set.
+# If the polynomial has evenly spaced gaps of zero coefficients, reduce
+# the polynomial through variable substitution.
 #
+# For example, a degree-6 polynomial like 9x**6 + 128x**3 + 7
+# can be reduced to a polynomial 9y**2 + 128y + 7, where y = x**3.
+#
+# After solving a quadratic instead of a sextic, the actual roots of
+# the original equation are found by taking the cube roots of each
+# root of the quadratic.
+#
+# Not exported.
+sub poly_analysis
+{
+	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
+	my @czp;
+	my $m = 1;
+
+	#
+	# Is the count of coefficients a multiple of any of the primes?
+	#
+	# Realistically I don't expect any gaps that can't be handled by
+	# the first three prime numbers, but it's not much of a waste of
+	# space to go up to 31.
+	#
+	@czp = grep(($#coefficients % $_) == 0,
+		(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31)
+	);
+
+	#
+	# Any coefficients zero at the non-N degrees? (1==T,0==F).
+	#
+	#### @czp
+	#
+	if (@czp)
+	{
+		for my $j (0..$#coefficients)
+		{
+			if (abs($coefficients[$j]) > $epsilon)
+			{
+				@czp = grep(($j % $_) == 0, @czp);
+			}
+		}
+
+		#
+		# The remaining list of primes represent the gap size
+		# between non-zero coefficients.
+		#
+		map(($m *= $_), @czp);
+
+		#### Substitution degree: $m
+	}
+
+	#
+	# If there's a sequence of zero-filled gaps in the coefficients,
+	# reduce the polynomial by degree $m and check again for the
+	# next round of factors (e.g., X**8 + X**4 + 1 needs two rounds
+	# to get to a factor of 4).
+	#
+	if ($m > 1)
+	{
+		my @alt_coefs;
+		push @alt_coefs, $coefficients[$_*$m] for (0..$#coefficients/$m);
+		my($cf, $m1) = poly_analysis(@alt_coefs);
+		@coefficients = @$cf;
+		$m *= $m1;
+	}
+
+	return \@coefficients, $m;
+}
+
+
+=head2 EXPORTED BY DEFAULT
+
+=head3 ascending_order()
+
+Changes the default order of the coefficents to the functions.
+
+When Math::Polynomial::Solve was originally written, it followed the
+calling convention of L<Math::Polynomial>, using the highest degree
+coefficient, followed by the next highest degree coefficient, and so
+on in descending order.
+
+Later Math::Polynomial was re-written, and the order of the coefficients were
+put in ascending order, e.g.:
+
+  use Math::Polynomial;
+
+  #
+  # Create the polynomial 8*x**3 - 6*x - 1.
+  #
+  $fpx = Math::Polynomial->new(-1, -6, 0, 8);
+
+If you use Math::Polynomial with this module, it will probably be
+more convenient to change the default parameter list of
+Math::Polynomial::Solve's functions, using the ascending_order() function:
+
+  use Math::Polynomial;
+  use Math::Polynomial::Solve qw(:classical :numeric);
+
+  ascending_order(1);
+
+  my $fp4 = Math::Polynomial->interpolate([1 .. 4], [14, 19, 25, 32]);
+
+  #
+  # Find roots of $fp4.
+  #
+  my @fp4_roots = quartic_roots($fp4->coefficients);
+
+or
+
+  my @fp4_roots = poly_roots($fp4->coefficients);
+
+If C<ascending_order(1)> had not been called, the previous line of code
+would have been written instead as
+
+  my @fp4_roots = poly_roots(reverse $fp4->coefficients);
+
+The function is a temporary measure to help with the change in the API when
+version 3.00 of this module is released. At that point coefficients will be
+in ascending order by default, and you will need to use C<ascending_order(0)>
+to use the old (current) style.
+
+=head2 Numeric Functions
+
+These are the functions that calculate the polynomial's roots through numeric
+algorithms. They are all exported under the tag "numeric".
+
+=head3 poly_roots()
+
+Returns the roots of a polynomial equation, regardless of degree.
+Unlike the other root-finding functions, it will check for coefficients
+of zero for the highest power, and 'step down' the degree of the
+polynomial to the appropriate case. Additionally, it will check for
+coefficients of zero for the lowest power terms, and add zeros to its
+root list before calling one of the root-finding functions.
+
+By default, C<poly_roots()> will use the Hessenberg matrix method for solving
+polynomials. This can be changed by calling L</poly_options()>.
+
+The method of poly_roots() is almost equivalent to
+
+  @x = hqr_eigen_hessenberg(
+        balance_matrix(build_companion(@coefficients))
+        );
+
+except this wouldn't check for leading and trailing zero coefficients, and it
+ignores the settings of C<poly_options()>.
+
+=cut
+
+sub poly_roots
+{
+	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
+	my(@x, @zero_x);
+	my $subst_degree = 1;
+
+	#
+	#### @coefficients
+	#
+	# Check for zero coefficients in the higher-powered terms.
+	#
+	shift @coefficients while (scalar @coefficients and
+				   abs($coefficients[0]) < $epsilon);
+
+	if (@coefficients == 0)
+	{
+		carp "All coefficients are zero\n";
+		return (0);
+	}
+
+	#
+	# How about zero coefficients in the low terms?
+	#
+	while (scalar @coefficients and
+	       abs($coefficients[$#coefficients]) < $epsilon)
+	{
+		push @zero_x, 0;
+		pop @coefficients
+	}
+
+	#
+	# If the polynomial is of the form ax**n + c, and $option{root_function}
+	# is set, use the Math::Complex::root() function to return the roots.
+	#
+	### %option
+	#
+	if ($option{root_function} and
+	    poly_nonzero_term_count(@coefficients) == 2)
+	{
+		return  @zero_x,
+			root(-$coefficients[$#coefficients]/$coefficients[0],
+			     $#coefficients);
+	}
+
+	#
+	# Next do some analysis of the coefficients.
+	# See if we can reduce the size of the polynomial by
+	# doing some variable substitution.
+	#
+	if ($option{varsubst})
+	{
+		my $cf;
+		($cf, $subst_degree) = poly_analysis(@coefficients);
+		@coefficients = @$cf if ($subst_degree > 1);
+	}
+
+	#
+	# If the remaining polynomial is a quintic or higher, or
+	# if $option{hessenberg} is set, continue with the matrix
+	# calculation.
+	#
+	#### @coefficients
+	#### $subst_degree
+	#
+
+	#
+	# The following root solvers do their own coefficient
+	# reversing, so undo the earlier reversal now.
+	#
+	@coefficients = reverse @coefficients if ($ascending_flag);
+
+	if ($option{hessenberg} or $#coefficients > 4)
+	{
+		#
+		# QR iterations from the matrix.
+		#
+		@x = hqr_eigen_hessenberg(
+			balance_matrix(build_companion(@coefficients))
+			);
+	}
+	elsif ($#coefficients == 4)
+	{
+		@x = quartic_roots(@coefficients);
+	}
+	elsif ($#coefficients == 3)
+	{
+		@x = cubic_roots(@coefficients);
+	}
+	elsif ($#coefficients == 2)
+	{
+		@x = quadratic_roots(@coefficients);
+	}
+	elsif ($#coefficients == 1)
+	{
+		@x = linear_roots(@coefficients);
+	}
+
+	@x = map(root($_, $subst_degree), @x) if ($subst_degree > 1);
+
+	return  @zero_x, @x;
+}
+
+
+=head3 poly_option()
+
+Set options that affect the behavior of the C<poly_roots()> function. All
+options are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
+and L</poly_tolerance()>.
+
+Options may be set and saved:
+
+  #
+  # Set a few options...
+  #
+  poly_option(hessenberg => 0, root_function => 1);
+
+  #
+  # Get all of the current options and their values.
+  #
+  my %all_options = poly_option();
+
+  #
+  # Set some options but save the former option values
+  # for later.
+  #
+  my %changed_options = poly_option(hessenberg => 1, varsubst => 1);
+
+The current options available are:
+
+=over 4
+
+=item hessenberg
+
+Use the QR Hessenberg matrix method to solve the polynomial. By default, this
+is set to 1. If set to 0, C<poly_roots()> uses one of the L<classical|Classical Functions>
+root-finding functions listed below, I<if> the degree of the polynomial is four
+or less.
+
+=item root_function
+
+Use the L<root()|Math::Complex/OPERATIONS> function from Math::Complex if the
+polynomial is of the form C<ax**n + c>. This will take precedence over the other
+solving methods.
+
+=item varsubst
+
+Reduce polynomials to a lower degree through variable substitution, if possible.
+
+For example, with C<varsubst> set to one and the polynomial to solve being
+C<9x**6 + 128x**3 + 21>, C<poly_roots()> will reduce the polynomial to
+C<9y**2 + 128y + 21> (where C<y = x**3>),
+and solve the quadratic (either classically or numerically, depending
+on the hessenberg option). Taking the cube root of each quadratic root
+completes the operation.
+
+This has the benefit of having a simpler matrix to solve, or if the
+C<hessenberg> option is set to zero, has the effect of being able to use one of
+the classical methods on a polynomial of high degree. In the above example, the
+order-six polynomial gets solved with the quadratic_roots() function if the
+hessenberg option is zero.
+
+Currently the variable substitution is fairly simple and will only look
+for gaps of zeros in the coefficients that are multiples of the prime numbers
+less than or equal to 31 (2, 3, 5, et cetera).
+
+=back
+
+=cut
+
 sub poly_option
 {
 	my %opts = @_;
@@ -235,345 +679,21 @@ sub poly_option
 	return %old_opts;
 }
 
-#
-# poly_tolerance(opt1 => n, opt2 => n, ...);
-#
-# In the :utility export set.
-#
-sub poly_tolerance
-{
-	my %tols = @_;
-	my %old_tols;
+=head3 build_companion
 
-	return %tolerance if (scalar @_ == 0);
+Creates the initial companion matrix of the polynomial. Returns an array
+of arrays (the internal representation of a matrix). This may be used as
+an argument to the L<Math::Matrix> contructor:
 
-	foreach my $k (keys %tols)
-	{
-		#
-		# If this is a real tolerance limit, save its old value, then set it.
-		#
-		if (exists $tolerance{$k})
-		{
-			my $val = abs($tols{$k});
+  my @cm = build_companion(@coef);
 
-			$old_tols{$k} = $tolerance{$k};
-			$tolerance{$k} = $val;
-		}
-		else
-		{
-			croak "poly_tolerance(): unknown key $k.";
-		}
-	}
+  my $m = Math::Matrix->new(@cm);
+  $m->print();
 
-	return %old_tols;
-}
+The Wikipedia article at L<http://en.wikipedia.org/wiki/Companion_matrix/> has
+more information on the subject.
 
-#
-# poly_iteration(opt1 => n, opt2 => n, ...);
-#
-# In the :utility export set.
-#
-sub poly_iteration
-{
-	my %limits = @_;
-	my %old_limits;
-
-	return %iteration if (scalar @_ == 0);
-
-	foreach my $k (keys %limits)
-	{
-		#
-		# If this is a real iteration limit, save its old value, then set it.
-		#
-		if (exists $iteration{$k})
-		{
-			my $val = abs(int($limits{$k}));
-			
-			carp "poly_iteration(): Unreasonably small value for $k => $val\n" if ($val < 10);
-
-			$old_limits{$k} = $iteration{$k};
-			$iteration{$k} = $val;
-		}
-		else
-		{
-			croak "poly_iteration(): unknown key $k.";
-		}
-	}
-
-	return %old_limits;
-}
-
-#
-# @x = linear_roots($a, $b)
-#
-# In the :classical export set.
-#
-sub linear_roots
-{
-	my($a, $b) = ($ascending_flag)? reverse @_: @_;
-
-	if (abs($a) < $epsilon)
-	{
-		carp "The coefficient of the highest power must not be zero!\n";
-		return ();
-	}
-
-	return wantarray? (-$b/$a): -$b/$a;
-}
-
-#
-# @x = quadratic_roots($a, $b, $c)
-#
-# In the :classical export set.
-#
-sub quadratic_roots
-{
-	my($a, $b, $c) = ($ascending_flag)? reverse @_: @_;
-
-	if (abs($a) < $epsilon)
-	{
-		carp "The coefficient of the highest power must not be zero!\n";
-		return ();
-	}
-
-	return (0, -$b/$a) if (abs($c) < $epsilon);
-
-	my $dis_sqrt = sqrt($b*$b - $a * 4 * $c);
-
-	$dis_sqrt = -$dis_sqrt if ($b < $epsilon);	# Avoid catastrophic cancellation.
-
-	my $xt = ($b + $dis_sqrt)/-2;
-
-	return ($xt/$a, $c/$xt);
-}
-
-#
-# @x = cubic_roots($a, $b, $c, $d)
-#
-# In the :classical export set.
-#
-sub cubic_roots
-{
-	my($a, $b, $c, $d) = ($ascending_flag)? reverse @_: @_;
-	my @x;
-
-	if (abs($a) < $epsilon)
-	{
-		carp "The coefficient of the highest power must not be zero!\n";
-		return @x;
-	}
-
-	#
-	# We're calling exported functions that also check
-	# the $ascending_flag. To avoid reversing the reversed,
-	# temporarily set the flag to zero and reset before returning.
-	#
-	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 0;
-
-	if (abs($d) < $epsilon)
-	{
-		@x = quadratic_roots($a, $b, $c);
-		$ascending_flag = $temp_ascending_flag;
-		return (0, @x);
-	}
-
-	my $xN = -$b/3/$a;
-	my $yN = $d + $xN * ($c + $xN * ($b + $a * $xN));
-
-	my $two_a = 2 * $a;
-	my $delta_sq = ($b * $b - 3 * $a * $c)/(9 * $a * $a);
-	my $h_sq = 4/9 * ($b * $b - 3 * $a * $c) * $delta_sq**2;
-	my $dis = $yN * $yN - $h_sq;
-	my $twothirds_pi = (2 * pi)/3;
-
-	#
-	###            cubic_roots() calculations...
-	#### $two_a
-	#### $delta_sq
-	#### $h_sq
-	#### $dis
-	#
-	if ($dis > $epsilon)
-	{
-		#
-		### Cubic branch 1, $dis is greater than  0...
-		#
-		# One real root, two complex roots.
-		#
-		my $dis_sqrt = sqrt($dis);
-		my $r_p = $yN - $dis_sqrt;
-		my $r_q = $yN + $dis_sqrt;
-		my $p = cbrt( abs($r_p)/$two_a );
-		my $q = cbrt( abs($r_q)/$two_a );
-
-		$p = -$p if ($r_p > 0);
-		$q = -$q if ($r_q > 0);
-
-		$x[0] = $xN + $p + $q;
-		$x[1] = $xN + $p * exp($twothirds_pi * i)
-			    + $q * exp(-$twothirds_pi * i);
-		$x[2] = ~$x[1];
-	}
-	elsif ($dis < -$epsilon)
-	{
-		#
-		### Cubic branch 2, $dis is less than  0...
-		#
-		# Three distinct real roots.
-		#
-		my $theta = acos(-$yN/sqrt($h_sq))/3;
-		my $delta = sqrt($b * $b - 3 * $a * $c)/(3 * $a);
-		my $two_d = 2 * $delta;
-
-		@x = ($xN + $two_d * cos($theta),
-			$xN + $two_d * cos($twothirds_pi - $theta),
-			$xN + $two_d * cos($twothirds_pi + $theta));
-	}
-	else
-	{
-		#
-		### Cubic branch 3, $dis equals 0, within epsilon...
-		#
-		# abs($dis) <= $epsilon (effectively zero).
-		#
-		# Three real roots (two or three equal).
-		#
-		my $delta = cbrt($yN/$two_a);
-
-		@x = ($xN + $delta, $xN + $delta, $xN - 2 * $delta);
-	}
-
-	$ascending_flag = $temp_ascending_flag;
-	return @x;
-}
-
-#
-# @x = quartic_roots($a, $b, $c, $d, $e)
-#
-# In the :classical export set.
-#
-sub quartic_roots
-{
-	my($a,$b,$c,$d,$e) = ($ascending_flag)? reverse @_: @_;
-	my @x = ();
-
-	if (abs($a) < $epsilon)
-	{
-		carp "Coefficient of highest power must not be zero!\n";
-		return @x;
-	}
-
-	#
-	# We're calling exported functions that also check
-	# the $ascending_flag. To avoid reversing the reversed,
-	# temporarily set the flag to zero and reset before returning.
-	#
-	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 0;
-
-	if (abs($e) < $epsilon)
-	{
-		@x = cubic_roots($a, $b, $c, $d);
-		$ascending_flag = $temp_ascending_flag;
-		return (0, @x);
-	}
-
-	#
-	# First step:  Divide by the leading coefficient.
-	#
-	$b /= $a;
-	$c /= $a;
-	$d /= $a;
-	$e /= $a;
-
-	#
-	# Second step: simplify the equation to the
-	# "resolvent cubic"  y**4 + fy**2 + gy + h.
-	#
-	# (This is done by setting x = y - b/4).
-	#
-	my $b4 = $b/4;
-
-	#
-	# The f, g, and h values are:
-	#
-	my $f = $c -
-		6 * $b4 * $b4;
-	my $g = $d +
-		2 * $b4 * (-$c + 4 * $b4 * $b4);
-	my $h = $e +
-		$b4 * (-$d + $b4 * ($c - 3 * $b4 * $b4));
-
-	#
-	###            quartic_roots calculations
-	#### $b4
-	#### $f
-	#### $g
-	#### $h
-	#
-	if (abs($h) < $epsilon)
-	{
-		#
-		### Quartic branch 1, $h equals 0, within epsilon...
-		#
-		# Special case: h == 0.  We have a cubic times y.
-		#
-		@x = (0, cubic_roots(1, 0, $f, $g));
-	}
-	elsif (abs($g * $g) < $epsilon)
-	{
-		#
-		### Quartic branch 2, $g equals 0, within epsilon...
-		#
-		# Another special case: g == 0.  We have a quadratic
-		# with y-squared.
-		#
-		# (We check $g**2 because that's what the constant
-		# value actually is in Ferrari's method, and it is
-		# possible for $g to be outside of epsilon while
-		# $g**2 is inside, i.e., "zero").
-		#
-		my($p, $q) = quadratic_roots(1, $f, $h);
-		$p = sqrt($p);
-		$q = sqrt($q);
-		@x = ($p, -$p, $q, -$q);
-	}
-	else
-	{
-		#
-		### Quartic branch 3, Ferrari's method...
-		#
-		# Special cases don't apply, so continue on with Ferrari's
-		# method.  This involves setting up the resolvent cubic
-		# as the product of two quadratics.
-		#
-		# After setting up conditions that guarantee that the
-		# coefficients come out right (including the zero value
-		# for the third-power term), we wind up with a 6th
-		# degree polynomial with, fortunately, only even-powered
-		# terms.  In other words, a cubic with z = y**2.
-		#
-		# Take a root of that equation, and get the
-		# quadratics from it.
-		#
-		my $z;
-		($z, undef, undef) = cubic_roots(1, 2*$f, $f*$f - 4*$h, -$g*$g);
-
-		#### $z
-
-		my $alpha = sqrt($z);
-		my $rho = $g/$alpha;
-		my $beta = ($f + $z - $rho)/2;
-		my $gamma = ($f + $z + $rho)/2;
-
-		@x = quadratic_roots(1, $alpha, $beta);
-		push @x, quadratic_roots(1, -$alpha, $gamma);
-	}
-
-	$ascending_flag = $temp_ascending_flag;
-	return ($x[0] - $b4, $x[1] - $b4, $x[2] - $b4, $x[3] - $b4);
-}
+=cut
 
 #
 # Perl code to find roots of a polynomial translated by Nick Ing-Simmons
@@ -581,14 +701,6 @@ sub quartic_roots
 #
 # From the netlib archive: http://netlib.bell-labs.com/netlib/search.html
 # In particular http://netlib.bell-labs.com/netlib/opt/companion.tgz
-
-#
-# @cm = build_companion(@coefficients);
-#
-# Build the Companion Matrix of the N degree polynomial.
-# Return an array of arrays representing the N by N matrix.
-#
-# In the :numeric export set.
 #
 sub build_companion
 {
@@ -617,6 +729,18 @@ sub build_companion
 
 	return @h;
 }
+
+
+=head3 balance_matrix
+
+Balances the matrix (makes the rows and columns have similar norms) created
+by build_companion() by applying a matrix transformation with a diagonal
+matrix of powers of two.
+
+This is used to help prevent any rounding errors that occur if the elements
+of the matrix differ greatly in magnitude.
+
+=cut
 
 #       BASE is the base of the floating point representation on the machine.
 #       It is 16 for base 16 float : for example, IBM system 360/370.
@@ -714,10 +838,10 @@ sub balance_matrix
 
 				#C Generic code.
 				#C   do $j=1,$n
-				#C	 $h($i,$j)=$h($i,$j)*$g
+				#C       $h($i,$j)=$h($i,$j)*$g
 				#C   enddo
 				#C   do $j=1,$n
-				#C	 $h($j,$i)=$h($j,$i)*$f
+				#C       $h($j,$i)=$h($j,$i)*$f
 				#C   enddo
 				#C begin specific code. Touch only non-zero elements of companion.
 				if ($i == 0)
@@ -751,15 +875,14 @@ sub balance_matrix
 	return @h;
 }
 
-#
-# @roots = hqr_eigen_hessenberg(@matrix)
-#
-# Finds the eigenvalues of a real upper Hessenberg matrix,
-# H, stored in the array $h(0:n-1,0:n-1).  Returns a list
-# of real and/or complex numbers.
-#
-# In the :numeric export set.
-#
+
+=head3 hqr_eigen_hessenberg
+
+Returns the roots of the polynomial equation by solving the matrix created by
+C<build_companion()> and C<balance_matrix()>. See L</poly_roots()>.
+
+=cut
+
 sub hqr_eigen_hessenberg
 {
 	my @h = @_;
@@ -1015,479 +1138,349 @@ sub hqr_eigen_hessenberg
 	return @roots;
 }
 
-#
-# @x = poly_roots(@coefficients)
-#
-# Coefficients are fed in highest degree first.  Equation 5x**5 + 4x**4 + 2x + 8
-# would be fed in with @x = poly_roots(5, 4, 0, 0, 2, 8);
-#
-# In the :numeric export set.
-#
-sub poly_roots
+
+=head2 Classical Functions
+
+These are the functions that solve polynomials via the classical methods.
+Quartic, cubic, quadratic, and even linear equations may be solved with
+these functions. They are all exported under the tag "classical".
+
+L</poly_roots()> will use these functions I<if> the hessenberg option
+is set to 0, I<and if> the degree of the polynomial is four or less.
+
+The leading coefficient C<$a> must always be non-zero for the classical
+functions.
+
+=head3 linear_roots()
+
+Here for completeness's sake more than anything else. Returns the
+solution for
+
+  ax + b = 0
+
+by returning C<-b/a>. This may be in either a scalar or an array context.
+
+=cut
+
+sub linear_roots
 {
-	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
-	my(@x, @zero_x);
-	my $subst_degree = 1;
+	my($a, $b) = ($ascending_flag)? reverse @_: @_;
 
-	#
-	#### @coefficients
-	#
-	# Check for zero coefficients in the higher-powered terms.
-	#
-	shift @coefficients while (scalar @coefficients and
-				   abs($coefficients[0]) < $epsilon);
-
-	if (@coefficients == 0)
+	if (abs($a) < $epsilon)
 	{
-		carp "All coefficients are zero\n";
-		return (0);
+		carp "The coefficient of the highest power must not be zero!\n";
+		return ();
 	}
 
-	#
-	# How about zero coefficients in the low terms?
-	#
-	while (scalar @coefficients and
-	       abs($coefficients[$#coefficients]) < $epsilon)
-	{
-		push @zero_x, 0;
-		pop @coefficients
-	}
-
-	#
-	# If the polynomial is of the form ax**n + c, and $option{root_function}
-	# is set, use the Math::Complex::root() function to return the roots.
-	#
-	### %option
-	#
-	if ($option{root_function} and
-	    poly_nonzero_term_count(@coefficients) == 2)
-	{
-		return  @zero_x,
-			root(-$coefficients[$#coefficients]/$coefficients[0],
-			     $#coefficients);
-	}
-
-	#
-	# Next do some analysis of the coefficients.
-	# See if we can reduce the size of the polynomial by
-	# doing some variable substitution.
-	#
-	if ($option{varsubst})
-	{
-		my $cf;
-		($cf, $subst_degree) = poly_analysis(@coefficients);
-		@coefficients = @$cf if ($subst_degree > 1);
-	}
-
-	#
-	# If the remaining polynomial is a quintic or higher, or
-	# if $option{hessenberg} is set, continue with the matrix
-	# calculation.
-	#
-	#### @coefficients
-	#### $subst_degree
-	#
-
-	#
-	# The following root solvers do their own coefficient
-	# reversing, so undo the earlier reversal now.
-	#
-	@coefficients = reverse @coefficients if ($ascending_flag);
-
-	if ($option{hessenberg} or $#coefficients > 4)
-	{
-		#
-		# QR iterations from the matrix.
-		#
-		@x = hqr_eigen_hessenberg(
-			balance_matrix(build_companion(@coefficients))
-			);
-	}
-	elsif ($#coefficients == 4)
-	{
-		@x = quartic_roots(@coefficients);
-	}
-	elsif ($#coefficients == 3)
-	{
-		@x = cubic_roots(@coefficients);
-	}
-	elsif ($#coefficients == 2)
-	{
-		@x = quadratic_roots(@coefficients);
-	}
-	elsif ($#coefficients == 1)
-	{
-		@x = linear_roots(@coefficients);
-	}
-
-	@x = map(root($_, $subst_degree), @x) if ($subst_degree > 1);
-
-	return  @zero_x, @x;
+	return wantarray? (-$b/$a): -$b/$a;
 }
 
-#
-# ($new_coefficients_ref, $varsubst) = poly_analysis(@coefficients);
-#
-# If the polynomial has evenly spaced gaps of zero coefficients, reduce
-# the polynomial through variable substitution.
-#
-# For example, a degree-6 polynomial like 9x**6 + 128x**3 + 7
-# can be reduced to a polynomial 9y**2 + 128y + 7, where y = x**3.
-#
-# After solving a quadratic instead of a sextic, the actual roots of
-# the original equation are found by taking the cube roots of each
-# root of the quadratic.
-#
-# Not exported.
-sub poly_analysis
+
+=head3 quadratic_roots()
+
+Gives the roots of the quadratic equation
+
+  ax**2 + bx + c = 0
+
+using the well-known quadratic formula. Returns a two-element list.
+
+=cut
+
+sub quadratic_roots
 {
-	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
-	my @czp;
-	my $m = 1;
+	my($a, $b, $c) = ($ascending_flag)? reverse @_: @_;
 
-	#
-	# Is the count of coefficients a multiple of any of the primes?
-	#
-	# Realistically I don't expect any gaps that can't be handled by
-	# the first three prime numbers, but it's not much of a waste of
-	# space to go up to 31.
-	#
-	@czp = grep(($#coefficients % $_) == 0,
-		(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31)
-	);
-
-	#
-	# Any coefficients zero at the non-N degrees? (1==T,0==F).
-	#
-	#### @czp
-	#
-	if (@czp)
+	if (abs($a) < $epsilon)
 	{
-		for my $j (0..$#coefficients)
-		{
-			if (abs($coefficients[$j]) > $epsilon)
-			{
-				@czp = grep(($j % $_) == 0, @czp);
-			}
-		}
+		carp "The coefficient of the highest power must not be zero!\n";
+		return ();
+	}
 
-		#
-		# The remaining list of primes represent the gap size
-		# between non-zero coefficients.
-		#
-		map(($m *= $_), @czp);
+	return (0, -$b/$a) if (abs($c) < $epsilon);
 
-		#### Substitution degree: $m
+	my $dis_sqrt = sqrt($b*$b - $a * 4 * $c);
+
+	$dis_sqrt = -$dis_sqrt if ($b < $epsilon);	# Avoid catastrophic cancellation.
+
+	my $xt = ($b + $dis_sqrt)/-2;
+
+	return ($xt/$a, $c/$xt);
+}
+
+
+=head3 cubic_roots()
+
+Gives the roots of the cubic equation
+
+  ax**3 + bx**2 + cx + d = 0
+
+by the method described by R. W. D. Nickalls (see the L</ACKNOWLEDGMENTS>
+section below). Returns a three-element list. The first element will
+always be real. The next two values will either be both real or both
+complex numbers.
+
+=cut
+
+sub cubic_roots
+{
+	my($a, $b, $c, $d) = ($ascending_flag)? reverse @_: @_;
+	my @x;
+
+	if (abs($a) < $epsilon)
+	{
+		carp "The coefficient of the highest power must not be zero!\n";
+		return @x;
 	}
 
 	#
-	# If there's a sequence of zero-filled gaps in the coefficients,
-	# reduce the polynomial by degree $m and check again for the
-	# next round of factors (e.g., X**8 + X**4 + 1 needs two rounds
-	# to get to a factor of 4).
+	# We're calling exported functions that also check
+	# the $ascending_flag. To avoid reversing the reversed,
+	# temporarily set the flag to zero and reset before returning.
 	#
-	if ($m > 1)
-	{
-		my @alt_coefs;
-		push @alt_coefs, $coefficients[$_*$m] for (0..$#coefficients/$m);
-		my($cf, $m1) = poly_analysis(@alt_coefs);
-		@coefficients = @$cf;
-		$m *= $m1;
-	}
-
-	return \@coefficients, $m;
-}
-
-#
-# $nzterms = poly_nonzero_term_count(@coeffients);
-#
-# Count the number of non-zero terms. Simple enough, yes?
-#
-# In the :utility export set.
-#
-sub poly_nonzero_term_count
-{
-	my(@coefficients) = @_;
-	my $nzc = 0;
-
-	for my $j (0..$#coefficients)
-	{
-		$nzc++ if (abs($coefficients[$j]) > $epsilon);
-	}
-	return $nzc;
-}
-
-#
-# @monic_polynomial = simplified_form(@coefficients);
-#
-# Return polynomial without any leading zero coefficients and in
-# a monic polynomial form (all coefficients divided by the coefficient
-# of the highest power).
-#
-# In the :utility export set.
-#
-sub simplified_form
-{
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
-
-	shift @coefficients while (scalar @coefficients and abs($coefficients[0]) < $epsilon);
-
-	if (scalar @coefficients == 0)
-	{
-		carp "All coefficients are zero\n";
-		return (0);
-	}
-
-	my $a = $coefficients[0];
-	$coefficients[$_] /= $a for (0..$#coefficients);
-
-	return ($ascending_flag)? reverse @coefficients: @coefficients;
-}
-
-#
-# @derived = poly_derivative(@coefficients)
-#
-# Returns the derivative of a polynomial. The constant value is
-# lost of course.
-#
-# In the :utility export set.
-#
-sub poly_derivative
-{
-	my @coefficients = ($ascending_flag)? @_: reverse @_;
-
-	my $d_ref = pl_derivative(\@coefficients);
-
-	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
-}
-
-#
-# @integral = poly_antiderivative(@coefficients)
-#
-# Returns the antiderivative of a polynomial. The constant value is
-# always set to zero; to override this $integral[$#integral] = $const;
-#
-# In the :utility export set.
-#
-sub poly_antiderivative
-{
-	my @coefficients = ($ascending_flag)? @_: reverse @_;
-
-	my $d_ref = pl_antiderivative(\@coefficients);
-
-	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
-}
-
-#
-# @results = poly_evaluate(\@coefficients, \@values);
-#
-# Returns a list of y-points on the polynomial for a corresponding
-# list of x-points, using Horner's method.
-#
-# In the :utility export set.
-#
-sub poly_evaluate
-{
-	my($coef_ref, $xval_ref) = @_;
-
-	my @coefficients = ($ascending_flag)? @$coef_ref: reverse @$coef_ref;
-
-	return pl_evaluate(\@coefficients, $xval_ref);
-}
-
-#
-# ($y, $dy, $ddy) = poly_derivaluate(\@coefficients, $x);
-#
-# Returns p(x), p'(x), and p"(x) of the polynomial for an
-# x-value, using Horner's method.
-#
-# In the :utility export set.
-#
-sub poly_derivaluate
-{
-	my($coef_ref, $x) = @_;
-	my(@coefficients) = ($ascending_flag)? reverse @$coef_ref: @$coef_ref;
-	my $n = $#coefficients;
-	my $val = shift @coefficients;
-	my $d1val = $val * $n;
-	my $d2val = 0;
-
-	#
-	# Be nice and check if the user accidentally passed in
-	# a reference for the $x value.
-	### poly_derivaluate
-	#### $coef_ref
-	#### $x
-	#
-	croak "Used a reference instead of an X value in poly_derivaluate()" if (ref $x eq "ARRAY" or ref $x eq "SCALAR");
-
-	#
-	# Special case for the linear eq'n (the y = constant eq'n
-	# takes care of itself).
-	#
-	if ($n == 1)
-	{
-		$d1val = $val;
-		$val = $val * $x + $coefficients[0];
-	}
-	elsif ($n >= 2)
-	{
-		my $lastn = --$n;
-		$d2val = $d1val * $n;
-
-		#
-		# Loop through the coefficients, except for
-		# the linear and constant terms.
-		#
-		foreach my $c (@coefficients[0..$lastn-2])
-		{
-			$val = $val * $x + $c;
-			$d1val = $d1val * $x + ($c *= $n--);
-			$d2val = $d2val * $x + ($c * $n);
-		}
-
-		#
-		# Handle the last two coefficients.
-		#
-		$d1val = $d1val * $x + $coefficients[$lastn-1];
-		$val = ($val * $x + $coefficients[$lastn-1]) * $x + $coefficients[$lastn];
-	}
-
-	return ($val, $d1val, $d2val);
-}
-
-#
-# ($q_ref, $r_ref) = poly_divide(\@coefficients1, \@coefficients2);
-#
-# Synthetic division for polynomials. Returns references to the quotient
-# and the remainder.
-#
-# In the :utility export set.
-#
-sub poly_divide
-{
-	my $n_ref = shift;
-	my $d_ref = shift;
-
-	my @numerator = @$n_ref;
-	my @divisor = @$d_ref;
-	my @quotient;
-	my @remainder;
-
 	my $temp_ascending_flag = $ascending_flag;
-	unless ($ascending_flag)
+	$ascending_flag = 0;
+
+	if (abs($d) < $epsilon)
 	{
-		@numerator = reverse @numerator;
-		@divisor = reverse @divisor;
-		$ascending_flag = 1;
+		@x = quadratic_roots($a, $b, $c);
+		$ascending_flag = $temp_ascending_flag;
+		return (0, @x);
 	}
 
-	#
-	# Just checking... removing any leading zeros.
-	#
-	pop @numerator while (@numerator and abs($numerator[$#numerator]) < $epsilon);
-	pop @divisor while (@divisor and abs($divisor[$#divisor]) < $epsilon);
+	my $xN = -$b/3/$a;
+	my $yN = $d + $xN * ($c + $xN * ($b + $a * $xN));
 
-	my($quo_ref, $rem_ref) = pl_div(\@numerator, \@divisor);
-
-	@quotient = @{$quo_ref};
-	@remainder = @{$rem_ref};
+	my $two_a = 2 * $a;
+	my $delta_sq = ($b * $b - 3 * $a * $c)/(9 * $a * $a);
+	my $h_sq = 4/9 * ($b * $b - 3 * $a * $c) * $delta_sq**2;
+	my $dis = $yN * $yN - $h_sq;
+	my $twothirds_pi = (2 * pi)/3;
 
 	#
-	# And once again, check for leading zeros in the remainder.
+	###            cubic_roots() calculations...
+	#### $two_a
+	#### $delta_sq
+	#### $h_sq
+	#### $dis
 	#
-	pop @remainder while (@remainder and abs($remainder[$#remainder]) < $epsilon);
-	push @remainder, 0 unless (@remainder);
-
-	unless ($temp_ascending_flag)
+	if ($dis > $epsilon)
 	{
-		@remainder = reverse @remainder;
-		@quotient = reverse @quotient;
+		#
+		### Cubic branch 1, $dis is greater than  0...
+		#
+		# One real root, two complex roots.
+		#
+		my $dis_sqrt = sqrt($dis);
+		my $r_p = $yN - $dis_sqrt;
+		my $r_q = $yN + $dis_sqrt;
+		my $p = cbrt( abs($r_p)/$two_a );
+		my $q = cbrt( abs($r_q)/$two_a );
+
+		$p = -$p if ($r_p > 0);
+		$q = -$q if ($r_q > 0);
+
+		$x[0] = $xN + $p + $q;
+		$x[1] = $xN + $p * exp($twothirds_pi * i)
+			    + $q * exp(-$twothirds_pi * i);
+		$x[2] = ~$x[1];
+	}
+	elsif ($dis < -$epsilon)
+	{
+		#
+		### Cubic branch 2, $dis is less than  0...
+		#
+		# Three distinct real roots.
+		#
+		my $theta = acos(-$yN/sqrt($h_sq))/3;
+		my $delta = sqrt($b * $b - 3 * $a * $c)/(3 * $a);
+		my $two_d = 2 * $delta;
+
+		@x = ($xN + $two_d * cos($theta),
+			$xN + $two_d * cos($twothirds_pi - $theta),
+			$xN + $two_d * cos($twothirds_pi + $theta));
+	}
+	else
+	{
+		#
+		### Cubic branch 3, $dis equals 0, within epsilon...
+		#
+		# abs($dis) <= $epsilon (effectively zero).
+		#
+		# Three real roots (two or three equal).
+		#
+		my $delta = cbrt($yN/$two_a);
+
+		@x = ($xN + $delta, $xN + $delta, $xN - 2 * $delta);
 	}
 
 	$ascending_flag = $temp_ascending_flag;
-	return (\@quotient, \@remainder);
+	return @x;
 }
 
-#
-# @new_coeffients = poly_constmult(\@coefficients, $multiplier);
-#
-# In the :utility export set.
-#
-sub poly_constmult
+=head3 quartic_roots()
+
+Gives the roots of the quartic equation
+
+  ax**4 + bx**3 + cx**2 + dx + e = 0
+
+using Ferrari's method (see the L</ACKNOWLEDGMENTS> section below). Returns
+a four-element list. The first two elements will be either
+both real or both complex. The next two elements will also be alike in
+type.
+
+=cut
+
+sub quartic_roots
 {
-	my($c_ref, $multiplier) = @_;
-	my @coefficients = @$c_ref;
+	my($a,$b,$c,$d,$e) = ($ascending_flag)? reverse @_: @_;
+	my @x = ();
 
-	return map($_ *= $multiplier, @coefficients);
-}
-
-#
-# @sturm_seq = poly_sturm_chain(@coefficients)
-#
-# In the :sturm export set.
-#
-sub poly_sturm_chain
-{
-	my @coefficients = @_;
-	my $degree = $#coefficients;
-	my(@chain, @remd);
-	my($f1, $f2);
-
-	@coefficients = reverse @coefficients unless ($ascending_flag);
-
-	$f1 = [@coefficients];
-	$f2 = pl_derivative(\@coefficients);
-
-	push @chain, $f1;
-
-	#
-	# Start the first links of the chain.
-	#
-	SKIPIT: {
-		last SKIPIT if ($degree < 1); #return @chain if ($degree < 1);
-
-		push @chain, $f2;
-
-		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
-
-		#
-		###### poly_sturm_chain chain before do loop:
-		###### @chain
-		#
-		do
-		{
-			my ($q, $r) = pl_div($f1, $f2);
-			$f1 = $f2;
-
-			#
-			# Remove any leading zeros in the remainder.
-			#
-			@remd = @{$r};
-			pop @remd while (@remd and abs($remd[$#remd]) < $epsilon);
-
-			$f2 = (@remd)? [map {$_ * -1} @remd]: [0];
-			push @chain, $f2;
-		}
-		while ($#remd > 0);
+	if (abs($a) < $epsilon)
+	{
+		carp "Coefficient of highest power must not be zero!\n";
+		return @x;
 	}
 
 	#
-	###### poly_sturm_chain:
-	###### @chain
+	# We're calling exported functions that also check
+	# the $ascending_flag. To avoid reversing the reversed,
+	# temporarily set the flag to zero and reset before returning.
 	#
-	return @chain;
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 0;
+
+	if (abs($e) < $epsilon)
+	{
+		@x = cubic_roots($a, $b, $c, $d);
+		$ascending_flag = $temp_ascending_flag;
+		return (0, @x);
+	}
+
+	#
+	# First step:  Divide by the leading coefficient.
+	#
+	$b /= $a;
+	$c /= $a;
+	$d /= $a;
+	$e /= $a;
+
+	#
+	# Second step: simplify the equation to the
+	# "resolvent cubic"  y**4 + fy**2 + gy + h.
+	#
+	# (This is done by setting x = y - b/4).
+	#
+	my $b4 = $b/4;
+
+	#
+	# The f, g, and h values are:
+	#
+	my $f = $c -
+		6 * $b4 * $b4;
+	my $g = $d +
+		2 * $b4 * (-$c + 4 * $b4 * $b4);
+	my $h = $e +
+		$b4 * (-$d + $b4 * ($c - 3 * $b4 * $b4));
+
+	#
+	###            quartic_roots calculations
+	#### $b4
+	#### $f
+	#### $g
+	#### $h
+	#
+	if (abs($h) < $epsilon)
+	{
+		#
+		### Quartic branch 1, $h equals 0, within epsilon...
+		#
+		# Special case: h == 0.  We have a cubic times y.
+		#
+		@x = (0, cubic_roots(1, 0, $f, $g));
+	}
+	elsif (abs($g * $g) < $epsilon)
+	{
+		#
+		### Quartic branch 2, $g equals 0, within epsilon...
+		#
+		# Another special case: g == 0.  We have a quadratic
+		# with y-squared.
+		#
+		# (We check $g**2 because that's what the constant
+		# value actually is in Ferrari's method, and it is
+		# possible for $g to be outside of epsilon while
+		# $g**2 is inside, i.e., "zero").
+		#
+		my($p, $q) = quadratic_roots(1, $f, $h);
+		$p = sqrt($p);
+		$q = sqrt($q);
+		@x = ($p, -$p, $q, -$q);
+	}
+	else
+	{
+		#
+		### Quartic branch 3, Ferrari's method...
+		#
+		# Special cases don't apply, so continue on with Ferrari's
+		# method.  This involves setting up the resolvent cubic
+		# as the product of two quadratics.
+		#
+		# After setting up conditions that guarantee that the
+		# coefficients come out right (including the zero value
+		# for the third-power term), we wind up with a 6th
+		# degree polynomial with, fortunately, only even-powered
+		# terms.  In other words, a cubic with z = y**2.
+		#
+		# Take a root of that equation, and get the
+		# quadratics from it.
+		#
+		my $z;
+		($z, undef, undef) = cubic_roots(1, 2*$f, $f*$f - 4*$h, -$g*$g);
+
+		#### $z
+
+		my $alpha = sqrt($z);
+		my $rho = $g/$alpha;
+		my $beta = ($f + $z - $rho)/2;
+		my $gamma = ($f + $z + $rho)/2;
+
+		@x = quadratic_roots(1, $alpha, $beta);
+		push @x, quadratic_roots(1, -$alpha, $gamma);
+	}
+
+	$ascending_flag = $temp_ascending_flag;
+	return ($x[0] - $b4, $x[1] - $b4, $x[2] - $b4, $x[3] - $b4);
 }
 
-#
-# $root_count = poly_real_root_count(@coefficients);
-#
-# An all-in-one function for finding the number of real roots in
-# a polynomial. Use this if you don't intend to do anything else
-# requiring the Sturm chain.
-#
-# In the :sturm export set.
-#
+=head2 Sturm Functions
+
+These are the functions that create and make use of the Sturm sequence.
+They are all exported under the tag "sturm".
+
+=head3 poly_real_root_count()
+
+Return the number of I<unique>, I<real> roots of the polynomial.
+
+  $unique_roots = poly_real_root_count(@coefficients);
+
+For example, the equation C<(x + 3)**3> forms the polynomial
+C<x**3 + 9x**2 + 27x + 27>, but since all three of its roots are identical,
+C<poly_real_root_count(1, 9, 27, 27)> will return 1.
+
+Likewise, C<poly_real_root_count(1, -8, 25)> will return 0 because the two roots
+of C<x**2 -8x + 25> are both complex.
+
+This function is the all-in-one function to use instead of
+
+  my @chain = poly_sturm_chain(@coefficients);
+
+  return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
+          sturm_sign_count(sturm_sign_plus_inf(\@chain));
+
+if you don't intend to use the Sturm chain for anything else.
+
+=cut
+
 sub poly_real_root_count
 {
 	my @coefficients = @_;
@@ -1498,15 +1491,25 @@ sub poly_real_root_count
 		sturm_sign_count(sturm_sign_plus_inf(\@chain));
 }
 
-#
-# $root_count = sturm_real_root_range_count(\@chain, $x0, $x1);
-#
-# An all-in-one function for finding the number of real roots in
-# a polynomial over a range in X. Use this if you don't intend to do
-# anything else requiring the Sturm chain.
-#
-# In the :sturm export set.
-#
+=head3 sturm_real_root_range_count()
+
+Return the number of I<unique>, I<real> roots of the polynomial between two X values.
+
+  my($x0, $x1) = (0, 1000);
+
+  my @chain = poly_sturm_chain(@coefficients);
+  $root_count = sturm_real_root_range_count(\@chain, $x0, $x1);
+
+This is equivalent to:
+
+  my($x0, $x1) = (0, 1000);
+
+  my @chain = poly_sturm_chain(@coefficients);
+  my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
+  $root_count = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
+
+=cut
+
 sub sturm_real_root_range_count
 {
 	my($chain_ref, $x0, $x1) = @_;
@@ -1524,19 +1527,24 @@ sub sturm_real_root_range_count
 	return $count0 - $count1;
 }
 
-#
-# @boundaries = sturm_bisection(\@chain, $from, $to);
-#
-# Using the bisection method on the root count method of Sturm, finds
-# the boundaries around the roots of a polynomial function.
-#
-# The elements of @boundaries will be two-element arrays bracketing
-# the root on the left and right.
-#
-# Will not bracket complex roots.
-#
-# In the :sturm export set.
-#
+
+=head3 sturm_bisection()
+
+Finds the boundaries around the roots of a polynomial function,
+using the root count method of Sturm.
+
+ @boundaries = sturm_bisection(\@chain, $from, $to);
+
+The elements of @boundaries will be a list of two-element arrays, each
+one bracketing a root.
+
+It will not bracket complex roots.
+
+This allows you to use a different root-finding function than laguerre(),
+which is the default function used by sturm_bisection_roots().
+
+=cut
+
 sub sturm_bisection
 {
 	my($chain_ref, $from, $to) = @_;
@@ -1626,14 +1634,21 @@ sub sturm_bisection
 	return @boundaries;
 }
 
-#
-# @roots = sturm_bisection_roots(\@chain, $from, $to);
-#
-# Using the bisection method on the root count method of Sturm, finds
-# the real roots of a polynomial function. Will not find complex roots.
-#
-# In the :sturm export set.
-#
+
+=head3 sturm_bisection_roots()
+
+Return the I<real> roots counted by L</sturm_real_root_range_count()>.
+Uses L</sturm_bisection()> to bracket the roots of the polynomial,
+then uses L</laguerre()> to close in on each root.
+
+  my($from, $to) = (-1000, 0);
+  my @chain = poly_sturm_chain(@coefficients);
+  my @roots = sturm_bisection_roots(\@chain, $from, $to);
+
+As it is using the Sturm functions, it will find only the real roots.
+
+=cut
+
 sub sturm_bisection_roots
 {
 	my($chain_ref, $from, $to) = @_;
@@ -1657,6 +1672,157 @@ sub sturm_bisection_roots
 
 	return @roots;
 }
+
+
+=head3 poly_sturm_chain()
+
+Returns the chain of Sturm functions used to evaluate the number of roots of a
+polynomial in a range of X values.
+
+If you feed in a sequence of X values to the Sturm functions, you can tell where
+the (real, not complex) roots of the polynomial are by counting the number of
+times the Y values change sign.
+
+See L</poly_real_root_count()> above for an example of its use.
+
+=cut
+
+sub poly_sturm_chain
+{
+	my @coefficients = @_;
+	my $degree = $#coefficients;
+	my(@chain, @remd);
+	my($f1, $f2);
+
+	@coefficients = reverse @coefficients unless ($ascending_flag);
+
+	$f1 = [@coefficients];
+	$f2 = pl_derivative(\@coefficients);
+
+	push @chain, $f1;
+
+	#
+	# Start the first links of the chain.
+	#
+	SKIPIT: {
+		last SKIPIT if ($degree < 1); #return @chain if ($degree < 1);
+
+		push @chain, $f2;
+
+		last SKIPIT if ($degree < 2); #return @chain if ($degree < 2);
+
+		#
+		###### poly_sturm_chain chain before do loop:
+		###### @chain
+		#
+		do
+		{
+			my ($q, $r) = pl_div($f1, $f2);
+			$f1 = $f2;
+
+			#
+			# Remove any leading zeros in the remainder.
+			#
+			@remd = @{$r};
+			pop @remd while (@remd and abs($remd[$#remd]) < $epsilon);
+
+			$f2 = (@remd)? [map {$_ * -1} @remd]: [0];
+			push @chain, $f2;
+		}
+		while ($#remd > 0);
+	}
+
+	#
+	###### poly_sturm_chain:
+	###### @chain
+	#
+	return @chain;
+}
+
+=head3 sturm_sign_count()
+
+Counts and returns the number of sign changes in a sequence of signs,
+such as those returned by the L</Sturm Sign Sequence Functions>
+
+See L</poly_real_root_count()> and L</sturm_real_root_range_count()> for
+examples of its use.
+
+=cut
+
+sub sturm_sign_count
+{
+	my @sign_seq = @_;
+	my $scnt = 0;
+
+	my $s1 = shift @sign_seq;
+	for my $s2 (@sign_seq)
+	{
+		$scnt++ if ($s1 != $s2);
+		$s1 = $s2;
+	}
+
+	return $scnt;
+}
+
+
+=head3 Sturm Sign Sequence Functions
+
+=head4 sturm_sign_chain()
+
+=head4 sturm_sign_minus_inf()
+
+=head4 sturm_sign_plus_inf()
+
+These functions return the array of signs that are used by the functions
+L</poly_real_root_count()> and L</sturm_real_root_range_count()> to find
+the number of real roots in a polynomial.
+
+In normal use you will probably never need to use them, unless you want
+to examine the internals of the Sturm functions:
+
+  #
+  # Examine the sign changes that occur at each endpoint of
+  # the x range.
+  #
+  my(@coefficients) = (1, 4, 7, 23);
+  my(@xvals) = (-12, 12);
+
+  my @chain = poly_sturm_chain( @coefficients);
+  my @signs = sturm_sign_chain(\@chain, \@xvals);  # An array of arrays.
+
+  print "\nPolynomial: [", join(", ", @coefficients), "]\n";
+
+  foreach my $j (0..$#signs)
+  {
+    my @s = @{$signs[$j]};
+    print $xval[$j], "\n",
+          "\t", join(", ", @s), "], sign count = ",
+          sturm_sign_count(@s), "\n\n";
+  }
+
+Similar examinations can be made at plus and minus infinity:
+
+  #
+  # Examine the sign changes that occur between plus and minus
+  # infinity.
+  #
+  my @coefficients = (1, 4, 7, 23);
+
+  my @chain = poly_sturm_chain( @coefficients);
+  my @smi = sturm_sign_minus_inf(\@chain);
+  my @spi = sturm_sign_plus_inf(\@chain);
+
+  print "\nPolynomial: [", join(", ", @coefficients), "]\n";
+
+  print "Minus Inf:\n",
+        "\t", join(", ", @smi), "], sign count = ",
+        sturm_sign_count(@smi), "\n\n";
+
+  print "Plus Inf:\n",
+        "\t", join(", ", @spi), "], sign count = ",
+        sturm_sign_count(@spi), "\n\n";
+
+=cut
 
 #
 # @signs = sturm_minus_inf(\@chain);
@@ -1752,35 +1918,100 @@ sub sturm_sign_chain
 	return @sign_chain;
 }
 
-#
-# $sign_changes = sturm_sign_count(@signs);
-#
-# Count the number of changes from sign to sign in the array.
-#
-# In the :sturm export set.
-#
-sub sturm_sign_count
+
+=head2 Utility Functions
+
+These are internal functions used by the other functions listed above
+that may also be useful to the user, or which affect the behavior of
+other functions. They are all exported under the tag "utility".
+
+Because many of these functions are useful outside the area of polynomials,
+they have been taken, with changes, to the module L<Math::Utils>, and
+have been deprecated for this module. See L</DEPRECATED FUNCTIONS>
+for more information, and the descriptions below for details.
+
+=head3 epsilon()
+
+Returns the machine epsilon value that was calculated when this module was
+loaded.
+
+The value may be changed, although this in general is not recommended.
+
+  my $old_epsilon = epsilon($new_epsilon);
+
+The previous value of epsilon may be saved to be restored later.
+
+The Wikipedia article at L<http://en.wikipedia.org/wiki/Machine_epsilon/> has
+more information on the subject.
+
+=cut
+
+sub epsilon
 {
-	my @sign_seq = @_;
-	my $scnt = 0;
-
-	my $s1 = shift @sign_seq;
-	for my $s2 (@sign_seq)
-	{
-		$scnt++ if ($s1 != $s2);
-		$s1 = $s2;
-	}
-
-	return $scnt;
+	my $eps = $epsilon;
+	$epsilon = $_[0] if (scalar @_ > 0);
+	return $eps;
 }
 
-#
-# @roots = laguerre(\@coefficients, \@xvals);
-#
-# Find the roots nearby the given X values.
-#
-# In the :utility export set.
-#
+
+=head3 fltcmp()
+
+The function is DEPRECATED. See L<Math::Utils> and the section "compare tag"
+for a replacement.
+
+Compare two floating point numbers within a degree of accuracy.
+
+Like most functions ending in "cmp", this one returns -1 if the first
+argument tests as less than the second argument, 1 if the first tests
+greater than the second, and 0 otherwise. Comparisons are made within
+a tolerance range that may be set with L</poly_tolerance()>.
+
+  #
+  # Set a very forgiving comparison tolerance.
+  #
+  poly_tolerance(fltcmp => 1e-5);
+  my @x = poly_roots(@cubic);
+  my @y = poly_evaluate(\@cubic, \@x);
+
+  if (fltcmp($y[0], 0.0) == 0 and
+      fltcmp($y[1], 0.0) == 0 and
+      fltcmp($y[2], 0.0) == 0)
+  {
+    print "Roots found: (", join(", ", @x), ")\n";
+  }
+  else
+  {
+    print "Problem root-finding for [", join(", ", @cubic), "]\n";
+  }
+
+=cut
+
+sub fltcmp
+{
+	my($a, $b) = @_;
+
+	return 0 if (abs($a - $b) <= $tolerance{fltcmp});
+	return -1 if ($a < $b);
+	return 1;
+}
+
+
+=head3 laguerre()
+
+A numerical method for finding a root of an equation, especially made
+for polynomials.
+
+  @roots = laguerre(\@coefficients, \@xvalues);
+  push @roots, laguerre(\@coefficients, $another_xvalue);
+
+For each x value the function will attempt to find a root closest to it.
+The function will return real roots only.
+
+This is the function used by L</sturm_bisection_roots()> after narrowing its
+search to a range containing a single root.
+
+=cut
+
 sub laguerre
 {
 	no Math::Complex;
@@ -1875,13 +2106,22 @@ sub laguerre
 	return @roots;
 }
 
-#
-# @xvals = newtonraphson(\@coefficients, \@xvals);
-#
-# Find the roots nearby the given X values.
-#
-# In the :utility export set.
-#
+
+=head3 newtonraphson()
+
+Like L</laguerre()>, a numerical method for finding a root of an equation.
+
+  @roots = newtonraphson(\@coefficients, \@xvalues);
+  push @roots, newtonraphson(\@coefficients, $another_xvalue);
+
+For each x value the function will attempt to find a root closest to it.
+The function will return real roots only.
+
+This function is provided as an alternative to laguerre(). It is not
+used internally by any other functions.
+
+=cut
+
 sub newtonraphson
 {
 	no Math::Complex;
@@ -1949,615 +2189,6 @@ sub newtonraphson
 	return @roots;
 }
 
-
-1;
-__END__
-
-=encoding utf8
-
-=head1 NAME
-
-Math::Polynomial::Solve - Find the roots of polynomial equations.
-
-=head1 SYNOPSIS
-
-  use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve qw(poly_roots);
-
-  my @x = poly_roots(@coefficients);
-
-or
-
-  use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve qw(:numeric);  # See the EXPORT section
-
-  #
-  # Find roots using the matrix method.
-  #
-  my @x = poly_roots(@coefficients);
-
-  #
-  # Alternatively, use the classical methods instead of the matrix
-  # method if the polynomial degree is less than five.
-  #
-  poly_option(hessenberg => 0);
-  @x = poly_roots(@coefficients);
-
-or
-
-  use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial::Solve qw(:classical);  # See the EXPORT section
-
-  #
-  # Find the polynomial roots using the classical methods.
-  #
-
-  # Find the roots of ax + b
-  my @x1 = linear_roots($a, $b);
-
-  # Find the roots of ax**2 + bx +c
-  my @x2 = quadratic_roots($a, $b, $c);
-
-  # Find the roots of ax**3 + bx**2 +cx + d
-  my @x3 = cubic_roots($a, $b, $c, $d);
-
-  # Find the roots of ax**4 + bx**3 +cx**2 + dx + e
-  my @x4 = quartic_roots($a, $b, $c, $d, $e);
-
-or
-
-  use Math::Complex;  # The roots may be complex numbers.
-  use Math::Polynomial;
-  use Math::Polynomial::Solve qw(:classical ascending_order);
-
-  ascending_order(1); # Change default coefficient order for M::P::S.
-
-  #
-  # Form 8*x**3 - 6*x - 1
-  #
-  my $p1 = Math::Polynomial->new(-1, -6, 0, 8);
-
-  #
-  # Use Math::Polynomial's coefficient order.
-  # If ascending_order() had not been called,
-  # the statement would be:
-  #
-  # my @roots = poly_roots(reverse $p1->coefficients);
-  #
-  my @roots = poly_roots($p1->coefficients);
-
-or
-
-  use Math::Polynomial::Solve qw(:utility);
-
-  my @coefficients = (89, 23, 23, 432, 27);
-
-  # Return a version of the polynomial with no leading zeroes
-  # and the leading coefficient equal to 1.
-  my @monic_form = simplified_form(@coefficients);
-
-  # Find the y-values of the polynomial at selected x-values.
-  my @xvals = (0, 1, 2, 3, 5, 7);
-  my @yvals = poly_evaluate(\@coefficients, \@xvals);
-
-or
-
-  use Math::Polynomial::Solve qw(:sturm);
-
-  # Find the number of unique real roots of the polynomial.
-  my $no_of_unique_roots = poly_real_root_count(@coefficients);
-
-=head1 DESCRIPTION
-
-This package supplies a set of functions that find the roots of
-polynomials, along with some utility functions.
-
-Roots will be either real or of type L<Math::Complex>.
-
-Functions making use of the Sturm sequence are also available, letting you
-find the number of real roots present in a range of X values.
-
-In addition to the root-finding functions, the internal functions have
-also been exported for your use.
-
-=head2 DEPRECATED FUNCTIONS
-
-Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
-Consequently this module now uses Math::Utils itself, and will remove the
-redundant :utility functions by the next two releases.
-
-Note that the L<polynomial functions|Math::Utils/polynomial tag> 
-in Math::Utils all take the polynomial
-coefficients in ascending order, left to right.
-
-Scheduled to be removed are:
-
-=over 4
-
-=item fltcmp()
-
-Use Math::Utils's generate_fltcmp() or generate_relational() to
-create comparison functions with a built-in tolerance.
-
-=item poly_divide()
-
-Use Math::Utils's pl_div(). Note that unlike poly_divide(), checking for
-leading zeros isn't done by pl_div(), and is expected to be done by
-the caller.
-
-=item poly_evaluate()
-
-Use Math::Utils's pl_evaluate().
-
-=item poly_derivative()
-
-Use Math::Utils's pl_derivative().
-
-=item poly_antiderivative()
-
-Use Math::Utils's pl_antiderivative().
-
-=item poly_derivaluate()
-
-Use Math::Utils's pl_dxevaluate().
-
-=item poly_constmult()
-
-Not duplicated in Math::Utils, use L<Math::VecStat>'s vecprod().
-
-=item simplified_form()
-
-This function is simply going to be dropped.
-
-=back
-
-=head2 EXPORTED BY DEFAULT
-
-=head3 ascending_order()
-
-Changes the default order of the coefficents to the functions.
-
-When Math::Polynomial::Solve was originally written, it followed the
-calling convention of L<Math::Polynomial>, using the highest degree
-coefficient, followed by the next highest degree coefficient, and so
-on in descending order.
-
-Later Math::Polynomial was re-written, and the order of the coefficients were
-put in ascending order, e.g.:
-
-  use Math::Polynomial;
-
-  #
-  # Create the polynomial 8*x**3 - 6*x - 1.
-  #
-  $fpx = Math::Polynomial->new(-1, -6, 0, 8);
-
-If you use Math::Polynomial with this module, it will probably be
-more convenient to change the default parameter list of
-Math::Polynomial::Solve's functions, using the ascending_order() function:
-
-  use Math::Polynomial;
-  use Math::Polynomial::Solve qw(:classical :numeric);
-
-  ascending_order(1);
-
-  my $fp4 = Math::Polynomial->interpolate([1 .. 4], [14, 19, 25, 32]);
-
-  #
-  # Find roots of $fp4.
-  #
-  my @fp4_roots = quartic_roots($fp4->coefficients);
-
-or
-
-  my @fp4_roots = poly_roots($fp4->coefficients);
-
-If C<ascending_order(1)> had not been called, the previous line of code
-would have been written instead as
-
-  my @fp4_roots = poly_roots(reverse $fp4->coefficients);
-
-The function is a temporary measure to help with the change in the API when
-version 3.00 of this module is released. At that point coefficients will be
-in ascending order by default, and you will need to use C<ascending_order(0)>
-to use the old (current) style.
-
-=head2 Numeric Functions
-
-These are the functions that calculate the polynomial's roots through numeric
-algorithms. They are all exported under the tag "numeric".
-
-=head3 poly_roots()
-
-Returns the roots of a polynomial equation, regardless of degree.
-Unlike the other root-finding functions, it will check for coefficients
-of zero for the highest power, and 'step down' the degree of the
-polynomial to the appropriate case. Additionally, it will check for
-coefficients of zero for the lowest power terms, and add zeros to its
-root list before calling one of the root-finding functions.
-
-By default, C<poly_roots()> will use the Hessenberg matrix method for solving
-polynomials. This can be changed by calling L</poly_options()>.
-
-The method of poly_roots() is almost equivalent to
-
-  @x = hqr_eigen_hessenberg(
-        balance_matrix(build_companion(@coefficients))
-        );
-
-except this wouldn't check for leading and trailing zero coefficients, and it
-ignores the settings of C<poly_options()>.
-
-=head3 poly_option()
-
-Set options that affect the behavior of the C<poly_roots()> function. All
-options are set to either 1 ("on") or 0 ("off"). See also L</poly_iteration()>
-and L</poly_tolerance()>.
-
-Options may be set and saved:
-
-  #
-  # Set a few options...
-  #
-  poly_option(hessenberg => 0, root_function => 1);
-
-  #
-  # Get all of the current options and their values.
-  #
-  my %all_options = poly_option();
-
-  #
-  # Set some options but save the former option values
-  # for later.
-  #
-  my %changed_options = poly_option(hessenberg => 1, varsubst => 1);
-
-The current options available are:
-
-=over 4
-
-=item hessenberg
-
-Use the QR Hessenberg matrix method to solve the polynomial. By default, this
-is set to 1. If set to 0, C<poly_roots()> uses one of the L<classical|Classical Functions>
-root-finding functions listed below, I<if> the degree of the polynomial is four
-or less.
-
-=item root_function
-
-Use the L<root()|Math::Complex/OPERATIONS> function from Math::Complex if the
-polynomial is of the form C<ax**n + c>. This will take precedence over the other
-solving methods.
-
-=item varsubst
-
-Reduce polynomials to a lower degree through variable substitution, if possible.
-
-For example, with C<varsubst> set to one and the polynomial to solve being
-C<9x**6 + 128x**3 + 21>, C<poly_roots()> will reduce the polynomial to
-C<9y**2 + 128y + 21> (where C<y = x**3>),
-and solve the quadratic (either classically or numerically, depending
-on the hessenberg option). Taking the cube root of each quadratic root
-completes the operation.
-
-This has the benefit of having a simpler matrix to solve, or if the
-C<hessenberg> option is set to zero, has the effect of being able to use one of
-the classical methods on a polynomial of high degree. In the above example, the
-order-six polynomial gets solved with the quadratic_roots() function if the
-hessenberg option is zero.
-
-Currently the variable substitution is fairly simple and will only look
-for gaps of zeros in the coefficients that are multiples of the prime numbers
-less than or equal to 31 (2, 3, 5, et cetera).
-
-=back
-
-=head3 build_companion
-
-Creates the initial companion matrix. Returns an array of arrays (the
-internal representation of a matrix). This may be used as an argument to
-the L<Math::Matrix> contructor:
-
-  my @cm = build_companion(@coef);
-
-  my $m = Math::Matrix->new(@cm);
-  $m->print();
-
-The Wikipedia article at L<http://en.wikipedia.org/wiki/Companion_matrix/> has
-more information on the subject.
-
-=head3 balance_matrix
-
-Balances the matrix (makes the rows and columns have similar norms) by
-applying a matrix transformation with a diagonal matrix of powers of two.
-This is used to help prevent any rounding errors that occur if the elements
-of the matrix differ greatly in magnitude.
-
-=head3 hqr_eigen_hessenberg
-
-Returns the roots of the polynomial equation by solving the matrix created by
-C<build_companion()> and C<balance_matrix()>. See L</poly_roots()>.
-
-=head2 Classical Functions
-
-These are the functions that solve polynomials via the classical methods.
-Quartic, cubic, quadratic, and even linear equations may be solved with
-these functions. They are all exported under the tag "classical".
-
-L</poly_roots()> will use these functions I<if> the hessenberg option
-is set to 0, I<and if> the degree of the polynomial is four or less.
-
-The leading coefficient C<$a> must always be non-zero for the classical
-functions.
-
-=head3 linear_roots()
-
-Here for completeness's sake more than anything else. Returns the
-solution for
-
-  ax + b = 0
-
-by returning C<-b/a>. This may be in either a scalar or an array context.
-
-=head3 quadratic_roots()
-
-Gives the roots of the quadratic equation
-
-  ax**2 + bx + c = 0
-
-using the well-known quadratic formula. Returns a two-element list.
-
-=head3 cubic_roots()
-
-Gives the roots of the cubic equation
-
-  ax**3 + bx**2 + cx + d = 0
-
-by the method described by R. W. D. Nickalls (see the L</ACKNOWLEDGMENTS>
-section below). Returns a three-element list. The first element will
-always be real. The next two values will either be both real or both
-complex numbers.
-
-=head3 quartic_roots()
-
-Gives the roots of the quartic equation
-
-  ax**4 + bx**3 + cx**2 + dx + e = 0
-
-using Ferrari's method (see the L</ACKNOWLEDGMENTS> section below). Returns
-a four-element list. The first two elements will be either
-both real or both complex. The next two elements will also be alike in
-type.
-
-=head2 Sturm Functions
-
-These are the functions that create and make use of the Sturm sequence.
-They are all exported under the tag "sturm".
-
-=head3 poly_real_root_count()
-
-Return the number of I<unique>, I<real> roots of the polynomial.
-
-  $unique_roots = poly_real_root_count(@coefficients);
-
-For example, the equation C<(x + 3)**3> forms the polynomial
-C<x**3 + 9x**2 + 27x + 27>, but since all three of its roots are identical,
-C<poly_real_root_count(1, 9, 27, 27)> will return 1.
-
-Likewise, C<poly_real_root_count(1, -8, 25)> will return 0 because the two roots
-of C<x**2 -8x + 25> are both complex.
-
-This function is the all-in-one function to use instead of
-
-  my @chain = poly_sturm_chain(@coefficients);
-
-  return sturm_sign_count(sturm_sign_minus_inf(\@chain)) -
-          sturm_sign_count(sturm_sign_plus_inf(\@chain));
-
-if you don't intend to use the Sturm chain for anything else.
-
-=head3 sturm_real_root_range_count()
-
-Return the number of I<unique>, I<real> roots of the polynomial between two X values.
-
-  my($x0, $x1) = (0, 1000);
-
-  my @chain = poly_sturm_chain(@coefficients);
-  $unique_roots = sturm_real_root_range_count(\@chain, $x0, $x1);
-
-This is equivalent to:
-
-  my($x0, $x1) = (0, 1000);
-
-  my @chain = poly_sturm_chain(@coefficients);
-  my @signs = sturm_sign_chain(\@chain, [$x0, $x1]);
-  $no_unique_roots = sturm_sign_count(@{$signs[0]}) - sturm_sign_count(@{$signs[1]});
-
-=head3 sturm_bisection()
-
-Finds the boundaries around the roots of a polynomial function,
-using the root count method of Sturm.
-
- @boundaries = sturm_bisection(\@chain, $from, $to);
-
-The elements of @boundaries will be a list of two-element arrays, each
-element bracketing a root.
-
-It will not bracket complex roots.
-
-This allows you to use a different root-finding function than laguerre(),
-which is the default function used by sturm_bisection_roots().
-
-=head3 sturm_bisection_roots()
-
-Return the I<real> roots counted by L</sturm_real_root_range_count()>.
-Uses L</sturm_bisection()> to bracket the roots of the polynomial,
-then uses L</laguerre()> to close in on each root.
-
-  my($from, $to) = (-1000, 0);
-  my @chain = poly_sturm_chain(@coefficients);
-  my @roots = sturm_bisection_roots(\@chain, $from, $to);
-
-As it is using the Sturm functions, it will find only the real roots.
-
-=head3 poly_sturm_chain()
-
-Returns the chain of Sturm functions used to evaluate the number of roots of a
-polynomial in a range of X values.
-
-If you feed in a sequence of X values to the Sturm functions, you can tell where
-the (real, not complex) roots of the polynomial are by counting the number of
-times the Y values change sign.
-
-See L</poly_real_root_count()> above for an example of its use.
-
-=head3 Sturm Sign Sequence Functions
-
-=head4 sturm_sign_chain()
-
-=head4 sturm_sign_minus_inf()
-
-=head4 sturm_sign_plus_inf()
-
-These functions return the array of signs that are used by the functions
-L</poly_real_root_count()> and L</sturm_real_root_range_count()> to find
-the number of real roots in a polynomial.
-
-In normal use you will probably never need to use them, unless you want
-to examine the internals of the Sturm functions:
-
-  #
-  # Examine the sign changes that occur at each endpoint of
-  # the x range.
-  #
-  my(@coefficients) = (1, 4, 7, 23);
-  my(@xvals) = (-12, 12);
-
-  my @chain = poly_sturm_chain( @coefficients);
-  my @signs = sturm_sign_chain(\@chain, \@xvals);  # An array of arrays.
-
-  print "\nPolynomial: [", join(", ", @coefficients), "]\n";
-
-  foreach my $j (0..$#signs)
-  {
-    my @s = @{$signs[$j]};
-    print $xval[$j], "\n",
-          "\t", join(", ", @s), "], sign count = ",
-          sturm_sign_count(@s), "\n\n";
-  }
-
-Similar examinations can be made at plus and minus infinity:
-
-  #
-  # Examine the sign changes that occur between plus and minus
-  # infinity.
-  #
-  my @coefficients = (1, 4, 7, 23);
-
-  my @chain = poly_sturm_chain( @coefficients);
-  my @smi = sturm_sign_minus_inf(\@chain);
-  my @spi = sturm_sign_plus_inf(\@chain);
-
-  print "\nPolynomial: [", join(", ", @coefficients), "]\n";
-
-  print "Minus Inf:\n",
-        "\t", join(", ", @smi), "], sign count = ",
-        sturm_sign_count(@smi), "\n\n";
-
-  print "Plus Inf:\n",
-        "\t", join(", ", @spi), "], sign count = ",
-        sturm_sign_count(@spi), "\n\n";
-
-=head3 sturm_sign_count()
-
-Counts and returns the number of sign changes in a sequence of signs,
-such as those returned by the L</Sturm Sign Sequence Functions>
-
-See L</poly_real_root_count()> and L</sturm_real_root_range_count()> for
-examples of its use.
-
-=head2 Utility Functions
-
-These are internal functions used by the other functions listed above
-that may also be useful to the user, or which affect the behavior of
-other functions. They are all exported under the tag "utility".
-
-Because many of these functions are useful outside the area of polynomials,
-they have been taken, with changes, to the module L<Math::Utils>, and
-have been deprecated for this module. See L</DEPRECATED FUNCTIONS>
-for more information, and the descriptions below for details.
-
-=head3 epsilon()
-
-Returns the machine epsilon value that was calculated when this module was
-loaded.
-
-The value may be changed, although this in general is not recommended.
-
-  my $old_epsilon = epsilon($new_epsilon);
-
-The previous value of epsilon may be saved to be restored later.
-
-The Wikipedia article at L<http://en.wikipedia.org/wiki/Machine_epsilon/> has
-more information on the subject.
-
-=head3 fltcmp()
-
-The function is DEPRECATED. See L<Math::Utils> and the section "compare tag"
-for a replacement.
-
-Compare two floating point numbers within a degree of accuracy.
-
-Like most functions ending in "cmp", this one returns -1 if the first
-argument tests as less than the second argument, 1 if the first tests
-greater than the second, and 0 otherwise. Comparisons are made within
-a tolerance range that may be set with L</poly_tolerance()>.
-
-  #
-  # Set a very forgiving comparison tolerance.
-  #
-  poly_tolerance(fltcmp => 1e-5);
-  my @x = poly_roots(@cubic);
-  my @y = poly_evaluate(\@cubic, \@x);
-
-  if (fltcmp($y[0], 0.0) == 0 and
-      fltcmp($y[1], 0.0) == 0 and
-      fltcmp($y[2], 0.0) == 0)
-  {
-    print "Roots found: (", join(", ", @x), ")\n";
-  }
-  else
-  {
-    print "Problem root-finding for [", join(", ", @cubic), "]\n";
-  }
-
-=head3 laguerre()
-
-A numerical method for finding a root of an equation, especially made
-for polynomials.
-
-  @roots = laguerre(\@coefficients, \@xvalues);
-  push @roots, laguerre(\@coefficients, $another_xvalue);
-
-For each x value the function will attempt to find a root closest to it.
-The function will return real roots only.
-
-This is the function used by L</sturm_bisection_roots()> after narrowing its
-search to a range containing a single root.
-
-=head3 newtonraphson()
-
-Like L</laguerre()>, a numerical method for finding a root of an equation.
-
-  @roots = newtonraphson(\@coefficients, \@xvalues);
-  push @roots, newtonraphson(\@coefficients, $another_xvalue);
-
-For each x value the function will attempt to find a root closest to it.
-The function will return real roots only.
-
-This function is provided as an alternative to laguerre(). It is not
-used internally by any other functions.
-
 =head3 poly_iteration()
 
 Sets the limit to the number of iterations that a solving method may go
@@ -2612,6 +2243,38 @@ is 100.
 
 =back
 
+=cut
+
+sub poly_iteration
+{
+	my %limits = @_;
+	my %old_limits;
+
+	return %iteration if (scalar @_ == 0);
+
+	foreach my $k (keys %limits)
+	{
+		#
+		# If this is a real iteration limit, save its old value, then set it.
+		#
+		if (exists $iteration{$k})
+		{
+			my $val = abs(int($limits{$k}));
+			
+			carp "poly_iteration(): Unreasonably small value for $k => $val\n" if ($val < 10);
+
+			$old_limits{$k} = $iteration{$k};
+			$iteration{$k} = $val;
+		}
+		else
+		{
+			croak "poly_iteration(): unknown key $k.";
+		}
+	}
+
+	return %old_limits;
+}
+
 =head3 poly_tolerance()
 
 Set the degree of accuracy needed for comparisons to be equal or roots to
@@ -2660,6 +2323,36 @@ will also be removed when the function is remvoed.
 
 =back
 
+=cut
+
+sub poly_tolerance
+{
+	my %tols = @_;
+	my %old_tols;
+
+	return %tolerance if (scalar @_ == 0);
+
+	foreach my $k (keys %tols)
+	{
+		#
+		# If this is a real tolerance limit, save its old value, then set it.
+		#
+		if (exists $tolerance{$k})
+		{
+			my $val = abs($tols{$k});
+
+			$old_tols{$k} = $tolerance{$k};
+			$tolerance{$k} = $val;
+		}
+		else
+		{
+			croak "poly_tolerance(): unknown key $k.";
+		}
+	}
+
+	return %old_tols;
+}
+
 =head3 poly_derivative()
 
   @derivative = poly_derivative(@coefficients);
@@ -2673,6 +2366,18 @@ This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::Utils> and the tag
 :polynomial for a replacement.
 
+=cut
+
+sub poly_derivative
+{
+	my @coefficients = ($ascending_flag)? @_: reverse @_;
+
+	my $d_ref = pl_derivative(\@coefficients);
+
+	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
+}
+
+
 =head3 poly_antiderivative()
 
 Returns the coefficients of the antiderivative of the polynomial. The
@@ -2685,6 +2390,17 @@ This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::Utils> and the tag
 :polynomial for a replacement.
 
+=cut
+
+sub poly_antiderivative
+{
+	my @coefficients = ($ascending_flag)? @_: reverse @_;
+
+	my $d_ref = pl_antiderivative(\@coefficients);
+
+	return ($ascending_flag)? @{$d_ref}: reverse @{$d_ref};
+}
+
 =head3 simplified_form()
 
 Return the polynomial adjusted by removing any leading zero coefficients
@@ -2693,6 +2409,26 @@ coefficient of the highest power).
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases.
+
+=cut
+
+sub simplified_form
+{
+	my @coefficients = ($ascending_flag)? reverse @_: @_;
+
+	shift @coefficients while (scalar @coefficients and abs($coefficients[0]) < $epsilon);
+
+	if (scalar @coefficients == 0)
+	{
+		carp "All coefficients are zero\n";
+		return (0);
+	}
+
+	my $a = $coefficients[0];
+	$coefficients[$_] /= $a for (0..$#coefficients);
+
+	return ($ascending_flag)? reverse @coefficients: @coefficients;
+}
 
 =head3 poly_evaluate()
 
@@ -2723,6 +2459,17 @@ This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
 
+=cut
+
+sub poly_evaluate
+{
+	my($coef_ref, $xval_ref) = @_;
+
+	my @coefficients = ($ascending_flag)? @$coef_ref: reverse @$coef_ref;
+
+	return pl_evaluate(\@coefficients, $xval_ref);
+}
+
 =head3 poly_derivaluate();
 
 This is one of the L<deprecated functions|/DEPRECATED FUNCTIONS>
@@ -2743,9 +2490,80 @@ This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
 
+=cut
+
+sub poly_derivaluate
+{
+	my($coef_ref, $x) = @_;
+	my(@coefficients) = ($ascending_flag)? reverse @$coef_ref: @$coef_ref;
+	my $n = $#coefficients;
+	my $val = shift @coefficients;
+	my $d1val = $val * $n;
+	my $d2val = 0;
+
+	#
+	# Be nice and check if the user accidentally passed in
+	# a reference for the $x value.
+	### poly_derivaluate
+	#### $coef_ref
+	#### $x
+	#
+	croak "Used a reference instead of an X value in poly_derivaluate()" if (ref $x eq "ARRAY" or ref $x eq "SCALAR");
+
+	#
+	# Special case for the linear eq'n (the y = constant eq'n
+	# takes care of itself).
+	#
+	if ($n == 1)
+	{
+		$d1val = $val;
+		$val = $val * $x + $coefficients[0];
+	}
+	elsif ($n >= 2)
+	{
+		my $lastn = --$n;
+		$d2val = $d1val * $n;
+
+		#
+		# Loop through the coefficients, except for
+		# the linear and constant terms.
+		#
+		foreach my $c (@coefficients[0..$lastn-2])
+		{
+			$val = $val * $x + $c;
+			$d1val = $d1val * $x + ($c *= $n--);
+			$d2val = $d2val * $x + ($c * $n);
+		}
+
+		#
+		# Handle the last two coefficients.
+		#
+		$d1val = $d1val * $x + $coefficients[$lastn-1];
+		$val = ($val * $x + $coefficients[$lastn-1]) * $x + $coefficients[$lastn];
+	}
+
+	return ($val, $d1val, $d2val);
+}
+
+
 =head3 poly_nonzero_term_count()
 
 Returns a simple count of the number of coefficients that aren't zero.
+
+=cut
+
+sub poly_nonzero_term_count
+{
+	my(@coefficients) = @_;
+	my $nzc = 0;
+
+	for my $j (0..$#coefficients)
+	{
+		$nzc++ if (abs($coefficients[$j]) > $epsilon);
+	}
+	return $nzc;
+}
+
 
 =head3 poly_constmult()
 
@@ -2757,6 +2575,17 @@ C<poly_evaluate()>, uses the reference of the coefficient list.
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::VecStat> for a replacement.
+
+=cut
+
+sub poly_constmult
+{
+	my($c_ref, $multiplier) = @_;
+	my @coefficients = @$c_ref;
+
+	return map($_ *= $multiplier, @coefficients);
+}
+
 
 =head3 poly_divide()
 
@@ -2773,6 +2602,54 @@ and a remainder.
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
 removed in two releases. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
+
+=cut
+
+sub poly_divide
+{
+	my $n_ref = shift;
+	my $d_ref = shift;
+
+	my @numerator = @$n_ref;
+	my @divisor = @$d_ref;
+	my @quotient;
+	my @remainder;
+
+	my $temp_ascending_flag = $ascending_flag;
+	unless ($ascending_flag)
+	{
+		@numerator = reverse @numerator;
+		@divisor = reverse @divisor;
+		$ascending_flag = 1;
+	}
+
+	#
+	# Just checking... removing any leading zeros.
+	#
+	pop @numerator while (@numerator and abs($numerator[$#numerator]) < $epsilon);
+	pop @divisor while (@divisor and abs($divisor[$#divisor]) < $epsilon);
+
+	my($quo_ref, $rem_ref) = pl_div(\@numerator, \@divisor);
+
+	@quotient = @{$quo_ref};
+	@remainder = @{$rem_ref};
+
+	#
+	# And once again, check for leading zeros in the remainder.
+	#
+	pop @remainder while (@remainder and abs($remainder[$#remainder]) < $epsilon);
+	push @remainder, 0 unless (@remainder);
+
+	unless ($temp_ascending_flag)
+	{
+		@remainder = reverse @remainder;
+		@quotient = reverse @quotient;
+	}
+
+	$ascending_flag = $temp_ascending_flag;
+	return (\@quotient, \@remainder);
+}
+
 
 =head1 EXPORT
 
@@ -2930,3 +2807,7 @@ I<Numerical Recipes in C>.  Cambridge University Press, 1988.  L<http://www.nr.c
 John M. Gamble may be found at B<jgamble@cpan.org>
 
 =cut
+
+1;
+__END__
+
