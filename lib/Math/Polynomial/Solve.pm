@@ -9,6 +9,7 @@ use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use strict;
 use warnings;
+use utf8;
 
 #
 # Three # for "I am here" messages, four # for variable dumps.
@@ -71,7 +72,7 @@ use warnings;
 	@{ $EXPORT_TAGS{'sturm'} },
 	@{ $EXPORT_TAGS{'utility'} } );
 
-@EXPORT = ( 'ascending_order' );
+@EXPORT = qw( ascending_order );
 
 our $VERSION = '2.71';
 
@@ -80,7 +81,7 @@ our $VERSION = '2.71';
 # methods of solving.
 #
 # hessenberg (default 1): set to 1 to force poly_roots() to use the QR
-# Hessenberg method # regardless of the degree of the polynomial.  Set to zero
+# Hessenberg method regardless of the degree of the polynomial.  Set to zero
 # to force poly_roots() uses one of the specialized routines (linerar_roots(),
 # quadratic_roots(), etc) if the degree of the polynomial is less than five.
 #
@@ -152,7 +153,9 @@ BEGIN
 #
 my $ascending_flag = 0;		# default 0, in a later version it will be 1.
 
-=encoding utf8
+=pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -261,50 +264,67 @@ also been exported for your use.
 
 =head2 DEPRECATED FUNCTIONS
 
-Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
+Many functions under the ':utility' tag now have equivalents in L<Math::Utils>.
 Consequently this module now uses Math::Utils itself, and will remove the
 redundant :utility functions by the version 2.80.
 
 Note that the L<polynomial functions|Math::Utils/polynomial tag> 
-in Math::Utils all take the polynomial
-coefficients in ascending order, left to right.
+in Math::Utils all take the polynomial coefficients in ascending
+order, left to right, as opposed to the current default behavior
+(until version 3.00) of right to left in this module.
 
 Scheduled to be removed are:
 
 =over 4
 
-=item fltcmp()
+=item *
+
+fltcmp()
 
 Use Math::Utils's generate_fltcmp() or generate_relational() to
 create comparison functions with a built-in tolerance.
 
-=item poly_divide()
+=item *
+
+poly_divide()
 
 Use Math::Utils's pl_div(). Note that unlike poly_divide(), checking for
 leading zeros isn't done by pl_div(), and is expected to be done by
 the caller.
 
-=item poly_evaluate()
+=item *
+
+poly_evaluate()
 
 Use Math::Utils's pl_evaluate().
 
-=item poly_derivative()
+=item *
+
+poly_derivative()
 
 Use Math::Utils's pl_derivative().
 
-=item poly_antiderivative()
+=item *
+
+poly_antiderivative()
 
 Use Math::Utils's pl_antiderivative().
 
-=item poly_derivaluate()
+=item *
+
+poly_derivaluate()
 
 Use Math::Utils's pl_dxevaluate().
 
-=item poly_constmult()
+=item *
+
+poly_constmult()
 
 Not duplicated in Math::Utils, use L<Math::VecStat>'s vecprod().
 
-=item simplified_form()
+=item *
+
+simplified_form()
 
 This function is simply going to be dropped.
 
@@ -402,6 +422,16 @@ sub poly_analysis
 	return \@coefficients, $m;
 }
 
+=head1 EXPORT
+
+Currently there is one default export, L<ascending_order|ascending_order()>.
+
+The remaining functions may be individually named in an export list,
+but there are also four export tags:
+L<classical|Classical Functions>,
+L<numeric|Numeric Functions>,
+L<sturm|Sturm Functions>, and
+L<utility|Utility Functions>.
 
 =head2 EXPORTED BY DEFAULT
 
@@ -2648,17 +2678,12 @@ sub poly_divide
 	return (\@quotient, \@remainder);
 }
 
+1;
+__END__
 
-=head1 EXPORT
+=pod
 
-Currently there is one default export, L<ascending_order|ascending_order()>.
-
-The remaining functions may be individually named in an export list,
-but there are also four export tags:
-L<classical|Classical Functions>,
-L<numeric|Numeric Functions>,
-L<sturm|Sturm Functions>, and
-L<utility|Utility Functions>.
+=encoding UTF-8
 
 =head1 ACKNOWLEDGMENTS
 
@@ -2736,9 +2761,9 @@ Fortran code for this routine is at L<http://netlib.sandia.gov/eispack/balanc.f>
 Alan Edelman and H. Murakami, "Polynomial Roots from Companion Matrix
 Eigenvalues", Math. Comp., v64,#210, pp.763-776(1995).
 
-=back
-
 For an overview (and useful algorithms), this is probably the book to start with.
+
+=back
 
 =head2 Sturm's Sequence and Laguerre's Method
 
@@ -2746,37 +2771,29 @@ For an overview (and useful algorithms), this is probably the book to start with
 
 =item
 
-Dörrie, Heinrich. I<100 Great Problems of Elementary Mathematics; Their History and Solution>.
+DE<0xf6>rrie, Heinrich. I<100 Great Problems of Elementary Mathematics; Their History and Solution>.
 New York: Dover Publications, 1965. Translated by David Antin.
-
-=back
 
 Discusses Charles Sturm's 1829 paper with an eye towards mathematical proof
 rather than an algorithm, but is still very useful.
-
-=over 3
 
 =item
 
 Glassner, Andrew S. I<Graphics Gems>. Boston: Academic Press, 1990. 
 
-=back
-
 The chapter "Using Sturm Sequences to Bracket Real Roots
 of Polynomial Equations" (by D. G. Hook and P. R. McAree) has a clearer
 description of the actual steps needed to implement Sturm's method.
-
-=over 3
 
 =item
 
 Acton, Forman S. I<Numerical Methods That Work>. New York: Harper & Row, Publishers, 1970.
 
-=back
-
 Lively, opinionated book on numerical equation solving. I looked it up when it
 became obvious that everyone was quoting Acton when discussing Laguerre's
 method.
+
+=back
 
 =head2 Newton-Raphson
 
@@ -2805,7 +2822,4 @@ I<Numerical Recipes in C>.  Cambridge University Press, 1988.  L<http://www.nr.c
 John M. Gamble may be found at B<jgamble@cpan.org>
 
 =cut
-
-1;
-__END__
 
