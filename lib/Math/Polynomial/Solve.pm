@@ -263,7 +263,7 @@ also been exported for your use.
 
 Many functions under the ':utility' tag are now duplicated in L<Math::Utils>.
 Consequently this module now uses Math::Utils itself, and will remove the
-redundant :utility functions by the next two releases.
+redundant :utility functions by the version 2.80.
 
 Note that the L<polynomial functions|Math::Utils/polynomial tag> 
 in Math::Utils all take the polynomial
@@ -316,8 +316,6 @@ This function is simply going to be dropped.
 # $asending = ascending_order();
 # $oldorder = ascending_order($neworder);
 #
-# Returns the machine epsilon value used internally by this module.
-# If overriding the machine epsilon, returns the old value.
 #
 sub ascending_order
 {
@@ -2363,7 +2361,7 @@ of the returned polynomial may be even shorter than expected from the length of 
 polynomial. Returns an empty list if the polynomial is a simple constant.
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> and the tag
+removed by version 2.80. Use the module L<Math::Utils> and the tag
 :polynomial for a replacement.
 
 =cut
@@ -2387,7 +2385,7 @@ constant term is set to zero; to override this use
   $integral[$#integral] = $const_term;
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> and the tag
+removed by version 2.80. Use the module L<Math::Utils> and the tag
 :polynomial for a replacement.
 
 =cut
@@ -2408,7 +2406,7 @@ and placing it in a monic polynomial form (all coefficients divided by the
 coefficient of the highest power).
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases.
+removed by version 2.80.
 
 =cut
 
@@ -2456,7 +2454,7 @@ or return a scalar.
   my $y_median = poly_evaluate(\@coefficients, $x_median);
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> under the section
+removed by version 2.80. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
 
 =cut
@@ -2487,7 +2485,7 @@ zero.  Similarly, if the "equation" is a constant, the first derivative value
 will be zero.
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> under the section
+removed by version 2.80. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
 
 =cut
@@ -2574,7 +2572,7 @@ C<poly_evaluate()>, uses the reference of the coefficient list.
   my @coef3 = poly_constmult(\@coefficients, 3);
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::VecStat> for a replacement.
+removed by version 2.80. Use the module L<Math::VecStat> for a replacement.
 
 =cut
 
@@ -2600,7 +2598,7 @@ and a remainder.
   my @remainder = @$r;
 
 This function is L<deprecated|/DEPRECATED FUNCTIONS>, and will be
-removed in two releases. Use the module L<Math::Utils> under the section
+removed by version 2.80. Use the module L<Math::Utils> under the section
 "polynomial tag" for a replacement.
 
 =cut
