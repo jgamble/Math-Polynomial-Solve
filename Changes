@@ -1,5 +1,17 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.72
+     Oct 19 2015
+	- Reformat to POD as function head (becoming both documentation
+	  and function comment description), as is currently done in
+	  perl modules.
+	- Documentation said ascending_order() is exported by default,
+	  but it had to be named in the import list. Move the name
+	  from @EXPORT_OK to @EXPORT.
+	- I'm pretty firm about (most of) the :utility functions going
+	  away by 2.80, but I also have it written that they're being
+	  removed in two releases in parts of the documentation. Too
+	  restrictive - remove that.
 2.71
      Oct 8 2015
 	- Document functions deprecated by Math-Utils and Math-VecStat.
