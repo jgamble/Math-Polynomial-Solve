@@ -1,10 +1,13 @@
 use Math::Complex;
 use Math::Polynomial::Solve qw(:utility);
+use Math::Utils qw(:polynomial :compare);
+
+my $fltcmp = generate_fltcmp(2.5e-7);
 
 sub allzeroes
 {
 	my($p_ref, @xvals) = @_;
-	my @yvals = grep {fltcmp($_, 0) != 0} poly_evaluate($p_ref, @xvals);
+	my @yvals = grep {&$fltcmp($_, 0) != 0} pl_evaluate($p_ref, @xvals);
 	return (scalar @yvals)? 0: 1;
 }
 
@@ -37,7 +40,7 @@ sub polycmp
 	foreach my $c1 (@polynomial1)
 	{
 		my $c2 = shift @polynomial2;
-		return 1 if (fltcmp($c1, $c2) != 0);
+		return 1 if (&$fltcmp($c1, $c2) != 0);
 	}
 
 	return 0;
