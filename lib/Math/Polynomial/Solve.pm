@@ -12,7 +12,8 @@ use warnings;
 use utf8;
 
 #
-# Three # for "I am here" messages, four # for variable dumps.
+# Three # for "I am here" messages.
+# Four # for variable dumps.
 # Five # for a dump of the companion matrix.
 # Six # for sturm structs (sign chain, etc).
 #
@@ -1705,7 +1706,8 @@ sub sturm_bisection_roots
 =head3 poly_sturm_chain()
 
 Returns the chain of Sturm functions used to evaluate the number of roots of a
-polynomial in a range of X values.
+polynomial in a range of X values. The chain is a list of coefficient
+references, the coefficients being stored in ascending order.
 
 If you feed in a sequence of X values to the Sturm functions, you can tell where
 the (real, not complex) roots of the polynomial are by counting the number of
@@ -1867,7 +1869,8 @@ sub sturm_sign_minus_inf
 	foreach my $c (@$chain_ref)
 	{
 		my @coefficients = @$c;
-		push @signs, ((($#coefficients & 1) == 1)? -1: 1) * sign($coefficients[$#coefficients]);
+		push @signs, sign($coefficients[$#coefficients]) *
+			((($#coefficients & 1) == 1)? -1: 1);
 	}
 
 	return @signs;
@@ -1884,7 +1887,6 @@ sub sturm_sign_plus_inf
 {
 	my($chain_ref) = @_;
 	my @signs;
-	#my @signs = map{ sign(${$_}[0]) } @$chain_ref;
 
 	foreach my $c (@$chain_ref)
 	{
