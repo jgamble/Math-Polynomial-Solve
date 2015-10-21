@@ -1,21 +1,24 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.72
-     Oct 20 2015
-	- More POD reformatting and clarification.
+     Oct 21 2015
+	- Changed tests to use Math::Utils's polynomial and compare code.
+	- More POD reformatting and clarification, extend the POD docs,
+	  and change some code based on aesthetics.
 	- Gave up on putting unicode directly in POD (Heinrich Dorrie's
 	  name seems to defeat the pod-to-html parser, which fails to
 	  recognize an o with an umlaut
 	  (<http://www.fileformat.info/info/unicode/char/f6/index.htm>).
+	- Bump the version numbers, up to CPAN.
      Oct 19 2015
-	- Reformat to POD as function head (becoming both documentation
+	- Reformat to POD-as-function-head (becoming both documentation
 	  and function comment description), as is currently done in
-	  perl modules.
+	  most perl modules.
 	- I'm pretty firm about (most of) the :utility functions going
 	  away by 2.80, but I also have it written that they're being
-	  removed in two releases in parts of the documentation, which
-	  is way too restrictive. Changed all mentions of "two releases"
-	  to "version 2.80".
+	  removed in two releases in some parts of the documentation,
+	  which is way too restrictive. Changed all mentions of "two
+	  releases" to "version 2.80".
 2.71
      Oct 8 2015
 	- Document functions deprecated by Math-Utils and Math-VecStat.
