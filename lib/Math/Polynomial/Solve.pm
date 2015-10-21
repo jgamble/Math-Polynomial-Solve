@@ -75,7 +75,7 @@ use utf8;
 
 @EXPORT = qw( ascending_order );
 
-our $VERSION = '2.71';
+our $VERSION = '2.72';
 
 #
 # Options to set or unset to force poly_roots() to use different
