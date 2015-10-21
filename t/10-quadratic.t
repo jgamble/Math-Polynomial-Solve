@@ -1,6 +1,4 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl quadratic.t'
-
+use 5.010001;
 use Test::More tests => 18;	# Twice the number of scalar @case.
 
 use Math::Polynomial::Solve qw(quadratic_roots ascending_order);

@@ -1,10 +1,10 @@
 {
-   "abstract" : "Find the Roots of Polynomial Equations",
+   "abstract" : "Find the roots of polynomial equations",
    "author" : [
       "John M. Gamble <jgamble@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Module::Build version 0.4214",
+   "generated_by" : "Module::Build version 0.4218",
    "license" : [
       "perl_5"
    ],
@@ -16,7 +16,7 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Test::Simple" : "0"
+            "Test::More" : "0"
          }
       },
       "configure" : {
@@ -35,10 +35,10 @@
    "provides" : {
       "Math::Polynomial::Solve" : {
          "file" : "lib/Math/Polynomial/Solve.pm",
-         "version" : "2.72"
+         "version" : "2.72_01"
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "license" : [
          "http://dev.perl.org/licenses/"
@@ -47,7 +47,7 @@
          "url" : "git://github.com/jgamble/Math-Polynomial-Solve.git"
       }
    },
-   "version" : "2.72",
+   "version" : "2.72_01",
    "x_keyword" : [
       "math",
       "polynomial",
@@ -62,5 +62,6 @@
       "Laguerre",
       "Hessenberg",
       "Newton-Raphson"
-   ]
+   ],
+   "x_serialization_backend" : "JSON::PP version 2.27300"
 }

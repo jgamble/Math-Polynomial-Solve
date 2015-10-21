@@ -1,5 +1,4 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 30-sturm.t'
+use 5.010001;
 
 use Test::More tests => 16;
 
@@ -29,7 +28,7 @@ my @case = (
 	[ [8, -24, 0, 6], 14.625, ],
 );
 
-foreach my $cref (@case)
+for my $cref (@case)
 {
 	my($p, $c) = @$cref;
 

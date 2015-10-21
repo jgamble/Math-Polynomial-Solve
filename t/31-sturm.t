@@ -1,6 +1,4 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 31-sturm.t'
-
+use 5.010001;
 use Test::More tests => 34;
 
 use Math::Polynomial::Solve qw(:sturm ascending_order);
@@ -27,7 +25,9 @@ my @case = (
 	[[1, -2.5, 7/8, -1/16], 3],
 );
 
-foreach my $cref (@case)
+ascending_order(0);
+
+for my $cref (@case)
 {
 	my($p, $n) = @$cref;
 	my @polynomial = @$p;
@@ -37,7 +37,7 @@ foreach my $cref (@case)
 
 ascending_order(1);
 
-foreach my $cref (@case)
+for my $cref (@case)
 {
 	my($p, $n) = @$cref;
 	my @polynomial = reverse @$p;

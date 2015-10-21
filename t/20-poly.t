@@ -2,6 +2,7 @@
 # Tests of the poly_roots() function, all of polynomials of degree
 # four or less.
 #
+use 5.010001;
 use Test::More tests => 48;
 
 use Math::Polynomial::Solve qw(:numeric ascending_order);
@@ -26,13 +27,15 @@ my @case = (
 	[1, 12, 46, 60, 25],
 );
 
+ascending_order(0);
+
 #
 # All of these tests will be dispatched to the
 # quadratic_roots, cubic_roots, and quartic_roots functions.
 #
 poly_option(hessenberg => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
@@ -49,7 +52,7 @@ foreach (@case)
 #
 poly_option(hessenberg => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
@@ -68,7 +71,7 @@ ascending_order(1);
 #
 poly_option(hessenberg => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
@@ -85,7 +88,7 @@ foreach (@case)
 #
 poly_option(hessenberg => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);

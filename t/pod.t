@@ -1,3 +1,4 @@
+use 5.010001;
 use strict;
 use Test::More;
 eval "use Test::Pod 1.41";

@@ -3,6 +3,7 @@
 # four or less. Cases are all 0.9216 times the values of the cases
 # in poly0.t.
 #
+use 5.010001;
 use Test::More tests => 44;
 
 use Math::Polynomial::Solve qw(:numeric ascending_order);
@@ -26,13 +27,15 @@ my @case = (
 	[0.9216, 11.0592, 42.3936, 55.296, 23.04],
 );
 
+ascending_order(0);
+
 #
 # All of these tests will be dispatched to the
 # quadratic_roots, cubic_roots, and quartic_roots functions.
 #
 poly_option(hessenberg => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
@@ -49,7 +52,7 @@ foreach (@case)
 #
 poly_option(hessenberg => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
@@ -68,7 +71,7 @@ ascending_order(1);
 #
 poly_option(hessenberg => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = reverse @$_;
 	my @x = poly_roots(@coef);
@@ -85,7 +88,7 @@ foreach (@case)
 #
 poly_option(hessenberg => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = reverse @$_;
 	my @x = poly_roots(@coef);

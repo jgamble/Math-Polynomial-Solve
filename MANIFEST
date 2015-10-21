@@ -42,8 +42,4 @@ t/32-sturm.t
 t/33-sturm.t
 t/50-laguerre.t
 t/51-nr.t
-t/90-derivative.t
-t/91-division.t
-t/92-pderival.t
-t/93-peval.t
 t/pod.t

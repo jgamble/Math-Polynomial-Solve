@@ -1,7 +1,5 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl newtonraphson.t'
-
-use Test::Simple tests => 6;
+use 5.010001;
+use Test::More tests => 6;
 
 use Math::Polynomial::Solve qw(newtonraphson ascending_order);
 use Math::Utils qw(:compare :polynomial);
@@ -27,7 +25,7 @@ sub ok_newton
 
 	#rootprint(@x);
 
-	foreach my $xv (@x)
+	for my $xv (@x)
 	{
 		my $yv = pl_evaluate($c_ref, $xv);
 		ok( (&$fltcmp($yv, 0.0) == 0),

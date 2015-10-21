@@ -1,3 +1,4 @@
+use 5.010001;
 use Math::Complex;
 use Math::Polynomial::Solve qw(:utility);
 use Math::Utils qw(:polynomial :compare);
@@ -14,14 +15,14 @@ sub allzeroes
 sub sumof
 {
 	my $x = cplx(0,0);
-	foreach (@_){$x += $_};
+	for (@_){$x += $_};
 	return $x;
 }
 
 sub prodof
 {
 	my $x = cplx(1,0);
-	foreach (@_){$x *= $_};
+	for (@_){$x *= $_};
 	return $x;
 }
 
@@ -37,7 +38,7 @@ sub polycmp
 
 	return 1 if (scalar @polynomial1 != scalar @polynomial2);
 
-	foreach my $c1 (@polynomial1)
+	for my $c1 (@polynomial1)
 	{
 		my $c2 = shift @polynomial2;
 		return 1 if (&$fltcmp($c1, $c2) != 0);
@@ -50,7 +51,7 @@ sub polychain2str
 {
 	my(@chain) = @_;
 	my $str = "";
-	foreach my $j (0..$#chain)
+	for my $j (0..$#chain)
 	{
 		my @c = @{$chain[$j]};
 		$str .= sprintf("    f%2d: [", $j) . join(", ", @c) . "]\n";
@@ -67,7 +68,7 @@ sub cartesian_format_signed($$@)
 	$fmt_re ||= "%.15g";	# Provide a default real format
 	$fmt_im ||= "%.15gi";	# Provide a default im format
 
-	foreach $n (@numbers)
+	for $n (@numbers)
 	{
 		#
 		# Is the number part of the Complex package?
@@ -99,7 +100,7 @@ sub cartesian_format($$@)
 	$fmt_re ||= "%.15g";		# Provide a default real format
 	$fmt_im ||= " + %.15gi";	# Provide a default im format
 
-	foreach $n (@numbers)
+	for $n (@numbers)
 	{
 		#
 		# Is the number part of the Complex package?
@@ -125,7 +126,7 @@ sub rootprint
 {
 	my $i = 0;
 	my $line = "";
-	foreach (@_)
+	for (@_)
 	{
 		$line .= "\tx[$i] = " . cartesian_format(undef, undef, $_) . "\n";
 		$i++;
@@ -136,7 +137,7 @@ sub rootprint
 sub rootformat
 {
 	my @fmtlist;
-	foreach (@_)
+	for (@_)
 	{
 		push @fmtlist, cartesian_format(undef, undef, $_);
 	}

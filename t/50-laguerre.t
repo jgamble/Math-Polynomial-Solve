@@ -1,7 +1,5 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl laguerre.t'
-
-use Test::Simple tests => 8;
+use 5.010001;
+use Test::More tests => 8;
 
 use Math::Polynomial::Solve qw(laguerre ascending_order);
 use Math::Utils qw(:compare);
@@ -28,7 +26,7 @@ sub ok_laguerre
 
 	#rootprint(@x);
 
-	foreach my $xv (@x)
+	for my $xv (@x)
 	{
 		my $yv = pl_evaluate($c_ref, $xv);
 		ok( (&$fltcmp($yv, 0.0) == 0),

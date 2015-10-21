@@ -1,5 +1,5 @@
-	Math::Polynomial::Solve, version 2.72, 21 October 2015.
-------------------------------------------------------------------------
+	Math::Polynomial::Solve, version 2.72_01, 15 May 2016.
+-------------------------------------------------------------------------------
 Coming changes:
 
 Most of the functions under the :utility tag have been
@@ -7,8 +7,12 @@ moved to Math::Utils. See the DEPRECATED FUNCTIONS section of the
 documentation, as well as the documentation of Math-Utils (there will
 be some parameter changes as well).
 
-The functions will be removed by version 2.80.
-------------------------------------------------------------------------
+You will now receive warning messages if you are using any of the
+deprecated functions in your code (politely collected and sorted for
+you at the end of the run.)
+
+The functions (and and their warning messages) will be removed by version 2.80.
+-------------------------------------------------------------------------------
 
 By release 3.00 (scheduled for approximately end of 2017), the default order
 of the the coefficients of the polynomials will be changed to an ascending

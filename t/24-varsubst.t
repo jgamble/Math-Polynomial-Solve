@@ -1,7 +1,8 @@
 #
 # Tests of the poly_roots() function with varsubst on and off.
 #
-use Test::Simple tests => 30;
+use 5.010001;
+use Test::More tests => 30;
 
 use Math::Polynomial::Solve qw(:numeric poly_nonzero_term_count);
 use Math::Complex;
@@ -31,7 +32,7 @@ my @case = (
 #
 poly_option(varsubst => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my $n = $#coef;
@@ -53,7 +54,7 @@ foreach (@case)
 #
 poly_option(varsubst => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my $n = $#coef;
@@ -77,7 +78,7 @@ foreach (@case)
 #
 poly_option(hessenberg => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my $n = $#coef;

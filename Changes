@@ -1,5 +1,18 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.72_01 (TRIAL)
+     May 15 2015
+	- The major change: Will now warn on exit (via the END block)
+	  about the use of deprecated functions. But that's alright,
+	  because you've already made that change over half a year
+	  ago, and don't use those functions anymore, right?
+	- Also the test files for the deprecated functions are gone.
+	- Hmm, I've been inconsistently using Test::Simple and Test::More
+	  in the test files. Settled on Test::More and made that change
+	  in Build.PL too.
+	- Some small improvements in the documentation.
+	- Some 2001-era usage looks pretty dated now ("use vars" in
+	  particular). Updated that.
 2.72
      Oct 21 2015
 	- Changed tests to use Math::Utils's polynomial and compare code.

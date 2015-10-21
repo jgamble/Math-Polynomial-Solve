@@ -1,7 +1,5 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl 02-limit.t'
-
-use Test::Simple tests => 11;
+use 5.010001;
+use Test::More tests => 11;
 
 use Math::Polynomial::Solve qw(:utility);
 use strict;

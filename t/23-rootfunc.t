@@ -1,7 +1,8 @@
 #
 # Tests of the poly_roots() function with both root_function on and off.
 #
-use Test::Simple tests => 34;
+use 5.010001;
+use Test::More tests => 34;
 
 use Math::Polynomial::Solve qw(:numeric poly_nonzero_term_count);
 use Math::Complex;
@@ -38,7 +39,7 @@ my @case = (
 #
 poly_option(root_function => 0);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my $n = $#coef;
@@ -60,7 +61,7 @@ foreach (@case)
 #
 poly_option(root_function => 1);
 
-foreach (@case)
+for (@case)
 {
 	my @coef = @$_;
 	my $n = $#coef;
