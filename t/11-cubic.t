@@ -1,7 +1,7 @@
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl cubic.t'
 
-use Test::More tests => 52;	# Twice the number of scalar @case.
+use Test::More tests => 26;	# Twice the number of scalar @case.
 
 use Math::Polynomial::Solve qw(cubic_roots :utility ascending_order);
 use Math::Complex;
@@ -31,18 +31,7 @@ foreach (@case)
 	my @coef = @$_;
 	my @x = cubic_roots(@coef);
 
-	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", @coef) . " ]");
-
-	#diag(rootformat(@x), "\n\n");
-
-	#
-	# Again, with the negative coefficients.
-	#
-	@coef = poly_constmult(\@coef, -1);
-	@x = cubic_roots(@coef);
-
-	ok(allzeroes(\@coef, @x),
+	ok(allzeroes([reverse @coef ], @x),
 		"   [ " . join(", ", @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
@@ -56,18 +45,7 @@ foreach (@case)
 	my @x = cubic_roots(@coef);
 
 	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", @coef) . " ]");
-
-	#diag(rootformat(@x), "\n\n");
-
-	#
-	# Again, with the negative coefficients.
-	#
-	@coef = poly_constmult(\@coef, -1);
-	@x = cubic_roots(@coef);
-
-	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", @coef) . " ]");
+		"   [ " . join(", ", @coef) . " ], ascending order");
 
 	#diag(rootformat(@x), "\n\n");
 }

@@ -3,7 +3,7 @@
 
 use Test::More tests => 18;
 
-use Math::Polynomial::Solve qw(poly_roots fltcmp ascending_order);
+use Math::Polynomial::Solve qw(poly_roots ascending_order);
 use Math::Complex;
 use strict;
 use warnings;
@@ -30,14 +30,14 @@ my @case = (
 # The last case is an oddball one, and I'm upping the tolerance
 # for it.
 #
-poly_tolerance(fltcmp => 4.5e-8);
+#poly_tolerance(fltcmp => 4.5e-8);
 
 foreach (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
 
-	ok(allzeroes(\@coef, @x),
+	ok(allzeroes([reverse @coef ], @x),
 		"   [ " . join(", ", @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
@@ -45,14 +45,14 @@ foreach (@case)
 
 ascending_order(1);
 
-poly_tolerance(fltcmp => 2.0e-7);
+#poly_tolerance(fltcmp => 2.0e-7);
 foreach (@case)
 {
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
 
 	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", reverse @coef) . " ]");
+		"   [ " . join(", ", reverse @coef) . " ], ascending order");
 
 	#diag(rootformat(@x), "\n\n");
 }

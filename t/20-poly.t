@@ -37,7 +37,7 @@ foreach (@case)
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
 
-	ok(allzeroes(\@coef, @x),
+	ok(allzeroes([reverse @coef ], @x),
 		"   [ " . join(", ", @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
@@ -54,7 +54,7 @@ foreach (@case)
 	my @coef = @$_;
 	my @x = poly_roots(@coef);
 
-	ok(allzeroes(\@coef, @x),
+	ok(allzeroes([reverse @coef ], @x),
 		"   [ " . join(", ", @coef) . " ]");
 
 	#diag(rootformat(@x), "\n\n");
@@ -74,7 +74,7 @@ foreach (@case)
 	my @x = poly_roots(@coef);
 
 	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", reverse @coef) . " ]");
+		"   [ " . join(", ", reverse @coef) . " ], ascending order");
 
 	#diag(rootformat(@x), "\n\n");
 }
@@ -91,7 +91,7 @@ foreach (@case)
 	my @x = poly_roots(@coef);
 
 	ok(allzeroes(\@coef, @x),
-		"   [ " . join(", ", reverse @coef) . " ]");
+		"   [ " . join(", ", reverse @coef) . " ], ascending order");
 
 	#diag(rootformat(@x), "\n\n");
 }
