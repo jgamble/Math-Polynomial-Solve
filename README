@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 2.71, 14 October 2015.
+	Math::Polynomial::Solve, version 2.72, 21 October 2015.
 ------------------------------------------------------------------------
 Coming changes:
 
@@ -13,7 +13,7 @@ The functions will be removed by version 2.80.
 By release 3.00 (scheduled for approximately end of 2017), the default order
 of the the coefficients of the polynomials will be changed to an ascending
 order, to match that of Math::Polynomial. To help with the change, the
-function ascending_order() is exported by default.
+function ascending_order() is available.
 
 Currently if your polynomial is the cubic x**3 + 3*x**2 + 11* x + 5,
 then all functions are called with the polynomials in descending order.
