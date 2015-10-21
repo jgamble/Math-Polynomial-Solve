@@ -3,16 +3,21 @@
 
 use Test::Simple tests => 8;
 
-use Math::Polynomial::Solve qw(laguerre poly_evaluate fltcmp);
+use Math::Polynomial::Solve qw(laguerre ascending_order);
+use Math::Utils qw(:compare);
 use Math::Complex;
 use strict;
 use warnings;
 
 require "t/coef.pl";
 
-ok_laguerre([1, 2, -11, -12], [-4.5, 0.5, 2.5]);
-ok_laguerre([12, 11, -2, -1], [-0.5, 0.3, -5]);
-ok_laguerre([1, 5, 8, 10, 11], [-8, 8]);
+my $fltcmp = generate_fltcmp();
+
+ascending_order(1);
+
+ok_laguerre([-12, -11, 2, 1], [-4.5, 0.5, 2.5]);
+ok_laguerre([-1, -2, 11, 12], [-0.5, 0.3, -5]);
+ok_laguerre([11, 10, 8, 5, 1], [-8, 8]);
 exit(0);
 
 sub ok_laguerre
@@ -25,8 +30,8 @@ sub ok_laguerre
 
 	foreach my $xv (@x)
 	{
-		my $yv = poly_evaluate($c_ref, $xv);
-		ok( (fltcmp($yv, 0.0) == 0),
+		my $yv = pl_evaluate($c_ref, $xv);
+		ok( (&$fltcmp($yv, 0.0) == 0),
 		"   [ " . join(", ", @coef) . " ], root == $xv");
 	}
 }

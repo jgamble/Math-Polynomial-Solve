@@ -3,16 +3,20 @@
 
 use Test::Simple tests => 6;
 
-use Math::Polynomial::Solve qw(newtonraphson poly_evaluate fltcmp);
+use Math::Polynomial::Solve qw(newtonraphson ascending_order);
+use Math::Utils qw(:compare :polynomial);
 use Math::Complex;
 use strict;
 use warnings;
 
 require "t/coef.pl";
 
-ok_newton([1, 2, -11, -12], [-4.5, 0.5, 2.5]);
-ok_newton([12, 11, -2, -1], [-0.5, 0.3, -5]);
-#ok_newton([1, 2, -11, -12], [-4.5, 0.5, 2.5]);
+my $fltcmp = generate_fltcmp();
+
+ascending_order(1);
+
+ok_newton([-12, -11, 2, 1], [-4.5, 0.5, 2.5]);
+ok_newton([-1, -2, 11, 12], [-0.5, 0.3, -5]);
 exit(0);
 
 sub ok_newton
@@ -25,8 +29,8 @@ sub ok_newton
 
 	foreach my $xv (@x)
 	{
-		my $yv = poly_evaluate($c_ref, $xv);
-		ok( (fltcmp($yv, 0.0) == 0),
+		my $yv = pl_evaluate($c_ref, $xv);
+		ok( (&$fltcmp($yv, 0.0) == 0),
 		"   [ " . join(", ", @coef) . " ], root == $xv");
 	}
 }
