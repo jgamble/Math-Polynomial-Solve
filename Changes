@@ -1,9 +1,15 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
+2.75
+     May 19 2016
+	- Remove (commented out) setting of fltcmp tolerance in
+	  21-poly.t. Note to self: will have to remove fltcmp
+	  tests in 02-limit.t once deprecated functions and
+	  fltcmp tolerance are removed.
 2.72_01 (TRIAL)
-     May 15 2015
+     May 15 2016
 	- The major change: Will now warn on exit (via the END block)
-	  about the use of deprecated functions. But that's alright,
+	  about the use of deprecated functions. But that's okay,
 	  because you've already made that change over half a year
 	  ago, and don't use those functions anymore, right?
 	- Also the test files for the deprecated functions are gone.
