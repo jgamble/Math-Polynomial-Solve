@@ -1,5 +1,5 @@
 use 5.010001;
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 use Math::Polynomial::Solve qw(poly_roots ascending_order);
 use Math::Complex;
@@ -17,6 +17,7 @@ my @case = (
 	[1, 5, 10, 10, 5, 1],
 	[1, 0, 0, 0, 1, 1],		# Two of the roots are cube roots of 1
 	[1, 1, 1, 1, 1, 1, 1, 1],
+	[4, 8, 15, 16, 23, 42],
 	[1, 0, 0, 0, 20, 16],
 	[1, 0, -3, -4, 3, 6, 2],
 	[-1, 0, 3, 4, -3, -6, -2],
@@ -25,12 +26,6 @@ my @case = (
 );
 
 ascending_order(0);
-
-#
-# The last case is an oddball one, and I'm upping the tolerance
-# for it.
-#
-#poly_tolerance(fltcmp => 4.5e-8);
 
 for (@case)
 {
@@ -45,7 +40,6 @@ for (@case)
 
 ascending_order(1);
 
-#poly_tolerance(fltcmp => 2.0e-7);
 for (@case)
 {
 	my @coef = @$_;
