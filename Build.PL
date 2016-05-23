@@ -8,7 +8,7 @@ my $build = Module::Build->new(
 
 	dist_abstract => 'Find the roots of polynomial equations',
 	dist_author => ['John M. Gamble <jgamble@cpan.org>'],
-	dist_version => '2.72_01',
+	dist_version => '2.75',
 	dist_name => 'Math-Polynomial-Solve',
 
 	provides => {
@@ -36,7 +36,7 @@ my $build = Module::Build->new(
 	create_readme => 0,
 	create_makefile_pl => 'traditional',
 	dynamic_config => 0,
-	release_status => 'testing',
+	release_status => 'stable',
 	add_to_cleanup	 => [ 'Math-Polynomial-Solve-*' ],
 
 	meta_merge => {

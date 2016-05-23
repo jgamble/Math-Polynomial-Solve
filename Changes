@@ -1,8 +1,12 @@
 Revision history for Perl extension Math::Polynomial::Solve.
 
 2.75
+     May 22 2016
+	- Updated the cubics paper by Dr. Nickalls, as I could no
+	  longer remember if the one in the references directory
+	  was the most recent version.
      May 19 2016
-	- Remove (commented out) setting of fltcmp tolerance in
+	- Remove the commented out setting of fltcmp tolerance in
 	  21-poly.t. Note to self: will have to remove fltcmp
 	  tests in 02-limit.t once deprecated functions and
 	  fltcmp tolerance are removed.

@@ -1,4 +1,4 @@
-	Math::Polynomial::Solve, version 2.72_01, 15 May 2016.
+	Math::Polynomial::Solve, version 2.75, 22 May 2016.
 -------------------------------------------------------------------------------
 Coming changes:
 
@@ -11,7 +11,7 @@ You will now receive warning messages if you are using any of the
 deprecated functions in your code (politely collected and sorted for
 you at the end of the run.)
 
-The functions (and and their warning messages) will be removed by version 2.80.
+The functions (and their warning messages) will be removed by version 2.80.
 -------------------------------------------------------------------------------
 
 By release 3.00 (scheduled for approximately end of 2017), the default order
@@ -69,8 +69,8 @@ in the web page Karl's Calculus Tutor,
 INSTALLATION:
 
 The usual way.  Unpack the archive:
-	gzip -d Math-Polynomial-Solve-2.71.tar.gz
-	tar xvf Math-Polynomial-Solve-2.71.tar
+	gzip -d Math-Polynomial-Solve-2.75.tar.gz
+	tar xvf Math-Polynomial-Solve-2.75.tar
 
 Go into the resulting directory, and type:
 	perl Build.PL

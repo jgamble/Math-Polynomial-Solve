@@ -75,7 +75,7 @@ our @EXPORT_OK = (
 
 our @EXPORT = qw( ascending_order );
 
-our $VERSION = '2.72_01';
+our $VERSION = '2.75';
 
 #
 # See the END block.
