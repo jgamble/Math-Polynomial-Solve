@@ -1,29 +1,28 @@
 use 5.010001;
-use Test::More tests => 20;
+use Test::More tests => 18;
 
 use Math::Complex;
-use Math::Polynomial::Solve qw(poly_roots ascending_order);
+use Math::Polynomial::Solve qw(:numeric ascending_order);
 use Math::Utils qw(:polynomial :compare);
 use strict;
 use warnings;
 
-my($eq, $ne) = generate_relational(3.0e-7);
+my($eq, $ne) = generate_relational(2.5e-7);
 
 #
 # All cases are degree 5 or higher, so there should be no need to set
 # the Hessenberg flag.
 #
 my @case = (
-	[1, 0, 0, 0, 0, -1],
-	[1, 5, 10, 10, 5, 1],
-	[1, 0, 0, 0, 1, 1],		# Two of the roots are cube roots of 1
-	[1, 1, 1, 1, 1, 1, 1, 1],
-	[4, 8, 15, 16, 23, 42],
-	[1, 0, 0, 0, 20, 16],
-	[1, 0, -3, -4, 3, 6, 2],
-	[-1, 0, 3, 4, -3, -6, -2],
-	[4, -20, -7, 49, -70, 7, -53, 90],	# (4x**2 - 8x + 9)(x + 2)(x - 5)(x**3 - 1)
-	[1950773,  7551423,  -1682934,  137445,  -4961,  67],
+	[0.9216, 0, 0, 0, 0, -0.9216],
+	[0.9216, 4.608, 9.2160, 9.2160, 4.608, 0.9216],
+	[0.9216, 0, 0, 0, 0.9216, 0.9216],
+	[0.9216, 0.9216, 0.9216, 0.9216, 0.9216, 0.9216, 0.9216, 0.9216],
+	[3.6864, 7.3728, 13.824, 14.7456, 21.1968, 38.7072],
+	[0.9216, 0, 0, 0, 18.432, 14.7456],
+	[0.9216, 0, -2.7648, -3.6864, 2.7648, 5.5296, 1.8432],
+	[-0.9216, 0, 2.7648, 3.6864, -2.7648, -5.5296, -1.8432],
+	[1, -2.1, 1.64, -0.586, 0.0969, -0.00737, 0.00021],
 );
 
 ascending_order(0);
@@ -38,8 +37,7 @@ for (@case)
 
 	ok(scalar @badvals == 0,
 		"   [ " . join(", ", @coef) . " ] descending order," .
-		" roots: [" . join(", ", @x) . "]" .
-		" evals: [" . join(", ", @y) . "]"
+		" roots: [" . join(", ", @x) . "]"
 	);
 }
 
@@ -55,8 +53,7 @@ for (@case)
 
 	ok(scalar @badvals == 0,
 		"   [ " . join(", ", @coef) . " ] ascending order," .
-		" roots: [" . join(", ", @x) . "]" .
-		" evals: [" . join(", ", @y) . "]"
+		" roots: [" . join(", ", @x) . "]"
 	);
 }
 
