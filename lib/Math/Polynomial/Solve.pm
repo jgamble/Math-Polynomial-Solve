@@ -70,11 +70,6 @@ our @EXPORT = qw( ascending_order );
 our $VERSION = '2.80';
 
 #
-# See the END block.
-#
-my $ascending_order_called = 0;
-
-#
 # Options to set or unset to force poly_roots() to use different
 # methods of solving.
 #
@@ -145,6 +140,12 @@ BEGIN
 # ($a0, $a1, $a2, $a3, ...)
 #
 my $ascending_flag = 0;		# default 0, in a later version it will be 1.
+
+#
+# See the END block.
+#
+my $ascending_order_called = 0;
+my %called_by;
 
 =pod
 
@@ -276,10 +277,10 @@ sub ascending_order
 # the original equation are found by taking the cube roots of each
 # root of the quadratic.
 #
-# Not exported.
+# Not exported. Coefficients are always in ascending order.
 sub poly_analysis
 {
-	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
+	my(@coefficients) = @_;
 	my @czp;
 	my $m = 1;
 
@@ -288,10 +289,10 @@ sub poly_analysis
 	#
 	# Realistically I don't expect any gaps that can't be handled by
 	# the first three prime numbers, but it's not much of a waste of
-	# space to go up to 31.
+	# space to check the first dozen.
 	#
 	@czp = grep(($#coefficients % $_) == 0,
-		(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31)
+		(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37)
 	);
 
 	#
@@ -301,7 +302,7 @@ sub poly_analysis
 	#
 	if (@czp)
 	{
-		for my $j (0..$#coefficients)
+		for my $j (1..$#coefficients - 1)
 		{
 			if (abs($coefficients[$j]) > $epsilon)
 			{
@@ -428,7 +429,7 @@ ignores the settings of C<poly_options()>.
 
 sub poly_roots
 {
-	my(@coefficients) = ($ascending_flag)? reverse @_: @_;
+	my(@coefficients) = ($ascending_flag == 0)? reverse @_: @_;
 	my(@x, @zero_x);
 	my $subst_degree = 1;
 
@@ -437,8 +438,8 @@ sub poly_roots
 	#
 	# Check for zero coefficients in the higher-powered terms.
 	#
-	shift @coefficients while (scalar @coefficients and
-				   abs($coefficients[0]) < $epsilon);
+	pop @coefficients while (scalar @coefficients and
+				   abs($coefficients[$#coefficients]) < $epsilon);
 
 	if (@coefficients == 0)
 	{
@@ -450,15 +451,16 @@ sub poly_roots
 	# How about zero coefficients in the low terms?
 	#
 	while (scalar @coefficients and
-	       abs($coefficients[$#coefficients]) < $epsilon)
+	       abs($coefficients[0]) < $epsilon)
 	{
 		push @zero_x, 0;
-		pop @coefficients
+		shift @coefficients
 	}
 
 	#
-	# If the polynomial is of the form ax**n + c, and $option{root_function}
-	# is set, use the Math::Complex::root() function to return the roots.
+	# If the polynomial is of the form c + ax**n, and if the
+	# root_function option is set, use the Math::Complex::root()
+	# function to return the roots.
 	#
 	### %option
 	#
@@ -466,7 +468,7 @@ sub poly_roots
 	    poly_nonzero_term_count(@coefficients) == 2)
 	{
 		return  @zero_x,
-			root(-$coefficients[$#coefficients]/$coefficients[0],
+			root(-$coefficients[0]/$coefficients[$#coefficients],
 			     $#coefficients);
 	}
 
@@ -475,7 +477,7 @@ sub poly_roots
 	# See if we can reduce the size of the polynomial by
 	# doing some variable substitution.
 	#
-	if ($option{varsubst})
+	if ($option{varsubst} and $#coefficients > 1)
 	{
 		my $cf;
 		($cf, $subst_degree) = poly_analysis(@coefficients);
@@ -490,12 +492,13 @@ sub poly_roots
 	#### @coefficients
 	#### $subst_degree
 	#
-
 	#
-	# The following root solvers do their own coefficient
-	# reversing, so undo the earlier reversal now.
+	# With the coefficents in ascending order,
+	# pretend it was always that way for the next
+	# function calls.
 	#
-	@coefficients = reverse @coefficients if ($ascending_flag);
+	my $temp_ascending_flag = $ascending_flag;
+	$ascending_flag = 1;
 
 	if ($option{hessenberg} or $#coefficients > 4)
 	{
@@ -522,6 +525,8 @@ sub poly_roots
 	{
 		@x = linear_roots(@coefficients);
 	}
+
+	$ascending_flag = $temp_ascending_flag;
 
 	@x = map(root($_, $subst_degree), @x) if ($subst_degree > 1);
 
@@ -646,7 +651,7 @@ more information on the subject.
 #
 sub build_companion
 {
-	my @coefficients = ($ascending_flag)? reverse @_: @_;
+	my @coefficients = ($ascending_flag == 0)? reverse @_: @_;
 	my $n = $#coefficients - 1;
 	my @h;
 
@@ -655,7 +660,7 @@ sub build_companion
 	#
 	# First step:  Divide by the leading coefficient and negate.
 	#
-	my $cn = - (shift @coefficients);
+	my $cn = - (pop @coefficients);
 	map($_ /= $cn, @coefficients);
 
 	#
@@ -663,7 +668,7 @@ sub build_companion
 	#
 	for my $i (0 .. $n)
 	{
-		$h[$i][$n] = pop @coefficients;
+		$h[$i][$n] = shift @coefficients;
 		map($h[$i][$_] = 0.0, 0 .. $n - 1);
 	}
 
@@ -671,7 +676,6 @@ sub build_companion
 
 	return @h;
 }
-
 
 =head3 balance_matrix
 
@@ -1106,7 +1110,7 @@ by returning C<-b/a>. This may be in either a scalar or an array context.
 
 sub linear_roots
 {
-	my($a, $b) = ($ascending_flag)? reverse @_: @_;
+	my($b, $a) = ($ascending_flag == 0)? reverse @_: @_;
 
 	if (abs($a) < $epsilon)
 	{
@@ -1130,7 +1134,7 @@ using the well-known quadratic formula. Returns a two-element list.
 
 sub quadratic_roots
 {
-	my($a, $b, $c) = ($ascending_flag)? reverse @_: @_;
+	my($c, $b, $a) = ($ascending_flag == 0)? reverse @_: @_;
 
 	if (abs($a) < $epsilon)
 	{
@@ -1165,7 +1169,7 @@ complex numbers.
 
 sub cubic_roots
 {
-	my($a, $b, $c, $d) = ($ascending_flag)? reverse @_: @_;
+	my($d, $c, $b, $a) = ($ascending_flag == 0)? reverse @_: @_;
 	my @x;
 
 	if (abs($a) < $epsilon)
@@ -1180,11 +1184,11 @@ sub cubic_roots
 	# temporarily set the flag to zero and reset before returning.
 	#
 	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 0;
+	$ascending_flag = 1;
 
 	if (abs($d) < $epsilon)
 	{
-		@x = quadratic_roots($a, $b, $c);
+		@x = quadratic_roots($c, $b, $a);
 		$ascending_flag = $temp_ascending_flag;
 		return (0, @x);
 	}
@@ -1274,7 +1278,7 @@ type.
 
 sub quartic_roots
 {
-	my($a,$b,$c,$d,$e) = ($ascending_flag)? reverse @_: @_;
+	my($e,$d,$c,$b,$a) = ($ascending_flag == 0)? reverse @_: @_;
 	my @x = ();
 
 	if (abs($a) < $epsilon)
@@ -1286,14 +1290,14 @@ sub quartic_roots
 	#
 	# We're calling exported functions that also check
 	# the $ascending_flag. To avoid reversing the reversed,
-	# temporarily set the flag to zero and reset before returning.
+	# temporarily set the flag to one and reset before returning.
 	#
 	my $temp_ascending_flag = $ascending_flag;
-	$ascending_flag = 0;
+	$ascending_flag = 1;
 
 	if (abs($e) < $epsilon)
 	{
-		@x = cubic_roots($a, $b, $c, $d);
+		@x = cubic_roots($d, $c, $b, $a);
 		$ascending_flag = $temp_ascending_flag;
 		return (0, @x);
 	}
@@ -1338,7 +1342,7 @@ sub quartic_roots
 		#
 		# Special case: h == 0.  We have a cubic times y.
 		#
-		@x = (0, cubic_roots(1, 0, $f, $g));
+		@x = (0, cubic_roots($g, $f, 0, 1));
 	}
 	elsif (abs($g * $g) < $epsilon)
 	{
@@ -1353,7 +1357,7 @@ sub quartic_roots
 		# possible for $g to be outside of epsilon while
 		# $g**2 is inside, i.e., "zero").
 		#
-		my($p, $q) = quadratic_roots(1, $f, $h);
+		my($p, $q) = quadratic_roots($h, $f, 1);
 		$p = sqrt($p);
 		$q = sqrt($q);
 		@x = ($p, -$p, $q, -$q);
@@ -1377,7 +1381,7 @@ sub quartic_roots
 		# quadratics from it.
 		#
 		my $z;
-		($z, undef, undef) = cubic_roots(1, 2*$f, $f*$f - 4*$h, -$g*$g);
+		($z, undef, undef) = cubic_roots(-$g*$g, $f*$f - 4*$h, 2*$f, 1);
 
 		#### $z
 
@@ -1386,8 +1390,8 @@ sub quartic_roots
 		my $beta = ($f + $z - $rho)/2;
 		my $gamma = ($f + $z + $rho)/2;
 
-		@x = quadratic_roots(1, $alpha, $beta);
-		push @x, quadratic_roots(1, -$alpha, $gamma);
+		@x = quadratic_roots($beta, $alpha, 1);
+		push @x, quadratic_roots($gamma, -$alpha, 1);
 	}
 
 	$ascending_flag = $temp_ascending_flag;
@@ -2151,7 +2155,8 @@ sub poly_iteration
 	for my $k (keys %limits)
 	{
 		#
-		# If this is a real iteration limit, save its old value, then set it.
+		# If this is a real iteration limit, save its old
+		# value, then set it.
 		#
 		if (exists $iteration{$k})
 		{
@@ -2223,7 +2228,8 @@ sub poly_tolerance
 	for my $k (keys %tols)
 	{
 		#
-		# If this is a real tolerance limit, save its old value, then set it.
+		# If this is a real tolerance limit, save its old
+		# value, then set it.
 		#
 		if (exists $tolerance{$k})
 		{
@@ -2262,10 +2268,13 @@ sub poly_nonzero_term_count
 END {
 	#unless ($ascending_order_called)
 	#{
-	#	warn "Ascending order is in default state.\n",
-	#	"Please use ascending_order() to make sure your function\n",
-	#	"calls will be in the correct order when version 3.00 is installed.\n";
-	#warn "Please see Math::Polynomial::Solve documentation.\n" if ($w == 1);
+	#	my $end_list = join("\n", keys %called_by);
+	#	warn "Coefficient order is in a default state, which will change by version 3.00.\n\n",
+	#	"Please use ascending_order(0) at the beginning of your code to\n",
+	#	"make sure your function parameters will be in the correct order when the default\n",
+	#	"order changes.\n\n",
+	#	"Please see the README file and the Math::Polynomial::Solve documentation.\n",
+	#	"File(s): $end_list\n";
 	#}
 }
 
@@ -2329,7 +2338,7 @@ polynomials can now be solved, albeit through numeric analysis methods.
 Hiroshi Murakami's Fortran routines were at
 L<http://netlib.bell-labs.com/netlib/>, but do not seem to be available
 from that source anymore. However, his files have been located and are now
-included in the C<references/qralg> directory.
+included in the C<references/qralg> directory of this package.
 
 He referenced the following articles:
 
