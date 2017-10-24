@@ -9,8 +9,9 @@ use Carp;
 use Math::Complex;
 use Math::Utils qw(:polynomial :utility);
 use Exporter;
-our @ISA = qw(Exporter);
 
+our $VERSION = '2.81';
+our @ISA = qw(Exporter);
 
 #
 # Three # for "I am here" messages.
@@ -19,8 +20,6 @@ our @ISA = qw(Exporter);
 # Six # for sturm structs (sign chain, etc).
 #
 #use Smart::Comments q(######);
-
-@ISA = qw(Exporter);
 
 #
 # Export only on request.
@@ -67,7 +66,10 @@ our @EXPORT_OK = (
 
 our @EXPORT = qw( ascending_order );
 
-our $VERSION = '2.80';
+#
+# Add an :all tag automatically.
+#
+$EXPORT_TAGS{all} = [@EXPORT_OK, @EXPORT];
 
 #
 # Options to set or unset to force poly_roots() to use different
@@ -339,14 +341,18 @@ sub poly_analysis
 
 =head1 EXPORT
 
+There is an B<all> tag that exports everything.
+
 Currently there is one default export, L<ascending_order|ascending_order()>.
 
-The remaining functions may be individually named in an export list,
-but there are also four export tags:
+If you want to have more fine-grained control you may
+individually name the functions in an export list, or
+use one four export tags:
+
 L<classical|Classical Functions>,
 L<numeric|Numeric Functions>,
-L<sturm|Sturm Functions>, and
-L<utility|Utility Functions>.
+L<sturm|Sturm Functions>,
+L<utility|Utility Functions>,
 
 =head2 EXPORTED BY DEFAULT
 
@@ -374,7 +380,7 @@ more convenient to change the default parameter list of
 Math::Polynomial::Solve's functions, using the ascending_order() function:
 
     use Math::Polynomial;
-    use Math::Polynomial::Solve qw(:classical :numeric);
+    use Math::Polynomial::Solve qw(:all);
 
     ascending_order(1);
 
@@ -594,7 +600,7 @@ hessenberg option is zero.
 
 Currently the variable substitution is fairly simple and will only look
 for gaps of zeros in the coefficients that are multiples of the prime numbers
-less than or equal to 31 (2, 3, 5, et cetera).
+less than or equal to 37 (2, 3, 5, et cetera).
 
 =back
 
@@ -1278,7 +1284,7 @@ type.
 
 sub quartic_roots
 {
-	my($e,$d,$c,$b,$a) = ($ascending_flag == 0)? reverse @_: @_;
+	my($e, $d, $c, $b, $a) = ($ascending_flag == 0)? reverse @_: @_;
 	my @x = ();
 
 	if (abs($a) < $epsilon)
@@ -2266,16 +2272,17 @@ sub poly_nonzero_term_count
 }
 
 END {
-	#unless ($ascending_order_called)
-	#{
-	#	my $end_list = join("\n", keys %called_by);
-	#	warn "Coefficient order is in a default state, which will change by version 3.00.\n\n",
-	#	"Please use ascending_order(0) at the beginning of your code to\n",
-	#	"make sure your function parameters will be in the correct order when the default\n",
-	#	"order changes.\n\n",
-	#	"Please see the README file and the Math::Polynomial::Solve documentation.\n",
-	#	"File(s): $end_list\n";
-	#}
+	unless (1)	#unless ($ascending_order_called)
+	{
+		my $end_list = join("\n", keys %called_by);
+		warn "Coefficient order is in a default state, which will change by version 3.00.\n\n",
+		"Please use ascending_order(0) at the beginning of your code to make\n",
+		"sure your function parameters will be in the correct order when the\n",
+		"default order changes.\n\n",
+		"See the README file and the Math::Polynomial::Solve documentation for\n",
+		"more information.\n",
+		"File(s): $end_list\n";
+	}
 }
 
 1;
