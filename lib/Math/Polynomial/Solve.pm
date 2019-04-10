@@ -473,7 +473,7 @@ coefficients of zero for the lowest power terms, and add zeros to its
 root list before calling one of the root-finding functions.
 
 By default, C<poly_roots()> will use the Hessenberg matrix method for solving
-polynomials. This can be changed by calling L</poly_options()>.
+polynomials. This can be changed by calling L</poly_option()>.
 
 The method of poly_roots() is almost equivalent to
 
@@ -482,7 +482,7 @@ The method of poly_roots() is almost equivalent to
           );
 
 except this wouldn't check for leading and trailing zero coefficients, and it
-ignores the settings of C<poly_options()>.
+ignores the settings of C<poly_option()>.
 
 =cut
 
