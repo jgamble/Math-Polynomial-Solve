@@ -76,9 +76,10 @@ The solution for the quartic is based on Ferrari's method, as described in the
 
 ## INSTALLATION
 
-To install this module, run the following commands:
+If you are not using the cpan or cpanm commands, nor using Activestate's PPM,
+install this module by running the following commands:
 
-```bash
+```sh
 perl Build.PL
 ./Build
 ./Build test
@@ -87,6 +88,11 @@ perl Build.PL
 
 ## COPYRIGHT AND LICENSE
 
-Copyright (c) 2018 John M. Gamble. All rights reserved. This program is
-free software; you can redistribute it and/or modify it under the same
-terms as Perl itself.
+Copyright (c) 2018 John M. Gamble.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
