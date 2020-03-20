@@ -3,7 +3,7 @@
 # four or less.
 #
 use 5.010001;
-use Test::More tests => 22;
+use Test::More tests => 24;
 
 use Math::Complex;
 use Math::Polynomial::Solve qw(:numeric);
@@ -16,6 +16,7 @@ my($eq, $ne) = generate_relational(2.5e-7);
 my @case = (
 	[1, 2],
 	[1, 2, 1],
+	[37, -64, 16],
 	[1, 3, 3, 1],
 	[9, 1, -1, 729],
 	[1, 4, 6, 4, 1],
@@ -50,7 +51,7 @@ for (@case)
 }
 
 #
-# Repeate, except that the next line sets the
+# Repeat, except that the next line sets the
 # 'always use the iterative matrix' flag.
 #
 poly_option(hessenberg => 1);

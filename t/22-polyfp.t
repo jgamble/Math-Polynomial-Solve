@@ -9,7 +9,7 @@
 # }
 #
 use 5.010001;
-use Test::More tests => 22;
+use Test::More tests => 24;
 
 use Math::Complex;
 use Math::Polynomial::Solve qw(:numeric);
@@ -22,6 +22,7 @@ my($eq, $ne) = generate_relational(2.5e-7);
 my @case = (
 	[0.9216, 1.8432],
 	[0.9216, 1.8432, 0.9216],
+	[34.0992, -58.9824, 14.7456],
 	[0.9216, 2.7648, 2.7648, 0.9216],
 	[8.2944, 0.9216, -0.9216, 671.8464],
 	[0.9216, 3.6864, 5.5296, 3.6864, 0.9216],
