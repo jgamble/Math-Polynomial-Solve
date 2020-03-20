@@ -12,7 +12,7 @@ Revision history for Perl extension Math::Polynomial::Solve.
 	  (MetaCPAN doesn't treat the file as special).
 	- Alas, Karl's Calculus Tutor has vanished from the web (not even
 	  to be found on the Wayback Machine), so use a link on the
-	  Encyclopedia of Mathematics web page instead on README.md.
+	  Encyclopedia of Mathematics web page instead in README.md.
 	- Fixed the links in the POD.
 	- Add a CONTRIBUTING.md file, which is becoming a thing.
 2.85
